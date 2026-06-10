@@ -184,7 +184,7 @@
                 </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v1" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
-                    <div id="fuel-val-v1" class="fuel-main-value">0.0L</div>
+                    <div id="fuel-val-v1" class="fuel-main-value">42.0L</div>
                     <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v1" style="color:#fff;">-</strong></div>
                     <div id="predict-box-v1" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
                     <div class="fuel-bar-container"><div id="bar-v1" class="fuel-bar"></div></div>
@@ -208,7 +208,7 @@
                 </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v2" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
-                    <div id="fuel-val-v2" class="fuel-main-value">0.0L</div>
+                    <div id="fuel-val-v2" class="fuel-main-value">42.0L</div>
                     <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v2" style="color:#fff;">-</strong></div>
                     <div id="predict-box-v2" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
                     <div class="fuel-bar-container"><div id="bar-v2" class="fuel-bar"></div></div>
@@ -232,7 +232,7 @@
                 </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v3" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
-                    <div id="fuel-val-v3" class="fuel-main-value">0.0L</div>
+                    <div id="fuel-val-v3" class="fuel-main-value">42.0L</div>
                     <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v3" style="color:#fff;">-</strong></div>
                     <div id="predict-box-v3" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
                     <div class="fuel-bar-container"><div id="bar-v3" class="fuel-bar"></div></div>
@@ -256,7 +256,7 @@
                 </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v4" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
-                    <div id="fuel-val-v4" class="fuel-main-value">0.0L</div>
+                    <div id="fuel-val-v4" class="fuel-main-value">42.0L</div>
                     <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v4" style="color:#fff;">-</strong></div>
                     <div id="predict-box-v4" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
                     <div class="fuel-bar-container"><div id="bar-v4" class="fuel-bar"></div></div>
@@ -584,13 +584,18 @@
             update(ref(db, 'race_state'), { isRain: window.isRain });
         };
 
+        // CORRECTION DE LA REMISE À ZÉRO STRATÉGIQUE (42L D'ESSENCE À LA COURSE)
         window.dbResetEntireRace = function() {
             const conf = confirm("⚠️ COCKPIT TEAM 4-RACE :\n\nÊtes-vous sûr à 100% de vouloir effacer toutes les données (litres, tours actuels, fiches de chronos et historique complet) pour démarrer une nouvelle session de course ?");
             if(conf) {
+                // Lecture dynamique du réservoir maximum configuré
+                const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value) || 42.0;
+
                 remove(ref(db, 'logs'));
                 remove(ref(db, 'race_state')).then(() => {
+                    // Les réservoirs repassent automatiquement pleins pour le départ
                     for(let id in window.fleetState) {
-                        window.fleetState[id].fuel = 0.0;
+                        window.fleetState[id].fuel = fuelMaxSetting;
                         window.fleetState[id].currentLap = 0;
                         window.fleetState[id].isInsidePit = false;
                         window.fleetState[id].pitSeconds = 0;
@@ -603,7 +608,7 @@
                     window.enemyDatabase = [];
                     
                     window.dbPushFullRaceState();
-                    window.dbLogLiveEventCloud("SYSTEM", "🔄 RESET COMPLET DE LA BASE - TOUS LES RÉSERVOIRS PASSENT À 0.0L", "0.0 L", "START");
+                    window.dbLogLiveEventCloud("SYSTEM", "🔄 DEPART DE LA COURSE : RESERVOIRS RECHARGES AU MAX", `${fuelMaxSetting.toFixed(1)} L`, "START");
                     setTimeout(() => { location.reload(); }, 300);
                 });
             }
@@ -655,8 +660,9 @@
         onValue(ref(db, 'race_state'), (snapshot) => {
             const data = snapshot.val();
             if (!data) {
+                const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value) || 42.0;
                 for(let id in window.fleetState) {
-                    window.fleetState[id].fuel = 0.0;
+                    window.fleetState[id].fuel = fuelMaxSetting;
                     window.fleetState[id].currentLap = 0;
                     window.fleetState[id].isInsidePit = false;
                 }
@@ -691,7 +697,6 @@
                         document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie;
                     }
 
-                    // CORRECTION UNIFICATION DES TIMERS DE STANDS INTER-APPAREILS
                     if (cloudCar.isInsidePit && !localCar.isInsidePit) {
                         localCar.isInsidePit = true;
                         localCar.pitSeconds = cloudCar.pitSeconds;
@@ -722,7 +727,6 @@
             }
         });
 
-        // Exportation des fonctions de stands vers l'espace global pour l'ordinateur principal
         window.applyPitVisualsOn = function(id) {
             document.getElementById(`opt-box-${id}`).style.display = 'flex';
             document.getElementById(`btn-lap-${id}`).style.display = 'none'; 
@@ -772,10 +776,10 @@
         };
 
         window.fleetState = {
-            "v1": { fuel: 0.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.65}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false },
-            "v2": { fuel: 0.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.7}, "2": {sec:1.77, pluie:1.6}, "3": {sec:1.77, pluie:1.65}, "4": {sec:1.77, pluie:1.7} }, hasAlerted: false },
-            "v3": { fuel: 0.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.55}, "2": {sec:1.77, pluie:1.5}, "3": {sec:1.77, pluie:1.6}, "4": {sec:1.77, pluie:1.55} }, hasAlerted: false },
-            "v4": { fuel: 0.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.9}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false }
+            "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.65}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false },
+            "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.7}, "2": {sec:1.77, pluie:1.6}, "3": {sec:1.77, pluie:1.65}, "4": {sec:1.77, pluie:1.7} }, hasAlerted: false },
+            "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.55}, "2": {sec:1.77, pluie:1.5}, "3": {sec:1.77, pluie:1.6}, "4": {sec:1.77, pluie:1.55} }, hasAlerted: false },
+            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.9}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false }
         };
 
         window.enemyDatabase = []; window.isFCY = false; window.isRain = false;
@@ -899,18 +903,13 @@
             window.dbPushFullRaceState();
         }
 
-        // CORRECTION DU DÉCLENCHEMENT LOCAL DEPUIS L'ORDINATEUR PRINCIPAL
         function enterCarPit(id) {
-            const car = window.fleetState[id]; 
-            car.isInsidePit = true; 
-            car.pitSeconds = 0;
-            
-            // Activation immédiate sur ton propre écran
+            const car = window.fleetState[id]; car.isInsidePit = true; car.pitSeconds = 0;
             if (window.applyPitVisualsOn) window.applyPitVisualsOn(id);
             if (window.startLocalPitTimer) window.startLocalPitTimer(id);
 
             window.dbLogLiveEventCloud(window.carIdMapping[id], "📥 ENTRÉE BOX STAND", `${car.fuel.toFixed(1)} L`, "STAND");
-            window.dbPushFullRaceState(); // Synchronise les autres téléphones
+            window.dbPushFullRaceState();
         }
 
         function exitCarPit(id) {
@@ -933,12 +932,10 @@
                 document.getElementById(`r_${id}_4`).value = car.rotation[3];
             }
             car.hasAlerted = false; closeRacePopup();
-            
-            // Masque le chrono immédiatement sur ton écran
             if (window.applyPitVisualsOff) window.applyPitVisualsOff(id);
 
             window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
-            window.dbPushFullRaceState(); // Synchronise les autres téléphones
+            window.dbPushFullRaceState();
         }
 
         function calculateEnemyIntel() {
