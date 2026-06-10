@@ -567,7 +567,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // URL européenne de ton projet Firebase
         const firebaseConfig = {
             databaseURL: "https://live-4-race-default-rtdb.europe-west1.firebasedatabase.app/"
         };
@@ -575,7 +574,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Fonctions d'envois rapides vers la base de données cloud
         window.dbToggleTrackState = function() {
             window.isFCY = !window.isFCY;
             update(ref(db, 'race_state'), { isFCY: window.isFCY });
@@ -586,15 +584,18 @@
             update(ref(db, 'race_state'), { isRain: window.isRain });
         };
 
-        // Réinitialisation globale et totale de la course pour nettoyer la base
+        // Fonction radicale de Remise à Zéro Totale avec rechargement complet des réservoirs
         window.dbResetEntireRace = function() {
             const conf = confirm("⚠️ COCKPIT TEAM 4-RACE :\n\nÊtes-vous sûr à 100% de vouloir effacer toutes les données (litres, tours actuels, fiches de chronos et historique complet) pour démarrer une nouvelle session de course ?");
             if(conf) {
+                // Lecture de la capacité max définie dans l'input pour calibrer le reset d'essence
+                const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value) || 42.0;
+
                 remove(ref(db, 'logs'));
                 remove(ref(db, 'race_state')).then(() => {
-                    // Restauration complète des variables initiales sur ton écran
+                    // Restauration complète des variables initiales sur ton écran (Réservoirs Pleins !)
                     for(let id in window.fleetState) {
-                        window.fleetState[id].fuel = 42.0;
+                        window.fleetState[id].fuel = fuelMaxSetting;
                         window.fleetState[id].currentLap = 0;
                         window.fleetState[id].isInsidePit = false;
                         window.fleetState[id].pitSeconds = 0;
@@ -607,13 +608,12 @@
                     window.enemyDatabase = [];
                     
                     window.dbPushFullRaceState();
-                    window.dbLogLiveEventCloud("SYSTEM", "🔄 REMISE À ZÉRO EFFECTUÉE - TOUTES LES SESSIONS SONT NETTOYÉES", "42.0 L", "START");
-                    alert("✅ Base réinitialisée ! Tous les terminaux mobiles du stand reprennent maintenant à zéro.");
+                    window.dbLogLiveEventCloud("SYSTEM", "🔄 REMISE À ZÉRO EFFECTUÉE - RÉSERVOIRS RECHARGÉS À PROPRE", `${fuelMaxSetting.toFixed(1)} L`, "START");
+                    alert("✅ Base réinitialisée ! Tous les réservoirs sont rechargés au maximum pour le départ.");
                 });
             }
         };
 
-        // Envoi total de la structure de données vers le serveur Firebase
         window.dbPushFullRaceState = function() {
             const statePayload = {
                 isRain: window.isRain,
@@ -656,7 +656,7 @@
             });
         };
 
-        // ÉCOUTE PERMANENTE DU CLOUD (Synchronise ton écran dès qu'une valeur change ailleurs)
+        // ÉCOUTE PERMANENTE DU CLOUD
         onValue(ref(db, 'race_state'), (snapshot) => {
             const data = snapshot.val();
             if (!data) {
@@ -668,13 +668,11 @@
             window.isRain = data.isRain;
             window.enemyDatabase = data.enemyDatabase || [];
 
-            // Application des boutons globaux
             document.getElementById('trackState').innerText = window.isFCY ? "🟨 FCY EN COURS" : "🟢 Piste Dégagée";
             document.getElementById('trackState').className = window.isFCY ? "track-status fcy" : "track-status";
             document.getElementById('weatherState').innerText = window.isRain ? "🌧️ PLUIE" : "☀️ SEC";
             document.getElementById('weatherState').className = window.isRain ? "weather-status rain" : "weather-status";
 
-            // Restauration complète des sous-fiches de consos et des pilotes sur la page setup
             for (let id in window.fleetState) {
                 if (data.cars && data.cars[id]) {
                     const cloudCar = data.cars[id];
@@ -686,7 +684,6 @@
                     localCar.rotation = cloudCar.rotation;
                     localCar.conso = cloudCar.conso;
 
-                    // Restauration des valeurs dans les formulaires pour les rendre modifiables
                     document.getElementById(`setup-${id}`).value = cloudCar.carNumInput;
                     for (let p = 1; p <= 4; p++) {
                         document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
@@ -694,7 +691,6 @@
                         document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie;
                     }
 
-                    // Prise en charge en temps réel des déclenchements de chronos d'arrêts aux stands
                     if (cloudCar.isInsidePit && !localCar.isInsidePit) {
                         localCar.isInsidePit = true;
                         localCar.pitSeconds = cloudCar.pitSeconds;
@@ -710,7 +706,6 @@
             applyGlobalCustomizationLocal();
         });
 
-        // RÉCEPTION DU FLUX DE HISTORIQUE LOGS
         onValue(ref(db, 'logs'), (snapshot) => {
             const logs = snapshot.val();
             const tbody = document.getElementById('fleetLogBody');
@@ -741,6 +736,7 @@
             document.getElementById(`opt-box-${id}`).style.display = 'none';
             document.getElementById(`btn-lap-${id}`).style.display = 'block'; 
             document.getElementById(`btn-pit-${id}`).style.display = 'block'; 
+            document.getElementById(`btn-exit-${id}`).style.none = 'none';
             document.getElementById(`btn-exit-${id}`).style.display = 'none';
             document.getElementById(`pit-timer-${id}`).style.display = 'none'; 
             document.getElementById(`pit-timer-${id}`).style.color = 'var(--state-alert)';
@@ -942,7 +938,6 @@
             if(laps <= 0 || fuelRemis <= 0) return;
             const resultConso = fuelRemis / laps;
             
-            // Injection de la valeur calculée dans la bonne case
             document.getElementById(`c_${id}_${pIdx}_${weather}`).value = resultConso.toFixed(2);
             window.dbPushFullRaceState();
             alert(`Ajustement validé : ${resultConso.toFixed(2)} L/tr.`);
