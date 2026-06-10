@@ -33,12 +33,16 @@
         h1 span.logo-race { font-weight: 700; font-style: var(--font-title-style); letter-spacing: 2px; }
         h1 span.logo-sub { font-size: 11px; color: #666; font-style: normal; letter-spacing: 0px; text-transform: none; display: block; margin-top: 2px; }
         
-        .controls-top { display: flex; gap: 15px; align-items: center; }
+        .controls-top { display: flex; gap: 12px; align-items: center; }
 
         .track-status { padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: var(--state-green); color: #000; cursor: pointer; font-size: 13px; }
         .track-status.fcy { background-color: var(--state-fcy); color: #000; } 
         .weather-status { padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: #ffffff; color: #000; cursor: pointer; font-size: 13px; }
         .weather-status.rain { background-color: #3b82f6; color: white; }
+        
+        /* Bouton Reset Technique */
+        .reset-status { padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: #333; color: #fff; cursor: pointer; font-size: 13px; border: 1px solid #444; transition: all 0.2s; }
+        .reset-status:hover { background-color: var(--state-alert); border-color: var(--state-alert); }
 
         /* BARRE DE NAVIGATION */
         nav { display: flex; gap: 8px; margin-bottom: 20px; background-color: #000; padding: 6px; border-radius: 8px; border: 1px solid #222; overflow-x: auto; }
@@ -79,11 +83,6 @@
         .fuel-main-value { font-size: 32px; font-weight: bold; color: var(--state-green); font-family: monospace; }
         .fuel-bar-container { background-color: #0f172a; height: 8px; border-radius: 4px; margin-top: 6px; overflow: hidden; position: relative; }
         .fuel-bar { background-color: var(--state-green); height: 100%; width: 100%; transition: width 0.3s ease; }
-        
-        .fuel-bar-container::after {
-            content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
-            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.15), rgba(255,255,255,0.15) 2px, transparent 2px, transparent 4px);
-        }
         
         .target-lap-badge {
             background-color: rgba(56, 189, 248, 0.1); border: 1px dashed #38bdf8;
@@ -150,6 +149,7 @@
         <div class="controls-top">
             <div id="weatherState" class="weather-status" onclick="dbToggleWeatherState()">☀️ SEC</div>
             <div id="trackState" class="track-status" onclick="dbToggleTrackState()">🟢 Piste Dégagée</div>
+            <div class="reset-status" onclick="dbResetEntireRace()">🔄 Reset Nouvelle Course</div>
         </div>
     </header>
 
@@ -583,9 +583,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Connexion sécurisée sur ton URL européenne Firebase
         const firebaseConfig = {
             databaseURL: "https://live-4-race-default-rtdb.europe-west1.firebasedatabase.app/"
         };
@@ -593,7 +592,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Liaison des fonctions de déclenchement globales avec l'interface Firebase
         window.dbToggleTrackState = function() {
             window.isFCY = !window.isFCY;
             update(ref(db, 'race_state'), { isFCY: window.isFCY });
@@ -604,7 +602,35 @@
             update(ref(db, 'race_state'), { isRain: window.isRain });
         };
 
-        // Envoi complet des variables d'état (essence, tours, pilotes, consos) au Cloud
+        // Fonction radicale de Remise à Zéro Totale pour une nouvelle course
+        window.dbResetEntireRace = function() {
+            const conf = confirm("⚠️ ATTENTION TEAM 4-RACE :\n\nÊtes-vous sûr de vouloir remettre à zéro TOUTES les données (essence, tours, pilotes et historique) pour démarrer une nouvelle course ?");
+            if(conf) {
+                // Élimination des nœuds dans Firebase Cloud
+                remove(ref(db, 'logs'));
+                remove(ref(db, 'race_state')).then(() => {
+                    // Restauration locale des paramètres de base
+                    for(let id in window.fleetState) {
+                        window.fleetState[id].fuel = 42.0;
+                        window.fleetState[id].currentLap = 0;
+                        window.fleetState[id].isInsidePit = false;
+                        window.fleetState[id].pitSeconds = 0;
+                        window.fleetState[id].hasAlerted = false;
+                        window.fleetState[id].rotation = ["1", "2", "3", "4"];
+                        clearInterval(window.fleetState[id].interval);
+                    }
+                    window.isFCY = false;
+                    window.isRain = false;
+                    window.enemyDatabase = [];
+                    
+                    // Envoi de la nouvelle structure propre sur Firebase
+                    window.dbPushFullRaceState();
+                    window.dbLogLiveEventCloud("SYSTEM", "🔄 RESET COMPLET DE LA BASE EFFECTUÉ - NOUVELLE COURSE PRÊTE", "42.0 L", "START");
+                    alert("✅ Base réinitialisée avec succès ! Tous les téléphones connectés sont maintenant synchronisés à zéro.");
+                });
+            }
+        };
+
         window.dbPushFullRaceState = function() {
             const statePayload = {
                 isRain: window.isRain,
@@ -635,7 +661,6 @@
             set(ref(db, 'race_state'), statePayload);
         };
 
-        // Envoi d'une ligne d'historique (Log) dans le cloud
         window.dbLogLiveEventCloud = function(carNum, action, fuel, trackStateLabel) {
             const now = new Date();
             const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
@@ -648,11 +673,10 @@
             });
         };
 
-        // ÉCOUTE DES CHANGEMENTS CLOUD (Synchronisation en direct sur tous les écrans)
+        // ÉCOUTE DES CHANGEMENTS DU CLOUD
         onValue(ref(db, 'race_state'), (snapshot) => {
             const data = snapshot.val();
             if (!data) {
-                // Si la base est vierge au démarrage, on l'initialise avec l'écran actuel
                 window.dbPushFullRaceState();
                 return;
             }
@@ -661,13 +685,11 @@
             window.isRain = data.isRain;
             window.enemyDatabase = data.enemyDatabase || [];
 
-            // Actualisation des boutons du haut
             document.getElementById('trackState').innerText = window.isFCY ? "🟨 FCY EN COURS" : "🟢 Piste Dégagée";
             document.getElementById('trackState').className = window.isFCY ? "track-status fcy" : "track-status";
             document.getElementById('weatherState').innerText = window.isRain ? "🌧️ PLUIE" : "☀️ SEC";
             document.getElementById('weatherState').className = window.isRain ? "weather-status rain" : "weather-status";
 
-            // Restauration des données spécifiques de chaque châssis
             for (let id in window.fleetState) {
                 if (data.cars && data.cars[id]) {
                     const cloudCar = data.cars[id];
@@ -679,47 +701,41 @@
                     localCar.rotation = cloudCar.rotation;
                     localCar.conso = cloudCar.conso;
 
-                    // Synchronisation des inputs du panneau Setup
                     document.getElementById(`setup-${id}`).value = cloudCar.carNumInput;
                     for (let p = 1; p <= 4; p++) {
                         document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
                     }
 
-                    // Gestion dynamique des chronomètres d'arrêts aux stands
                     if (cloudCar.isInsidePit && !localCar.isInsidePit) {
-                        // La voiture vient d'entrer au stand sur un autre écran
                         localCar.isInsidePit = true;
                         localCar.pitSeconds = cloudCar.pitSeconds;
                         applyPitVisualsOn(id);
                         startLocalPitTimer(id);
                     } else if (!cloudCar.isInsidePit && localCar.isInsidePit) {
-                        // La voiture vient de repartir sur un autre écran
                         clearInterval(localCar.interval);
                         localCar.isInsidePit = false;
                         applyPitVisualsOff(id);
                     }
                 }
             }
-
-            // Relancer les fonctions d'affichage graphique d'origine
             applyGlobalCustomizationLocal();
         });
 
-        // ÉCOUTE DES LOGS PARTAGÉS EN DIRECT
         onValue(ref(db, 'logs'), (snapshot) => {
             const logs = snapshot.val();
             const tbody = document.getElementById('fleetLogBody');
-            if (tbody && logs) {
+            if (tbody) {
                 tbody.innerHTML = "";
-                Object.values(logs).reverse().forEach(log => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `<td><span style="font-family:monospace;">${log.time}</span></td><td><strong style="color:var(--4race-coral);">#${log.carNum}</strong></td><td>${log.action}</td><td>${log.fuel}</td><td><span style="font-weight:bold;">${log.status}</span></td>`;
-                    tbody.appendChild(row);
-                });
+                if(logs) {
+                    Object.values(logs).reverse().forEach(log => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `<td><span style="font-family:monospace;">${log.time}</span></td><td><strong style="color:var(--4race-coral);">#${log.carNum}</strong></td><td>${log.action}</td><td>${log.fuel}</td><td><span style="font-weight:bold;">${log.status}</span></td>`;
+                        tbody.appendChild(row);
+                    });
+                }
             }
         });
 
-        // Fonctions internes d'ajustements visuels pour la synchronisation des stands
         function applyPitVisualsOn(id) {
             document.getElementById(`opt-box-${id}`).style.display = 'flex';
             document.getElementById(`btn-lap-${id}`).style.display = 'none'; 
@@ -735,6 +751,7 @@
             document.getElementById(`opt-box-${id}`).style.display = 'none';
             document.getElementById(`btn-lap-${id}`).style.display = 'block'; 
             document.getElementById(`btn-pit-${id}`).style.display = 'block'; 
+            document.getElementById(`btn-exit-${id}`).style.none = 'none';
             document.getElementById(`btn-exit-${id}`).style.display = 'none';
             document.getElementById(`pit-timer-${id}`).style.display = 'none'; 
             document.getElementById(`pit-timer-${id}`).style.color = 'var(--state-alert)';
@@ -760,9 +777,7 @@
     </script>
 
     <script>
-        // Clonage exact des variables d'origine du fichier de l'utilisateur
         window.carIdMapping = { "v1": "531", "v2": "183", "v3": "156", "v4": "40" };
-        
         window.pilotsDatabase = {
             "v1": { "1": "Alex", "2": "Hugo", "3": "Max", "4": "Yanis" },
             "v2": { "1": "Thomas", "2": "Loïc", "3": "Antoine", "4": "Séb" },
@@ -777,11 +792,8 @@
             "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.9}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false }
         };
 
-        window.enemyDatabase = [];
-        window.isFCY = false; 
-        window.isRain = false;
+        window.enemyDatabase = []; window.isFCY = false; window.isRain = false;
 
-        // Fonction d'affichage graphique déclenchée à la réception de données cloud
         function applyGlobalCustomizationLocal() {
             for (let id in window.fleetState) {
                 window.pilotsDatabase[id]["1"] = document.getElementById(`s_${id}_1`).value;
@@ -808,23 +820,16 @@
                 document.querySelectorAll(`.p4_${id}`).forEach(el => el.innerText = db["4"]);
 
                 const sCalc = document.getElementById(`calc_p_${id}`);
-                if(sCalc) {
-                    sCalc.innerHTML = `<option value="1">${db["1"]}</option><option value="2">${db["2"]}</option><option value="3">${db["3"]}</option><option value="4">${db["4"]}</option>`;
-                }
+                if(sCalc) sCalc.innerHTML = `<option value="1">${db["1"]}</option><option value="2">${db["2"]}</option><option value="3">${db["3"]}</option><option value="4">${db["4"]}</option>`;
                 
                 for(let r=1; r<=4; r++) {
                     const sRot = document.getElementById(`r_${id}_${r}`);
                     if(sRot) {
                         const selectedVal = window.fleetState[id].rotation[r-1];
-                        sRot.innerHTML = `
-                            <option value="1" ${selectedVal=='1'?'selected':''}>${db["1"]}</option>
-                            <option value="2" ${selectedVal=='2'?'selected':''}>${db["2"]}</option>
-                            <option value="3" ${selectedVal=='3'?'selected':''}>${db["3"]}</option>
-                            <option value="4" ${selectedVal=='4'?'selected':''}>${db["4"]}</option>`;
+                        sRot.innerHTML = `<option value="1" ${selectedVal=='1'?'selected':''}>${db["1"]}</option><option value="2" ${selectedVal=='2'?'selected':''}>${db["2"]}</option><option value="3" ${selectedVal=='3'?'selected':''}>${db["3"]}</option><option value="4" ${selectedVal=='4'?'selected':''}>${db["4"]}</option>`;
                     }
                 }
             }
-
             for (let id in window.fleetState) { updateCarStrategyLocal(id); }
             rebuildIntelTableLocal();
         }
@@ -839,7 +844,6 @@
             if (window.isFCY && !car.isInsidePit) currentConso *= fcyCoeff;
 
             let lapsLeft = Math.floor(car.fuel / currentConso); if (lapsLeft < 0) lapsLeft = 0;
-
             let targetStopLap = car.currentLap + lapsLeft;
             document.getElementById(`predict-box-${id}`).innerText = `🎯 Arrêt idéal : Tour ${targetStopLap}`;
 
@@ -865,7 +869,6 @@
                     car.hasAlerted = false;
                 }
             }
-
             document.getElementById(`bar-${id}`).style.width = ((car.fuel / fuelMaxSetting) * 100) + '%';
 
             const tbody = document.getElementById(`plan-body-${id}`);
@@ -885,7 +888,7 @@
 
             window.enemyDatabase.forEach(enemy => {
                 totalConsoSum += enemy.conso; totalVehiclesCount++;
-                tbody.innerHTML += `<tr style="background-color: rgba(255, 71, 25, 0.03); border-left: 4px solid var(--4race-coral);"><td>export <strong>#${enemy.num}</strong></td><td><span style="color:var(--4race-coral); font-weight:600;">Adversaire</span></td><td>${enemy.laps} tours</td><td><strong>${enemy.conso.toFixed(2)} L/tr</strong></td><td><span class="badge-intel ${enemy.danger?'badge-intel-danger':'badge-intel-safe'}">${enemy.status}</span></td></tr>`;
+                tbody.innerHTML += `<tr style="background-color: rgba(255, 71, 25, 0.03); border-left: 4px solid var(--4race-coral);"><td><strong>#${enemy.num}</strong></td><td><span style="color:var(--4race-coral); font-weight:600;">Adversaire</span></td><td>${enemy.laps} tours</td><td><strong>${enemy.conso.toFixed(2)} L/tr</strong></td><td><span class="badge-intel ${enemy.danger?'badge-intel-danger':'badge-intel-safe'}">${enemy.status}</span></td></tr>`;
             });
 
             for(let id in window.fleetState) {
@@ -897,21 +900,17 @@
             else document.getElementById("globalMeanValue").innerText = "0.00 L";
         }
 
-        // --- DÉCLENCHEMENT DES ACTIONS AVEC SÉCURISATION ET PUSH CLOUD ---
         function triggerCarLap(id) {
             const car = window.fleetState[id]; if (car.isInsidePit) return;
             car.currentLap++; const pilotIdx = car.rotation[0];
             let conso = car.conso[pilotIdx][window.isRain?"pluie":"sec"]; if(window.isFCY) conso *= parseFloat(document.getElementById("setup-fcyCoeff").value);
             car.fuel = Math.max(0, car.fuel - conso);
-            
             window.dbLogLiveEventCloud(window.carIdMapping[id], `Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, window.isFCY?"🟨 FCY":"🟢 VERT");
             window.dbPushFullRaceState();
         }
 
         function enterCarPit(id) {
             const car = window.fleetState[id]; car.isInsidePit = true; car.pitSeconds = 0;
-            car.hasAlerted = false;
-
             window.dbLogLiveEventCloud(window.carIdMapping[id], "📥 ENTRÉE BOX STAND", `${car.fuel.toFixed(1)} L`, "STAND");
             window.dbPushFullRaceState();
         }
@@ -927,17 +926,13 @@
             if (doPilotChange) {
                 let oldPilot = car.rotation.shift(); car.rotation.push(oldPilot);
                 logDetails += ` + Relais ${window.pilotsDatabase[id][car.rotation[0]]}`;
-                
                 document.getElementById(`r_${id}_1`).value = car.rotation[0];
                 document.getElementById(`r_${id}_2`).value = car.rotation[1];
                 document.getElementById(`r_${id}_3`).value = car.rotation[2];
                 document.getElementById(`r_${id}_4`).value = car.rotation[3];
             }
-
             car.hasAlerted = false; closeRacePopup();
             window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
-            
-            // On signale la sortie au Cloud
             car.isInsidePit = false;
             window.dbPushFullRaceState();
         }
@@ -947,8 +942,6 @@
             if(!num || laps <= 0) return;
             const calculatedConso = parseFloat(document.getElementById("setup-maxFuel").value) / laps; let dangerState = (calculatedConso < 1.76);
             window.enemyDatabase.push({ num: num, laps: laps, conso: calculatedConso, status: dangerState?"🚨 Pousse son réservoir !":"S'arrête avant nous", danger: dangerState });
-            
-            alert(`Concurrent #${num} enregistré.`);
             window.dbPushFullRaceState();
         }
 
@@ -958,15 +951,11 @@
             const laps = parseInt(document.getElementById(`calc_laps_${id}`).value);
             const fuelRemis = parseFloat(document.getElementById(`calc_fuel_${id}`).value);
             if(laps <= 0 || fuelRemis <= 0) return;
-
             const resultConso = fuelRemis / laps;
             document.getElementById(`c_${id}_${pIdx}_${weather}`).value = resultConso.toFixed(2);
-            
-            alert(`Calibrage validé : ${resultConso.toFixed(2)} L/tr.`);
             window.dbPushFullRaceState();
         }
 
-        function applyGlobalCustomization() { window.dbPushFullRaceState(); }
         function saveCarConfig(id) { window.dbPushFullRaceState(); }
         function navigateToPage(targetPageId, activeNavId) {
             document.getElementById('page-fleet').style.display = 'none';
