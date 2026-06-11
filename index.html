@@ -355,7 +355,7 @@
             <div class="config-row">
                 <div class="config-group"><label>N° Châssis 1</label><input type="number" id="setup-v1" value="531" onchange="dbPushFullRaceState()"></div>
                 <div class="config-group"><label>N° Châssis 2</label><input type="number" id="setup-v2" value="183" onchange="dbPushFullRaceState()"></div>
-                <div class="config-group"><label>N° Châssis 3</label><input type="number" id="setup-v3" value="156" onchange="document.getElementById('setup-v3').value = this.value; dbPushFullRaceState();"></div>
+                <div class="config-group"><label>N° Châssis 3</label><input type="number" id="setup-v3" value="156" onchange="dbPushFullRaceState()"></div>
                 <div class="config-group"><label>N° Châssis 4</label><input type="number" id="setup-v4" value="40" onchange="dbPushFullRaceState()"></div>
             </div>
             <div class="config-row" style="margin-top:15px;">
@@ -402,7 +402,7 @@
                 <div class="card-title" style="color: var(--4race-coral);">⚡ Calculateur Flash Conso (Essais)</div>
                 <div class="config-row">
                     <div class="config-group"><label>Pilote</label><select id="calc_p_v1"></select></div>
-                    <div class="config-group"><label>Météo</label><select id="calc_w_v1"><option value="sec">Sec ☀️</option><option value="pluie">Pluie 2</option></select></div>
+                    <div class="config-group"><label>Météo</label><select id="calc_w_v1"><option value="sec">Sec ☀️</option><option value="pluie">Pluie 🌧️</option></select></div>
                 </div>
                 <div class="config-row" style="margin-top:10px;">
                     <div class="config-group"><label>Tours</label><input type="number" id="calc_laps_v1" value="10" min="1"></div>
@@ -694,7 +694,6 @@
                         document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie;
                     }
 
-                    // APPLICATION UNIFIEE DU CHANGEMENT DE STATUT DES STANDS INTER-APPAREILS
                     if (cloudCar.isInsidePit && !localCar.isInsidePit) {
                         localCar.isInsidePit = true;
                         localCar.pitSeconds = cloudCar.pitSeconds;
@@ -725,7 +724,6 @@
             }
         });
 
-        // Exportation globale des utilitaires graphiques pour qu'ils soient synchronisés au clic sur tous les écrans
         window.applyPitVisualsOn = function(id) {
             document.getElementById(`opt-box-${id}`).style.display = 'flex';
             document.getElementById(`btn-lap-${id}`).style.display = 'none'; 
@@ -743,7 +741,7 @@
             document.getElementById(`btn-pit-${id}`).style.display = 'block'; 
             document.getElementById(`btn-exit-${id}`).style.display = 'none';
             document.getElementById(`pit-timer-${id}`).style.display = 'none'; 
-            document.getElementById(`pit-timer-${id}`).style.color = 'var(--state-alert)';
+            document.getElementById(`pit-timer-${id').style.color = 'var(--state-alert)';
         };
 
         window.startLocalPitTimer = function(id) {
@@ -898,17 +896,12 @@
             car.currentLap++; const pilotIdx = car.rotation[0];
             let conso = car.conso[pilotIdx][window.isRain?"pluie":"sec"]; if(window.isFCY) conso *= parseFloat(document.getElementById("setup-fcyCoeff").value);
             car.fuel = Math.max(0, car.fuel - conso);
-            window.dbLogLiveEventCloud(window.carIdMapping[id], `Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, window.isFCY?"🟨 FCY":"🟢 VERT");
+            window.dbLogLiveEventCloud(window.carIdMapping[id], `Tour #${car.currentLap}`, `${car.fuel.toFixed(1)} L`, window.isFCY?"🟨 FCY CONTAINER":"🟢 VERT");
             window.dbPushFullRaceState();
         }
 
-        // RECTIFICATION LOCALE SUR L'ORDI LOGGUEUR AU MOMENT DE L'ENTREE STANDS
         function enterCarPit(id) {
-            const car = window.fleetState[id]; 
-            car.isInsidePit = true; 
-            car.pitSeconds = 0;
-            
-            // On force le muret PC à basculer ses visuels et démarrer le chrono immédiatement au clic
+            const car = window.fleetState[id]; car.isInsidePit = true; car.pitSeconds = 0;
             if (window.applyPitVisualsOn) window.applyPitVisualsOn(id);
             if (window.startLocalPitTimer) window.startLocalPitTimer(id);
 
@@ -916,7 +909,6 @@
             window.dbPushFullRaceState();
         }
 
-        // RECTIFICATION LOCALE SUR L'ORDI ÉGALEMENT AU MOMENT DE LA REPARTIE
         function exitCarPit(id) {
             const car = window.fleetState[id];
             clearInterval(car.interval);
@@ -937,8 +929,6 @@
                 document.getElementById(`r_${id}_4`).value = car.rotation[3];
             }
             car.hasAlerted = false; closeRacePopup();
-            
-            // Masque et remet à zéro le chrono sur ton propre écran PC
             if (window.applyPitVisualsOff) window.applyPitVisualsOff(id);
 
             window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
