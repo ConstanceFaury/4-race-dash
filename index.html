@@ -164,7 +164,7 @@
         </div>
     </header>
 
-    <nav id="main-nav-bar">
+ <nav id="main-nav-bar">
         <button id="nav-fleet" class="tab-btn active" onclick="navigateToPage('page-fleet', 'nav-fleet')">📋 Supervision Flotte</button>
         <button id="nav-intel" class="tab-btn" onclick="navigateToPage('page-intel', 'nav-intel')">🕵️ Intel Adversaires</button>
         <button id="nav-setup" class="tab-btn" onclick="navigateToPage('page-setup', 'nav-setup')">⚙️ Setup Équipe</button>
@@ -172,6 +172,8 @@
         <button id="nav-v2" class="tab-btn" onclick="navigateToPage('page-v2', 'nav-v2')">🏎️ <span class="lbl-v2">#183</span></button>
         <button id="nav-v3" class="tab-btn" onclick="navigateToPage('page-v3', 'nav-v3')">🏎️ <span class="lbl-v3">#156</span></button>
         <button id="nav-v4" class="tab-btn" onclick="navigateToPage('page-v4', 'nav-v4')">🏎️ <span class="lbl-v4">#40</span></button>
+        
+        <button id="btn-paddock-mode" class="tab-btn" onclick="window.togglePaddockMode()" style="margin-left: auto; border: 1px solid #333; color: #fff; background-color: #1a1a1a;">🔓 Mode Administrateur</button>
     </nav>
 
     <div id="raceAlertPopup" class="race-alert-popup">
@@ -1199,6 +1201,63 @@
                 setTimeout(() => { bannerDiv.style.opacity = "1"; }, 150);
             }
         };
+
+        // =======================================================================
+// 4. LOGIQUE DU PADDOCK MODE (GESTION DES DROITS ÉCRAN BOX / ÉCRAN MURET)
+// =======================================================================
+window.isReadOnlyMode = false;
+
+window.togglePaddockMode = function() {
+    window.isReadOnlyMode = !window.isReadOnlyMode;
+    
+    const btnMode = document.getElementById("btn-paddock-mode");
+    
+    // Liste de toutes les classes de boutons d'action à masquer
+    // (Boutons de passage ligne, entrées/sorties stands, reset, injection, calculs)
+    const elementsAction = document.querySelectorAll(
+        '.btn-quick, .btn-action, .btn-calculator, .reset-status, input, select'
+    );
+    
+    if (window.isReadOnlyMode) {
+        // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
+        if (btnMode) {
+            btnMode.innerText = "🔒 Mode Lecture (Box)";
+            btnMode.style.backgroundColor = "#EF4444"; // Rouge alerte
+            btnMode.style.color = "#ffffff";
+        }
+        
+        // On masque les boutons et on verrouille les champs de saisie
+        elementsAction.forEach(el => {
+            if (el.id !== "btn-paddock-mode" && el.id !== "main-nav-bar") {
+                if (el.tagName === "INPUT" || el.tagName === "SELECT") {
+                    el.disabled = true; // Verrouille les cases de saisie et menus
+                } else {
+                    el.style.visibility = "hidden"; // Masque les boutons d'action
+                }
+            }
+        });
+        
+        console.log("🔒 Paddock Mode activé : Écran sécurisé en lecture seule.");
+    } else {
+        // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
+        if (btnMode) {
+            btnMode.innerText = "🔓 Mode Administrateur";
+            btnMode.style.backgroundColor = "#1a1a1a";
+            btnMode.style.color = "#ffffff";
+        }
+        
+        // On réaffiche tout et on déverrouille
+        elementsAction.forEach(el => {
+            if (el.tagName === "INPUT" || el.tagName === "SELECT") {
+                el.disabled = false;
+            } else {
+                el.style.visibility = "visible";
+            }
+        });
+        
+        console.log("🔓 Mode Administrateur activé : Toutes les commandes muret sont disponibles.");
+    }
+};
     </script>
 </body>
 </html>
