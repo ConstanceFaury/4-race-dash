@@ -1069,32 +1069,55 @@
             window.dbPushFullRaceState();
         }
 
-        function exitCarPit(id) {
+        window.exitCarPit = function(id) {
             const car = window.fleetState[id];
             clearInterval(car.interval);
-            car.isInsidePit = false;
+            car.isInsidePit = false; // 🟢 La voiture sort officiellement des stands en local
             
             const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
-            const doFuelReset = document.getElementById(`chk-fuel-${id}`).checked;
-            const doPilotChange = document.getElementById(`chk-pilot-${id}`).checked;
-
-            let logDetails = "Arrêt";
-            if (doFuelReset) { car.fuel = fuelMaxSetting; logDetails += " + Plein Carburant"; }
-            if (doPilotChange) {
-                let oldPilot = car.rotation.shift(); car.rotation.push(oldPilot);
-                logDetails += ` + Relais ${window.pilotsDatabase[id][car.rotation[0]]}`;
-                document.getElementById(`r_${id}_1`).value = car.rotation[0];
-                document.getElementById(`r_${id}_2`).value = car.rotation[1];
-                document.getElementById(`r_${id}_3`).value = car.rotation[2];
-                document.getElementById(`r_${id}_4`).value = car.rotation[3];
-            }
-            car.hasAlerted = false; closeRacePopup();
             
+            // Détection du mode de ravitaillement choisi au muret
+            const isFullFuel = document.getElementById(`rad-full-${id}`).checked;
+            const doPilotChange = document.getElementById(`chk-pilot-${id}`).checked;
+        
+            let logDetails = "Arrêt";
+            
+            if (isFullFuel) {
+                car.fuel = fuelMaxSetting; 
+                logDetails += " + Plein Carburant Complet"; 
+            } else {
+                const litresAAjouter = parseFloat(document.getElementById(`input-litres-${id}`).value) || 0.0;
+                // On ajoute les litres au reste actuel sans dépasser la capacité maximale du réservoir
+                car.fuel = Math.min(fuelMaxSetting, car.fuel + litresAAjouter);
+                logDetails += ` + Ravitaillement Partiel (+${litresAAjouter.toFixed(1)}L)`;
+            }
+            
+            if (doPilotChange) {
+                let oldPilot = car.rotation.shift(); 
+                car.rotation.push(oldPilot);
+                logDetails += ` + Relais ${window.pilotsDatabase[id][car.rotation[0]]}`;
+                
+                // Mise à jour des menus déroulants de rotation
+                if(document.getElementById(`r_${id}_1`)) document.getElementById(`r_${id}_1`).value = car.rotation[0];
+                if(document.getElementById(`r_${id}_2`)) document.getElementById(`r_${id}_2`).value = car.rotation[1];
+                if(document.getElementById(`r_${id}_3`)) document.getElementById(`r_${id}_3`).value = car.rotation[2];
+                if(document.getElementById(`r_${id}_4`)) document.getElementById(`r_${id}_4`).value = car.rotation[3];
+            }
+            
+            car.hasAlerted = false; 
+            closeRacePopup();
+            
+            // Désactivation des visuels des stands immédiatement
             if (window.applyPitVisualsOff) window.applyPitVisualsOff(id);
-
-            window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
-            window.dbPushFullRaceState();
-        }
+        
+            // 📡 ENVOI SYNCHRONISÉ AU CLOUD FIREBASE
+            if (typeof window.dbLogLiveEventCloud === "function") {
+                window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
+            }
+            if (typeof window.dbPushFullRaceState === "function") {
+                window.dbPushFullRaceState(); // Moteur Firebase qui renvoie l'état "En Piste" à tous les écrans
+            }
+        };
 
         function calculateEnemyIntel() {
             const num = document.getElementById("intelCarNum").value; const laps = parseInt(document.getElementById("intelCarLaps").value);
