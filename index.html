@@ -1202,8 +1202,8 @@
             }
         };
 
-     // =======================================================================
-// 4. LOGIQUE DU PADDOCK MODE (VERROUILLAGE ABSOLU ÉCRAN BOX / MURET)
+        // =======================================================================
+// 4. LOGIQUE DU PADDOCK MODE (GESTION DES DROITS ÉCRAN BOX / ÉCRAN MURET)
 // =======================================================================
 window.isReadOnlyMode = false;
 
@@ -1212,15 +1212,11 @@ window.togglePaddockMode = function() {
     
     const btnMode = document.getElementById("btn-paddock-mode");
     
-    // 1. On cible tous les boutons d'action et éléments de saisie des pages
+    // Liste de toutes les classes de boutons d'action à masquer
+    // (Boutons de passage ligne, entrées/sorties stands, reset, injection, calculs)
     const elementsAction = document.querySelectorAll(
-        '.btn-quick, .btn-action, .btn-calculator, input, select'
+        '.btn-quick, .btn-action, .btn-calculator, .reset-status, input, select'
     );
-    
-    // 2. On cible spécifiquement les commandes stratégiques du Header (FCY, Météo, Reset)
-    const headerFCY = document.getElementById("trackState");
-    const headerReset = document.querySelector(".reset-status");
-    const headerMeteo = document.getElementById("weatherStateSelect");
     
     if (window.isReadOnlyMode) {
         // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
@@ -1230,31 +1226,18 @@ window.togglePaddockMode = function() {
             btnMode.style.color = "#ffffff";
         }
         
-        // Verrouillage des inputs, sélecteurs et masquage des boutons de passage de ligne
+        // On masque les boutons et on verrouille les champs de saisie
         elementsAction.forEach(el => {
-            if (el.id !== "btn-paddock-mode") {
+            if (el.id !== "btn-paddock-mode" && el.id !== "main-nav-bar") {
                 if (el.tagName === "INPUT" || el.tagName === "SELECT") {
-                    el.disabled = true;
+                    el.disabled = true; // Verrouille les cases de saisie et menus
                 } else {
-                    el.style.visibility = "hidden";
+                    el.style.visibility = "hidden"; // Masque les boutons d'action
                 }
             }
         });
         
-        // Verrouillage sécurité du header (FCY, Reset, Météo)
-        if (headerFCY) {
-            headerFCY.style.pointerEvents = "none"; // Rend le bouton incliquable
-            headerFCY.style.opacity = "0.6";        // Effet visuel désactivé
-        }
-        if (headerReset) {
-            headerReset.style.pointerEvents = "none";
-            headerReset.style.opacity = "0.3";
-        }
-        if (headerMeteo) {
-            headerMeteo.disabled = true; // Bloque le menu déroulant météo à 3 états
-        }
-        
-        console.log("🔒 Paddock Mode activé : FCY, Météo, Reset et commandes verrouillés.");
+        console.log("🔒 Paddock Mode activé : Écran sécurisé en lecture seule.");
     } else {
         // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
         if (btnMode) {
@@ -1263,7 +1246,7 @@ window.togglePaddockMode = function() {
             btnMode.style.color = "#ffffff";
         }
         
-        // On réactive et réaffiche tout
+        // On réaffiche tout et on déverrouille
         elementsAction.forEach(el => {
             if (el.tagName === "INPUT" || el.tagName === "SELECT") {
                 el.disabled = false;
@@ -1271,19 +1254,6 @@ window.togglePaddockMode = function() {
                 el.style.visibility = "visible";
             }
         });
-        
-        // Réactivation des commandes du header
-        if (headerFCY) {
-            headerFCY.style.pointerEvents = "auto";
-            headerFCY.style.opacity = "1";
-        }
-        if (headerReset) {
-            headerReset.style.pointerEvents = "auto";
-            headerReset.style.opacity = "1";
-        }
-        if (headerMeteo) {
-            headerMeteo.disabled = false;
-        }
         
         console.log("🔓 Mode Administrateur activé : Toutes les commandes muret sont disponibles.");
     }
