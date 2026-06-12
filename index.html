@@ -1202,12 +1202,7 @@
             }
         };
 
-        // =======================================================================
-// 4. LOGIQUE DU PADDOCK MODE (GESTION DES DROITS ÉCRAN BOX / ÉCRAN MURET)
-// =======================================================================
-window.isReadOnlyMode = false;
-
-// =======================================================================
+     // =======================================================================
 // 4. LOGIQUE DU PADDOCK MODE (VERROUILLAGE ABSOLU ÉCRAN BOX / MURET)
 // =======================================================================
 window.isReadOnlyMode = false;
@@ -1246,7 +1241,7 @@ window.togglePaddockMode = function() {
             }
         });
         
-        # VERROUILLAGE SÉCURITÉ DU HEADER (FCY, RESET, MÉTÉO)
+        // Verrouillage sécurité du header (FCY, Reset, Météo)
         if (headerFCY) {
             headerFCY.style.pointerEvents = "none"; // Rend le bouton incliquable
             headerFCY.style.opacity = "0.6";        // Effet visuel désactivé
@@ -1277,7 +1272,7 @@ window.togglePaddockMode = function() {
             }
         });
         
-        # RÉACTIVATION DES COMMANDES DU HEADER
+        // Réactivation des commandes du header
         if (headerFCY) {
             headerFCY.style.pointerEvents = "auto";
             headerFCY.style.opacity = "1";
