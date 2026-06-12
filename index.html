@@ -94,7 +94,7 @@
             font-weight: 600; margin-top: 4px; display: inline-block; width: 100%; text-align: center;
         }
 
-        .pit-options-box { display: none; background-color: #000; padding: 8px; border-radius: 4px; font-size: 11px; flex-direction: column; gap: 6px; border: 1px solid var(--state-alert); }
+        .pit-options-box { display: none; background-color: #000; padding: 8px; border-radius: 4px; font-size: 11px; flex-direction: column; gap: 6px; border: 1px solid #ef4444; }
         .pit-options-box label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #aaa; }
         .pit-mini-timer { font-size: 24px; font-weight: bold; font-family: monospace; color: var(--state-alert); text-align: center; background-color: rgba(239, 68, 68, 0.1); padding: 6px; border-radius: 4px; display: none; }
         .car-actions { display: flex; flex-direction: column; gap: 8px; }
@@ -352,6 +352,20 @@
 
         <div class="card col-12">
             <div class="card-title">⚙️ Paramètres Communs, Seuils & Attribution Numéros</div>
+            
+            <div class="circuit-selector-container" style="margin-bottom: 15px; padding: 12px; background: #0A0A0C; border-radius: 6px; border: 1px solid #333;">
+                <label for="setup-circuit" style="color: #888; font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase;">🗺️ Sélection du Circuit (Consos Théoriques) :</label>
+                <select id="setup-circuit" onchange="window.dbAppliquerCircuit(this.value)" style="width: 100%; padding: 8px; background: #141416; color: #fff; border: 1px solid #333; border-radius: 4px; font-size: 13px;">
+                    <option value="SPA" selected>Spa-Francorchamps (25h)</option>
+                    <option value="Castellet">Castellet (8h)</option>
+                    <option value="Dijon">Dijon-Prenois</option>
+                    <option value="Nogaro">Nogaro (8h)</option>
+                    <option value="Magny-cours">Magny cours (8h)</option>
+                    <option value="Le Mans">Le Mans (8h)</option>
+                    <option value="Portimao">Portimao (8h)</option>
+                </select>
+            </div>
+
             <div class="config-row">
                 <div class="config-group"><label>N° Châssis 1</label><input type="number" id="setup-v1" value="531" onchange="dbPushFullRaceState()"></div>
                 <div class="config-group"><label>N° Châssis 2</label><input type="number" id="setup-v2" value="183" onchange="dbPushFullRaceState()"></div>
@@ -562,19 +576,6 @@
             <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v4"></tbody></table></div>
         </div>
     </div>
-    
-    <div class="circuit-selector-container" style="margin: 15px 0; padding: 10px; background: #1e1e1e; border-radius: 5px; border: 1px solid #333;">
-    <label for="setup-circuit" style="color: #fff; font-weight: bold; display: block; margin-bottom: 5px;">🗺️ Sélection du Circuit (Consos Théoriques) :</label>
-    <select id="setup-circuit" onchange="window.dbAppliquerCircuit(this.value)" style="width: 100%; padding: 8px; background: #2a2a2a; color: #fff; border: 1px solid #555; border-radius: 4px; font-size: 14px;">
-        <option value="SPA" selected>Spa-Francorchamps (25h)</option>
-        <option value="Castellet">Castellet (8h)</option>
-        <option value="Dijon">Dijon-Prenois</option>
-        <option value="Nogaro">Nogaro (8h)</option>
-        <option value="Magny-cours">Magny cours (8h)</option>
-        <option value="Le Mans">Le Mans (8h)</option>
-        <option value="Portimao">Portimao (8h)</option>
-    </select>
-</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -794,77 +795,17 @@
             "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.9}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false }
         };
         
+        // =======================================================================
+        // 1. LA BASE DE DONNÉES DES CIRCUITS
+        // =======================================================================
         window.circuitsDatabase = {
-            "Castellet": {
-                "name": "Castellet (8h)",
-                "maxFuel": 42,
-                "conso": [
-                    { sec: 1.38, pluie: 1.60 },
-                    { sec: 1.38, pluie: 1.65 },
-                    { sec: 1.38, pluie: 1.55 },
-                    { sec: 1.38, pluie: 1.60 }
-                ]
-            },
-            "Dijon": {
-                "name": "Dijon-Prenois",
-                "maxFuel": 40,
-                "conso": [
-                    { sec: 0.88, pluie: 1.90 },
-                    { sec: 0.88, pluie: 1.95 },
-                    { sec: 0.88, pluie: 1.85 },
-                    { sec: 0.88, pluie: 1.90 }
-                ]
-            },
-            "SPA": {
-                "name": "SPA (25h)",
-                "maxFuel": 42,
-                "conso": [
-                    { sec: 1.77, pluie: 1.15 },
-                    { sec: 1.77, pluie: 1.20 },
-                    { sec: 1.77, pluie: 1.10 },
-                    { sec: 1.77, pluie: 1.15 }
-                ]
-            },
-            "Nogaro": {
-                "name": "Nogaro (8h)",
-                "maxFuel": 42,
-                "conso": [
-                    { sec: 0.92, pluie: 1.15 },
-                    { sec: 0.92, pluie: 1.20 },
-                    { sec: 0.92, pluie: 1.10 },
-                    { sec: 0.92, pluie: 1.15 }
-                ]
-            },
-            "Magny-cours": {
-                "name": "Magny cours (8h)",
-                "maxFuel": 42,
-                "conso": [
-                    { sec: 1.17, pluie: 1.15 },
-                    { sec: 1.17, pluie: 1.20 },
-                    { sec: 1.17, pluie: 1.10 },
-                    { sec: 1.17, pluie: 1.15 }
-                ]
-            },
-            "Le Mans": {
-                "name": "Le Mans (8h)",
-                "maxFuel": 42,
-                "conso": [
-                    { sec: 1.06, pluie: 1.15 },
-                    { sec: 1.06, pluie: 1.20 },
-                    { sec: 1.06, pluie: 1.10 },
-                    { sec: 1.06, pluie: 1.15 }
-                ]
-            },
-            "Portimao": {
-                "name": "Portimao (8h)",
-                "maxFuel": 42,
-                "conso": [
-                    { sec: 1.20, pluie: 1.15 },
-                    { sec: 1.20, pluie: 1.20 },
-                    { sec: 1.20, pluie: 1.10 },
-                    { sec: 1.20, pluie: 1.15 }
-                ]
-            }
+            "Castellet": { "name": "Castellet (8h)", "maxFuel": 42, "conso": [{ sec: 1.38, pluie: 1.60 }, { sec: 1.38, pluie: 1.65 }, { sec: 1.38, pluie: 1.55 }, { sec: 1.38, pluie: 1.60 }] },
+            "Dijon": { "name": "Dijon-Prenois", "maxFuel": 40, "conso": [{ sec: 0.88, pluie: 1.90 }, { sec: 0.88, pluie: 1.95 }, { sec: 0.88, pluie: 1.85 }, { sec: 0.88, pluie: 1.90 }] },
+            "SPA": { "name": "SPA (25h)", "maxFuel": 42, "conso": [{ sec: 1.77, pluie: 1.15 }, { sec: 1.77, pluie: 1.20 }, { sec: 1.77, pluie: 1.10 }, { sec: 1.77, pluie: 1.15 }] },
+            "Nogaro": { "name": "Nogaro (8h)", "maxFuel": 42, "conso": [{ sec: 0.92, pluie: 1.15 }, { sec: 0.92, pluie: 1.20 }, { sec: 0.92, pluie: 1.10 }, { sec: 0.92, pluie: 1.15 }] },
+            "Magny-cours": { "name": "Magny cours (8h)", "maxFuel": 42, "conso": [{ sec: 1.17, pluie: 1.15 }, { sec: 1.17, pluie: 1.20 }, { sec: 1.17, pluie: 1.10 }, { sec: 1.17, pluie: 1.15 }] },
+            "Le Mans": { "name": "Le Mans (8h)", "maxFuel": 42, "conso": [{ sec: 1.06, pluie: 1.15 }, { sec: 1.06, pluie: 1.20 }, { sec: 1.06, pluie: 1.10 }, { sec: 1.06, pluie: 1.15 }] },
+            "Portimao": { "name": "Portimao (8h)", "maxFuel": 42, "conso": [{ sec: 1.20, pluie: 1.15 }, { sec: 1.20, pluie: 1.20 }, { sec: 1.20, pluie: 1.10 }, { sec: 1.20, pluie: 1.15 }] }
         };
         window.enemyDatabase = []; window.isFCY = false; window.isRain = false;
 
@@ -987,13 +928,11 @@
             window.dbPushFullRaceState();
         }
 
-        // RECTIFICATION LOCALE SUR L'ORDI LOGGUEUR AU MOMENT DE L'ENTREE STANDS
         function enterCarPit(id) {
             const car = window.fleetState[id]; 
             car.isInsidePit = true; 
             car.pitSeconds = 0;
             
-            // On force le muret PC à basculer ses visuels et démarrer le chrono immédiatement au clic
             if (window.applyPitVisualsOn) window.applyPitVisualsOn(id);
             if (window.startLocalPitTimer) window.startLocalPitTimer(id);
 
@@ -1001,7 +940,6 @@
             window.dbPushFullRaceState();
         }
 
-        // RECTIFICATION LOCALE SUR L'ORDI ÉGALEMENT AU MOMENT DE LA REPARTIE
         function exitCarPit(id) {
             const car = window.fleetState[id];
             clearInterval(car.interval);
@@ -1023,7 +961,6 @@
             }
             car.hasAlerted = false; closeRacePopup();
             
-            // Masque et remet à zéro le chrono sur ton propre écran PC
             if (window.applyPitVisualsOff) window.applyPitVisualsOff(id);
 
             window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
@@ -1090,66 +1027,53 @@
         }
         function closeRacePopup() { document.getElementById("raceAlertPopup").style.display = "none"; }
         function formatPitTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}.${Math.floor((s%1)*10)}`; }
+
         // =======================================================================
-    // 1. LA BASE DE DONNÉES DES CIRCUITS
-    // =======================================================================
-    window.circuitsDatabase = {
-        "Castellet": { "name": "Castellet (8h)", "maxFuel": 42, "conso": [{ sec: 1.38, pluie: 1.60 }, { sec: 1.38, pluie: 1.65 }, { sec: 1.38, pluie: 1.55 }, { sec: 1.38, pluie: 1.60 }] },
-        "Dijon": { "name": "Dijon-Prenois", "maxFuel": 40, "conso": [{ sec: 0.88, pluie: 1.90 }, { sec: 0.88, pluie: 1.95 }, { sec: 0.88, pluie: 1.85 }, { sec: 0.88, pluie: 1.90 }] },
-        "SPA": { "name": "SPA (25h)", "maxFuel": 42, "conso": [{ sec: 1.77, pluie: 1.15 }, { sec: 1.77, pluie: 1.20 }, { sec: 1.77, pluie: 1.10 }, { sec: 1.77, pluie: 1.15 }] },
-        "Nogaro": { "name": "Nogaro (8h)", "maxFuel": 42, "conso": [{ sec: 0.92, pluie: 1.15 }, { sec: 0.92, pluie: 1.20 }, { sec: 0.92, pluie: 1.10 }, { sec: 0.92, pluie: 1.15 }] },
-        "Magny-cours": { "name": "Magny cours (8h)", "maxFuel": 42, "conso": [{ sec: 1.17, pluie: 1.15 }, { sec: 1.17, pluie: 1.20 }, { sec: 1.17, pluie: 1.10 }, { sec: 1.17, pluie: 1.15 }] },
-        "Le Mans": { "name": "Le Mans (8h)", "maxFuel": 42, "conso": [{ sec: 1.06, pluie: 1.15 }, { sec: 1.06, pluie: 1.20 }, { sec: 1.06, pluie: 1.10 }, { sec: 1.06, pluie: 1.15 }] },
-        "Portimao": { "name": "Portimao (8h)", "maxFuel": 42, "conso": [{ sec: 1.20, pluie: 1.15 }, { sec: 1.20, pluie: 1.20 }, { sec: 1.20, pluie: 1.10 }, { sec: 1.20, pluie: 1.15 }] }
-    };
+        // 2. LA FONCTION D'APPLICATION DES CIRCUITS
+        // =======================================================================
+        window.dbAppliquerCircuit = function(circuitKey) {
+            const circuit = window.circuitsDatabase[circuitKey];
+            if (!circuit) return;
 
-    // =======================================================================
-    // 2. LA FONCTION D'APPLICATION (Celle que tu as partagée)
-    // =======================================================================
-    window.dbAppliquerCircuit = function(circuitKey) {
-        const circuit = window.circuitsDatabase[circuitKey];
-        if (!circuit) return;
+            const maxFuelInput = document.getElementById("setup-maxFuel");
+            if (maxFuelInput) { maxFuelInput.value = circuit.maxFuel; }
 
-        const maxFuelInput = document.getElementById("setup-maxFuel");
-        if (maxFuelInput) { maxFuelInput.value = circuit.maxFuel; }
+            ["v1", "v2", "v3", "v4"].forEach(id => {
+                if (!window.fleetState || !window.fleetState[id]) return;
+                const car = window.fleetState[id];
+                if (!car.conso) car.conso = [];
 
-        ["v1", "v2", "v3", "v4"].forEach(id => {
-            if (!window.fleetState || !window.fleetState[id]) return;
-            const car = window.fleetState[id];
-            if (!car.conso) car.conso = [];
+                for (let p = 1; p <= 4; p++) {
+                    const consoTheorique = circuit.conso[p - 1];
+                    if (!car.conso[p]) car.conso[p] = { sec: 1.77, pluie: 1.15 };
+                    
+                    car.conso[p].sec = consoTheorique.sec;
+                    car.conso[p].pluie = consoTheorique.pluie;
 
-            for (let p = 1; p <= 4; p++) {
-                const consoTheorique = circuit.conso[p - 1];
-                if (!car.conso[p]) car.conso[p] = { sec: 1.77, pluie: 1.15 };
-                
-                car.conso[p].sec = consoTheorique.sec;
-                car.conso[p].pluie = consoTheorique.pluie;
+                    const inputSec = document.getElementById(`c_${id}_${p}_sec`);
+                    const inputPluie = document.getElementById(`c_${id}_${p}_pluie`);
+                    if (inputSec) inputSec.value = consoTheorique.sec;
+                    if (inputPluie) inputPluie.value = consoTheorique.pluie;
+                }
+                car.fuel = circuit.maxFuel;
+            });
 
-                const inputSec = document.getElementById(`c_${id}_${p}_sec`);
-                const inputPluie = document.getElementById(`c_${id}_${p}_pluie`);
-                if (inputSec) inputSec.value = consoTheorique.sec;
-                if (inputPluie) inputPluie.value = consoTheorique.pluie;
+            if (typeof window.dbPushFullRaceState === "function") { window.dbPushFullRaceState(); }
+
+            if (typeof window.dbLogLiveEventCloud === "function") {
+                window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Consommations théoriques appliquées aux 4 voitures)`, `${circuit.maxFuel}.0 L`, "TRACK");
+            } else {
+                const URL_LOGS = "https://live-4-race-default-rtdb.europe-west1.firebasedatabase.app/logs";
+                const now_ms = Date.now();
+                const time_str = new Date().toLocaleTimeString('fr-FR');
+                fetch(`${URL_LOGS}/${now_ms}.json`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ time: time_str, carNum: "SYS", action: `🗺️ Configuration : ${circuit.name}`, fuel: `${circuit.maxFuel} L`, status: "⚙️ CONFIG" })
+                }).catch(e => console.log(e));
             }
-            car.fuel = circuit.maxFuel;
-        });
 
-        if (typeof window.dbPushFullRaceState === "function") { window.dbPushFullRaceState(); }
-
-        if (typeof window.dbLogLiveEventCloud === "function") {
-            window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Consommations théoriques appliquées aux 4 voitures)`, `${circuit.maxFuel}.0 L`, "TRACK");
-        } else {
-            const URL_LOGS = "https://live-4-race-default-rtdb.europe-west1.firebasedatabase.app/logs";
-            const now_ms = Date.now();
-            const time_str = new Date().toLocaleTimeString('fr-FR');
-            fetch(`${URL_LOGS}/${now_ms}.json`, {
-                method: 'PUT',
-                body: JSON.stringify({ time: time_str, carNum: "SYS", action: `🗺️ Configuration : ${circuit.name}`, fuel: `${circuit.maxFuel} L`, status: "⚙️ CONFIG" })
-            }).catch(e => console.log(e));
-        }
-
-        alert(`✅ Configuration réussie pour ${circuit.name} ! Les paramètres ont été transmis aux 4 voitures et synchronisés.`);
-    };
-        
+            alert(`✅ Configuration réussie pour ${circuit.name} ! Les paramètres ont été transmis aux 4 voitures et synchronisés.`);
+        };
     </script>
 </body>
 </html>
