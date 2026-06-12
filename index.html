@@ -37,8 +37,11 @@
 
         .track-status { padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: var(--state-green); color: #000; cursor: pointer; font-size: 13px; }
         .track-status.fcy { background-color: var(--state-fcy); color: #000; } 
-        .weather-status { padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: #ffffff; color: #000; cursor: pointer; font-size: 13px; }
-        .weather-status.rain { background-color: #3b82f6; color: white; }
+        
+        /* Style du nouveau sélecteur météo en-tête */
+        .weather-select-top { padding: 6px 10px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: #ffffff; color: #000; border: none; font-size: 13px; cursor: pointer; outline: none; }
+        .weather-select-top.rain-mod { background-color: #3b82f6; color: white; }
+        .weather-select-top.rain-heavy { background-color: #1d4ed8; color: white; }
         
         .reset-status { padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: #222; color: #aaa; cursor: pointer; font-size: 13px; border: 1px solid #333; transition: all 0.2s; }
         .reset-status:hover { background-color: var(--state-alert); border-color: var(--state-alert); color: #fff; }
@@ -94,7 +97,7 @@
             font-weight: 600; margin-top: 4px; display: inline-block; width: 100%; text-align: center;
         }
 
-        .pit-options-box { display: none; background-color: #000; padding: 8px; border-radius: 4px; font-size: 11px; flex-direction: column; gap: 6px; border: 1px solid #ef4444; }
+        .pit-options-box { display: none; background-color: #000; padding: 8px; border-radius: 4px; font-size: 11px; flex-direction: column; gap: 6px; border: 1px solid var(--state-alert); }
         .pit-options-box label { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #aaa; }
         .pit-mini-timer { font-size: 24px; font-weight: bold; font-family: monospace; color: var(--state-alert); text-align: center; background-color: rgba(239, 68, 68, 0.1); padding: 6px; border-radius: 4px; display: none; }
         .car-actions { display: flex; flex-direction: column; gap: 8px; }
@@ -151,7 +154,11 @@
             <h1>Timing Dash <span class="logo-4">4</span><span class="logo-race">-RACE</span> <span class="logo-sub">CLASSIC AND RACING CARS SERVICES // LIVE TRACK SYNC</span></h1>
         </div>
         <div class="controls-top">
-            <div id="weatherState" class="weather-status" onclick="dbToggleWeatherState()">☀️ SEC</div>
+            <select id="weatherStateSelect" class="weather-select-top" onchange="dbChangeWeatherState(this.value)">
+                <option value="sec" selected>☀️ SEC</option>
+                <option value="pluie_moderee">🌧️ PLUIE MODÉRÉE (-10%)</option>
+                <option value="forte_pluie">⛈️ FORTE PLUIE</option>
+            </select>
             <div id="trackState" class="track-status" onclick="dbToggleTrackState()">🟢 Piste Dégagée</div>
             <div class="reset-status" onclick="dbResetEntireRace()">🔄 Reset Nouvelle Course</div>
         </div>
@@ -300,8 +307,23 @@
     </div>
 
     <div id="page-setup" class="page-content grid">
-        <div class="card col-12" style="border: 2px solid var(--4race-coral);">
-            <div class="card-title" style="color: var(--4race-coral);">👤 Gestion des Équipages (4 Pilotes Distincts par Voiture)</div>
+        <div class="card col-12" style="border: 2px solid var(--4race-coral); background: var(--4race-card);">
+            <div class="card-title" style="color: var(--4race-coral); margin-bottom: 10px;">🗺️ CONFIGURATION DU CIRCUIT DE COURSE</div>
+            <div class="circuit-selector-container">
+                <select id="setup-circuit" onchange="window.dbAppliquerCircuit(this.value)" style="width: 100%; padding: 10px; background: #0A0A0C; color: #fff; border: 1px solid #333; border-radius: 6px; font-size: 14px; font-weight: bold; letter-spacing: 0.5px;">
+                    <option value="SPA" selected>Spa-Francorchamps (25h)</option>
+                    <option value="Castellet">Castellet (8h)</option>
+                    <option value="Dijon">Dijon-Prenois</option>
+                    <option value="Nogaro">Nogaro (8h)</option>
+                    <option value="Magny-cours">Magny cours (8h)</option>
+                    <option value="Le Mans">Le Mans (8h)</option>
+                    <option value="Portimao">Portimao (8h)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="card col-12" style="border: 1px solid #222;">
+            <div class="card-title" style="color: var(--4race-white);">👤 Gestion des Équipages (4 Pilotes Distincts par Voiture)</div>
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
                 <div style="background:#000; padding:12px; border-radius:6px; border:1px solid #222;">
                     <div style="font-weight:bold; margin-bottom:10px; color:var(--4race-coral);" class="lbl-v1">#531</div>
@@ -352,20 +374,6 @@
 
         <div class="card col-12">
             <div class="card-title">⚙️ Paramètres Communs, Seuils & Attribution Numéros</div>
-            
-            <div class="circuit-selector-container" style="margin-bottom: 15px; padding: 12px; background: #0A0A0C; border-radius: 6px; border: 1px solid #333;">
-                <label for="setup-circuit" style="color: #888; font-size: 11px; font-weight: bold; display: block; margin-bottom: 5px; text-transform: uppercase;">🗺️ Sélection du Circuit (Consos Théoriques) :</label>
-                <select id="setup-circuit" onchange="window.dbAppliquerCircuit(this.value)" style="width: 100%; padding: 8px; background: #141416; color: #fff; border: 1px solid #333; border-radius: 4px; font-size: 13px;">
-                    <option value="SPA" selected>Spa-Francorchamps (25h)</option>
-                    <option value="Castellet">Castellet (8h)</option>
-                    <option value="Dijon">Dijon-Prenois</option>
-                    <option value="Nogaro">Nogaro (8h)</option>
-                    <option value="Magny-cours">Magny cours (8h)</option>
-                    <option value="Le Mans">Le Mans (8h)</option>
-                    <option value="Portimao">Portimao (8h)</option>
-                </select>
-            </div>
-
             <div class="config-row">
                 <div class="config-group"><label>N° Châssis 1</label><input type="number" id="setup-v1" value="531" onchange="dbPushFullRaceState()"></div>
                 <div class="config-group"><label>N° Châssis 2</label><input type="number" id="setup-v2" value="183" onchange="dbPushFullRaceState()"></div>
@@ -397,26 +405,26 @@
                 <div class="card-title">📊 Fiche Consos - Châssis <span class="lbl-v1">#531</span></div>
                 <div class="config-row">
                     <div class="config-group"><label class="p1_v1">Pilote 1</label><input type="number" id="c_v1_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                    <div class="config-group"><label class="p1_v1">Pilote 1 Pluie</label><input type="number" id="c_v1_1_pluie" value="1.60" step="0.01" onchange="saveCarConfig('v1')"></div>
+                    <div class="config-group"><label class="p1_v1">Pilote 1 Pluie</label><input type="number" id="c_v1_1_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v1')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p2_v1">Pilote 2</label><input type="number" id="c_v1_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                    <div class="config-group"><label class="p2_v1">Pilote 2 Pluie</label><input type="number" id="c_v1_2_pluie" value="1.65" step="0.01" onchange="saveCarConfig('v1')"></div>
+                    <div class="config-group"><label class="p2_v1">Pilote 2 Pluie</label><input type="number" id="c_v1_2_pluie" value="1.20" step="0.01" onchange="saveCarConfig('v1')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p3_v1">Pilote 3</label><input type="number" id="c_v1_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                    <div class="config-group"><label class="p3_v1">Pilote 3 Pluie</label><input type="number" id="c_v1_3_pluie" value="1.55" step="0.01" onchange="saveCarConfig('v1')"></div>
+                    <div class="config-group"><label class="p3_v1">Pilote 3 Pluie</label><input type="number" id="c_v1_3_pluie" value="1.10" step="0.01" onchange="saveCarConfig('v1')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p4_v1">Pilote 4</label><input type="number" id="c_v1_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                    <div class="config-group"><label class="p4_v1">Pilote 4 Pluie</label><input type="number" id="c_v1_4_pluie" value="1.60" step="0.01" onchange="saveCarConfig('v1')"></div>
+                    <div class="config-group"><label class="p4_v1">Pilote 4 Pluie</label><input type="number" id="c_v1_4_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v1')"></div>
                 </div>
             </div>
             <div class="card col-4" style="border: 1px dashed var(--4race-coral);">
                 <div class="card-title" style="color: var(--4race-coral);">⚡ Calculateur Flash Conso (Essais)</div>
                 <div class="config-row">
                     <div class="config-group"><label>Pilote</label><select id="calc_p_v1"></select></div>
-                    <div class="config-group"><label>Météo</label><select id="calc_w_v1"><option value="sec">Sec ☀️</option><option value="pluie">Pluie 2</option></select></div>
+                    <div class="config-group"><label>Météo</label><select id="calc_w_v1"><option value="sec">Sec ☀️</option><option value="pluie_moderee">Pluie modérée</option><option value="forte_pluie">Forte pluie</option></select></div>
                 </div>
                 <div class="config-row" style="margin-top:10px;">
                     <div class="config-group"><label>Tours</label><input type="number" id="calc_laps_v1" value="10" min="1"></div>
@@ -443,26 +451,26 @@
                 <div class="card-title">📊 Fiche Consos - Châssis <span class="lbl-v2">#183</span></div>
                 <div class="config-row">
                     <div class="config-group"><label class="p1_v2">Pilote 1</label><input type="number" id="c_v2_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                    <div class="config-group"><label class="p1_v2">Pilote 1 Pluie</label><input type="number" id="c_v2_1_pluie" value="1.70" step="0.01" onchange="saveCarConfig('v2')"></div>
+                    <div class="config-group"><label class="p1_v2">Pilote 1 Pluie</label><input type="number" id="c_v2_1_pluie" value="1.20" step="0.01" onchange="saveCarConfig('v2')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p2_v2">Pilote 2</label><input type="number" id="c_v2_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                    <div class="config-group"><label class="p2_v2">Pilote 2 Pluie</label><input type="number" id="c_v2_2_pluie" value="1.60" step="0.01" onchange="saveCarConfig('v2')"></div>
+                    <div class="config-group"><label class="p2_v2">Pilote 2 Pluie</label><input type="number" id="c_v2_2_pluie" value="1.20" step="0.01" onchange="saveCarConfig('v2')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p3_v2">Pilote 3</label><input type="number" id="c_v2_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                    <div class="config-group"><label class="p3_v2">Pilote 3 Pluie</label><input type="number" id="c_v2_3_pluie" value="1.65" step="0.01" onchange="saveCarConfig('v2')"></div>
+                    <div class="config-group"><label class="p3_v2">Pilote 3 Pluie</label><input type="number" id="c_v2_3_pluie" value="1.20" step="0.01" onchange="saveCarConfig('v2')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p4_v2">Pilote 4</label><input type="number" id="c_v2_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                    <div class="config-group"><label class="p4_v2">Pilote 4 Pluie</label><input type="number" id="c_v2_4_pluie" value="1.70" step="0.01" onchange="saveCarConfig('v2')"></div>
+                    <div class="config-group"><label class="p4_v2">Pilote 4 Pluie</label><input type="number" id="c_v2_4_pluie" value="1.20" step="0.01" onchange="saveCarConfig('v2')"></div>
                 </div>
             </div>
             <div class="card col-4" style="border: 1px dashed var(--4race-coral);">
                 <div class="card-title" style="color: var(--4race-coral);">⚡ Calculateur Flash Conso (Essais)</div>
                 <div class="config-row">
                     <div class="config-group"><label>Pilote</label><select id="calc_p_v2"></select></div>
-                    <div class="config-group"><label>Météo</label><select id="calc_w_v2"><option value="sec">Sec ☀️</option><option value="pluie">Pluie 🌧️</option></select></div>
+                    <div class="config-group"><label>Météo</label><select id="calc_w_v2"><option value="sec">Sec ☀️</option><option value="pluie_moderee">Pluie modérée</option><option value="forte_pluie">Forte pluie</option></select></div>
                 </div>
                 <div class="config-row" style="margin-top:10px;">
                     <div class="config-group"><label>Tours</label><input type="number" id="calc_laps_v2" value="10" min="1"></div>
@@ -489,26 +497,26 @@
                 <div class="card-title">📊 Fiche Consos - Châssis <span class="lbl-v3">#156</span></div>
                 <div class="config-row">
                     <div class="config-group"><label class="p1_v3">Pilote 1</label><input type="number" id="c_v3_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                    <div class="config-group"><label class="p1_v3">Pilote 1 Pluie</label><input type="number" id="c_v3_1_pluie" value="1.55" step="0.01" onchange="saveCarConfig('v3')"></div>
+                    <div class="config-group"><label class="p1_v3">Pilote 1 Pluie</label><input type="number" id="c_v3_1_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v3')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p2_v3">Pilote 2</label><input type="number" id="c_v3_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                    <div class="config-group"><label class="p2_v3">Pilote 2 Pluie</label><input type="number" id="c_v3_2_pluie" value="1.50" step="0.01" onchange="saveCarConfig('v3')"></div>
+                    <div class="config-group"><label class="p2_v3">Pilote 2 Pluie</label><input type="number" id="c_v3_2_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v3')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p3_v3">Pilote 3</label><input type="number" id="c_v3_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                    <div class="config-group"><label class="p3_v3">Pilote 3 Pluie</label><input type="number" id="c_v3_3_pluie" value="1.60" step="0.01" onchange="saveCarConfig('v3')"></div>
+                    <div class="config-group"><label class="p3_v3">Pilote 3 Pluie</label><input type="number" id="c_v3_3_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v3')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p4_v3">Pilote 4</label><input type="number" id="c_v3_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                    <div class="config-group"><label class="p4_v3">Pilote 4 Pluie</label><input type="number" id="c_v3_4_pluie" value="1.55" step="0.01" onchange="saveCarConfig('v3')"></div>
+                    <div class="config-group"><label class="p4_v3">Pilote 4 Pluie</label><input type="number" id="c_v3_4_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v3')"></div>
                 </div>
             </div>
             <div class="card col-4" style="border: 1px dashed var(--4race-coral);">
                 <div class="card-title" style="color: var(--4race-coral);">⚡ Calculateur Flash Conso (Essais)</div>
                 <div class="config-row">
                     <div class="config-group"><label>Pilote</label><select id="calc_p_v3"></select></div>
-                    <div class="config-group"><label>Météo</label><select id="calc_w_v3"><option value="sec">Sec ☀️</option><option value="pluie">Pluie 🌧️</option></select></div>
+                    <div class="config-group"><label>Météo</label><select id="calc_w_v3"><option value="sec">Sec ☀️</option><option value="pluie_moderee">Pluie modérée</option><option value="forte_pluie">Forte pluie</option></select></div>
                 </div>
                 <div class="config-row" style="margin-top:10px;">
                     <div class="config-group"><label>Tours</label><input type="number" id="calc_laps_v3" value="10" min="1"></div>
@@ -535,26 +543,26 @@
                 <div class="card-title">📊 Fiche Consos - Châssis <span class="lbl-v4">#40</span></div>
                 <div class="config-row">
                     <div class="config-group"><label class="p1_v4">Pilote 1</label><input type="number" id="c_v4_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                    <div class="config-group"><label class="p1_v4">Pilote 1 Pluie</label><input type="number" id="c_v4_1_pluie" value="1.60" step="0.01" onchange="saveCarConfig('v4')"></div>
+                    <div class="config-group"><label class="p1_v4">Pilote 1 Pluie</label><input type="number" id="c_v4_1_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v4')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p2_v4">Pilote 2</label><input type="number" id="c_v4_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                    <div class="config-group"><label class="p2_v4">Pilote 2 Pluie</label><input type="number" id="c_v4_2_pluie" value="1.90" step="0.01" onchange="saveCarConfig('v4')"></div>
+                    <div class="config-group"><label class="p2_v4">Pilote 2 Pluie</label><input type="number" id="c_v4_2_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v4')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p3_v4">Pilote 3</label><input type="number" id="c_v4_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                    <div class="config-group"><label class="p3_v4">Pilote 3 Pluie</label><input type="number" id="c_v4_3_pluie" value="1.55" step="0.01" onchange="saveCarConfig('v4')"></div>
+                    <div class="config-group"><label class="p3_v4">Pilote 3 Pluie</label><input type="number" id="c_v4_3_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v4')"></div>
                 </div>
                 <div class="config-row">
                     <div class="config-group"><label class="p4_v4">Pilote 4</label><input type="number" id="c_v4_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                    <div class="config-group"><label class="p4_v4">Pilote 4 Pluie</label><input type="number" id="c_v4_4_pluie" value="1.60" step="0.01" onchange="saveCarConfig('v4')"></div>
+                    <div class="config-group"><label class="p4_v4">Pilote 4 Pluie</label><input type="number" id="c_v4_4_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v4')"></div>
                 </div>
             </div>
             <div class="card col-4" style="border: 1px dashed var(--4race-coral);">
                 <div class="card-title" style="color: var(--4race-coral);">⚡ Calculateur Flash Conso (Essais)</div>
                 <div class="config-row">
                     <div class="config-group"><label>Pilote</label><select id="calc_p_v4"></select></div>
-                    <div class="config-group"><label>Météo</label><select id="calc_w_v4"><option value="sec">Sec ☀️</option><option value="pluie">Pluie 🌧️</option></select></div>
+                    <div class="config-group"><label>Météo</label><select id="calc_w_v4"><option value="sec">Sec ☀️</option><option value="pluie_moderee">Pluie modérée</option><option value="forte_pluie">Forte pluie</option></select></div>
                 </div>
                 <div class="config-row" style="margin-top:10px;">
                     <div class="config-group"><label>Tours</label><input type="number" id="calc_laps_v4" value="10" min="1"></div>
@@ -593,9 +601,9 @@
             update(ref(db, 'race_state'), { isFCY: window.isFCY });
         };
 
-        window.dbToggleWeatherState = function() {
-            window.isRain = !window.isRain;
-            update(ref(db, 'race_state'), { isRain: window.isRain });
+        // GESTION MULTI-ÉTATS DE LA MÉTÉO SUR FIREBASE
+        window.dbChangeWeatherState = function(valeurMeteo) {
+            update(ref(db, 'race_state'), { weatherMode: valeurMeteo });
         };
 
         window.dbResetEntireRace = function() {
@@ -615,7 +623,7 @@
                         clearInterval(window.fleetState[id].interval);
                     }
                     window.isFCY = false;
-                    window.isRain = false;
+                    window.weatherMode = "sec";
                     window.enemyDatabase = [];
                     
                     window.dbPushFullRaceState();
@@ -627,7 +635,7 @@
 
         window.dbPushFullRaceState = function() {
             const statePayload = {
-                isRain: window.isRain,
+                weatherMode: window.weatherMode,
                 isFCY: window.isFCY,
                 enemyDatabase: window.enemyDatabase,
                 cars: {}
@@ -682,13 +690,20 @@
             }
 
             window.isFCY = data.isFCY;
-            window.isRain = data.isRain;
+            window.weatherMode = data.weatherMode || "sec";
             window.enemyDatabase = data.enemyDatabase || [];
 
             document.getElementById('trackState').innerText = window.isFCY ? "🟨 FCY EN COURS" : "🟢 Piste Dégagée";
             document.getElementById('trackState').className = window.isFCY ? "track-status fcy" : "track-status";
-            document.getElementById('weatherState').innerText = window.isRain ? "🌧️ PLUIE" : "☀️ SEC";
-            document.getElementById('weatherState').className = window.isRain ? "weather-status rain" : "weather-status";
+            
+            // Mise à jour visuelle dynamique du sélecteur météo haut
+            const wSelect = document.getElementById('weatherStateSelect');
+            if (wSelect) {
+                wSelect.value = window.weatherMode;
+                if(window.weatherMode === "sec") wSelect.className = "weather-select-top";
+                else if(window.weatherMode === "pluie_moderee") wSelect.className = "weather-select-top rain-mod";
+                else if(window.weatherMode === "forte_pluie") wSelect.className = "weather-select-top rain-heavy";
+            }
 
             for (let id in window.fleetState) {
                 if (data.cars && data.cars[id]) {
@@ -705,10 +720,15 @@
                     for (let p = 1; p <= 4; p++) {
                         document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
                         document.getElementById(`c_${id}_${p}_sec`).value = cloudCar.conso[p].sec;
-                        document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie;
+                        
+                        // Rétrocompatibilité d'affichage sur l'input pluie visuel
+                        if (cloudCar.conso[p].pluie_moderee !== undefined) {
+                            document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p][window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
+                        } else {
+                            document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie || 1.15;
+                        }
                     }
 
-                    // APPLICATION UNIFIEE DU CHANGEMENT DE STATUT DES STANDS INTER-APPAREILS
                     if (cloudCar.isInsidePit && !localCar.isInsidePit) {
                         localCar.isInsidePit = true;
                         localCar.pitSeconds = cloudCar.pitSeconds;
@@ -739,7 +759,6 @@
             }
         });
 
-        // Exportation globale des utilitaires graphiques pour qu'ils soient synchronisés au clic sur tous les écrans
         window.applyPitVisualsOn = function(id) {
             document.getElementById(`opt-box-${id}`).style.display = 'flex';
             document.getElementById(`btn-lap-${id}`).style.display = 'none'; 
@@ -789,25 +808,81 @@
         };
 
         window.fleetState = {
-            "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.65}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false },
-            "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.7}, "2": {sec:1.77, pluie:1.6}, "3": {sec:1.77, pluie:1.65}, "4": {sec:1.77, pluie:1.7} }, hasAlerted: false },
-            "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.55}, "2": {sec:1.77, pluie:1.5}, "3": {sec:1.77, pluie:1.6}, "4": {sec:1.77, pluie:1.55} }, hasAlerted: false },
-            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie:1.6}, "2": {sec:1.77, pluie:1.9}, "3": {sec:1.77, pluie:1.55}, "4": {sec:1.77, pluie:1.6} }, hasAlerted: false }
+            "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.10, forte_pluie:1.10}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
+            "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "4": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20} }, hasAlerted: false },
+            "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
+            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false }
         };
         
         // =======================================================================
-        // 1. LA BASE DE DONNÉES DES CIRCUITS
+        // 1. BASE DE DONNÉES COMPLÈTE : SEC / PLUIE MODÉRÉE / FORTE PLUIE
         // =======================================================================
         window.circuitsDatabase = {
-            "Castellet": { "name": "Castellet (8h)", "maxFuel": 42, "conso": [{ sec: 1.38, pluie: 1.60 }, { sec: 1.38, pluie: 1.65 }, { sec: 1.38, pluie: 1.55 }, { sec: 1.38, pluie: 1.60 }] },
-            "Dijon": { "name": "Dijon-Prenois", "maxFuel": 40, "conso": [{ sec: 0.88, pluie: 1.90 }, { sec: 0.88, pluie: 1.95 }, { sec: 0.88, pluie: 1.85 }, { sec: 0.88, pluie: 1.90 }] },
-            "SPA": { "name": "SPA (25h)", "maxFuel": 42, "conso": [{ sec: 1.77, pluie: 1.15 }, { sec: 1.77, pluie: 1.20 }, { sec: 1.77, pluie: 1.10 }, { sec: 1.77, pluie: 1.15 }] },
-            "Nogaro": { "name": "Nogaro (8h)", "maxFuel": 42, "conso": [{ sec: 0.92, pluie: 1.15 }, { sec: 0.92, pluie: 1.20 }, { sec: 0.92, pluie: 1.10 }, { sec: 0.92, pluie: 1.15 }] },
-            "Magny-cours": { "name": "Magny cours (8h)", "maxFuel": 42, "conso": [{ sec: 1.17, pluie: 1.15 }, { sec: 1.17, pluie: 1.20 }, { sec: 1.17, pluie: 1.10 }, { sec: 1.17, pluie: 1.15 }] },
-            "Le Mans": { "name": "Le Mans (8h)", "maxFuel": 42, "conso": [{ sec: 1.06, pluie: 1.15 }, { sec: 1.06, pluie: 1.20 }, { sec: 1.06, pluie: 1.10 }, { sec: 1.06, pluie: 1.15 }] },
-            "Portimao": { "name": "Portimao (8h)", "maxFuel": 42, "conso": [{ sec: 1.20, pluie: 1.15 }, { sec: 1.20, pluie: 1.20 }, { sec: 1.20, pluie: 1.10 }, { sec: 1.20, pluie: 1.15 }] }
+            "Castellet": {
+                "name": "Castellet (8h)", "maxFuel": 42,
+                "conso": [
+                    { sec: 1.38, pluie_moderee: 1.24, forte_pluie: 1.13 },
+                    { sec: 1.38, pluie_moderee: 1.24, forte_pluie: 1.13 },
+                    { sec: 1.38, pluie_moderee: 1.24, forte_pluie: 1.13 },
+                    { sec: 1.38, pluie_moderee: 1.24, forte_pluie: 1.13 }
+                ]
+            },
+            "Dijon": {
+                "name": "Dijon-Prenois", "maxFuel": 40,
+                "conso": [
+                    { sec: 0.88, pluie_moderee: 0.79, forte_pluie: 0.72 },
+                    { sec: 0.88, pluie_moderee: 0.79, forte_pluie: 0.72 },
+                    { sec: 0.88, pluie_moderee: 0.79, forte_pluie: 0.72 },
+                    { sec: 0.88, pluie_moderee: 0.79, forte_pluie: 0.72 }
+                ]
+            },
+            "SPA": {
+                "name": "SPA (25h)", "maxFuel": 42,
+                "conso": [
+                    { sec: 1.77, pluie_moderee: 1.59, forte_pluie: 1.45 },
+                    { sec: 1.77, pluie_moderee: 1.59, forte_pluie: 1.45 },
+                    { sec: 1.77, pluie_moderee: 1.59, forte_pluie: 1.45 },
+                    { sec: 1.77, pluie_moderee: 1.59, forte_pluie: 1.45 }
+                ]
+            },
+            "Nogaro": {
+                "name": "Nogaro (8h)", "maxFuel": 42,
+                "conso": [
+                    { sec: 0.92, pluie_moderee: 0.83, forte_pluie: 0.75 },
+                    { sec: 0.92, pluie_moderee: 0.83, forte_pluie: 0.75 },
+                    { sec: 0.92, pluie_moderee: 0.83, forte_pluie: 0.75 },
+                    { sec: 0.92, pluie_moderee: 0.83, forte_pluie: 0.75 }
+                ]
+            },
+            "Magny-cours": {
+                "name": "Magny cours (8h)", "maxFuel": 42,
+                "conso": [
+                    { sec: 1.17, pluie_moderee: 1.05, forte_pluie: 0.96 },
+                    { sec: 1.17, pluie_moderee: 1.05, forte_pluie: 0.96 },
+                    { sec: 1.17, pluie_moderee: 1.05, forte_pluie: 0.96 },
+                    { sec: 1.17, pluie_moderee: 1.05, forte_pluie: 0.96 }
+                ]
+            },
+            "Le Mans": {
+                "name": "Le Mans (8h)", "maxFuel": 42,
+                "conso": [
+                    { sec: 1.06, pluie_moderee: 0.95, forte_pluie: 0.87 },
+                    { sec: 1.06, pluie_moderee: 0.95, forte_pluie: 0.87 },
+                    { sec: 1.06, pluie_moderee: 0.95, forte_pluie: 0.87 },
+                    { sec: 1.06, pluie_moderee: 0.95, forte_pluie: 0.87 }
+                ]
+            },
+            "Portimao": {
+                "name": "Portimao (8h)", "maxFuel": 42,
+                "conso": [
+                    { sec: 1.20, pluie_moderee: 1.08, forte_pluie: 0.98 },
+                    { sec: 1.20, pluie_moderee: 1.08, forte_pluie: 0.98 },
+                    { sec: 1.20, pluie_moderee: 1.08, forte_pluie: 0.98 },
+                    { sec: 1.20, pluie_moderee: 1.08, forte_pluie: 0.98 }
+                ]
+            }
         };
-        window.enemyDatabase = []; window.isFCY = false; window.isRain = false;
+        window.enemyDatabase = []; window.isFCY = false; window.weatherMode = "sec";
 
         function applyGlobalCustomizationLocal() {
             for (let id in window.fleetState) {
@@ -850,12 +925,16 @@
         }
 
         function updateCarStrategyLocal(id) {
-            const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; const weatherKey = window.isRain ? "pluie" : "sec";
+            const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
             const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
             const fcyCoeff = parseFloat(document.getElementById("setup-fcyCoeff").value);
             const alertLimit = parseInt(document.getElementById("setup-alertLimit").value);
 
-            let currentConso = car.conso[pilotIdx][weatherKey]; 
+            // Sélection dynamique de l'indice de consommation météo
+            let currentConso = 1.77;
+            if (car.conso[pilotIdx]) {
+                currentConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"];
+            }
             if (window.isFCY && !car.isInsidePit) currentConso *= fcyCoeff;
 
             let lapsLeft = Math.floor(car.fuel / currentConso); if (lapsLeft < 0) lapsLeft = 0;
@@ -894,7 +973,9 @@
             if(tbody) {
                 tbody.innerHTML = ""; let trackerLap = car.currentLap;
                 for(let i=0; i<4; i++) {
-                    let pIdx = car.rotation[i]; let c = car.conso[pIdx][weatherKey]; if(i===0 && window.isFCY) c *= fcyCoeff;
+                    let pIdx = car.rotation[i]; 
+                    let c = car.conso[pIdx][window.weatherMode] || car.conso[pIdx]["sec"]; 
+                    if(i===0 && window.isFCY) c *= fcyCoeff;
                     let l = (i===0) ? Math.floor(car.fuel / c) : Math.floor(fuelMaxSetting / c); trackerLap += l;
                     tbody.innerHTML += `<tr><td><strong>Relais ${i+1}</strong></td><td>${window.pilotsDatabase[id][pIdx]}</td><td>~ ${l} tours (Fin au Tour ${trackerLap})</td><td>${i===0?car.fuel.toFixed(1)+' L restants':'Plein ('+fuelMaxSetting+' L)'}</td></tr>`;
                 }
@@ -903,7 +984,7 @@
 
         function rebuildIntelTableLocal() {
             const tbody = document.getElementById("intelTableBody"); tbody.innerHTML = "";
-            let totalConsoSum = 0; let totalVehiclesCount = 0; const weatherKey = window.isRain ? "pluie" : "sec";
+            let totalConsoSum = 0; let totalVehiclesCount = 0;
 
             window.enemyDatabase.forEach(enemy => {
                 totalConsoSum += enemy.conso; totalVehiclesCount++;
@@ -911,7 +992,8 @@
             });
 
             for(let id in window.fleetState) {
-                const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; const baseConso = car.conso[pilotIdx][weatherKey];
+                const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
+                const baseConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"];
                 totalConsoSum += baseConso; totalVehiclesCount++;
                 tbody.innerHTML += `<tr style="border-left: 4px solid var(--state-green);"><td><strong>#${window.carIdMapping[id]}</strong></td><td><span style="color:var(--state-green); font-weight:600;">Notre Team</span></td><td>~ ${Math.floor(parseFloat(document.getElementById("setup-maxFuel").value) / baseConso)} tours</td><td><strong style="color:var(--state-green);">${baseConso.toFixed(2)} L/tr</strong></td><td><span>${window.pilotsDatabase[id][pilotIdx]}</span></td></tr>`;
             }
@@ -922,9 +1004,16 @@
         function triggerCarLap(id) {
             const car = window.fleetState[id]; if (car.isInsidePit) return;
             car.currentLap++; const pilotIdx = car.rotation[0];
-            let conso = car.conso[pilotIdx][window.isRain?"pluie":"sec"]; if(window.isFCY) conso *= parseFloat(document.getElementById("setup-fcyCoeff").value);
+            let conso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"]; 
+            if(window.isFCY) conso *= parseFloat(document.getElementById("setup-fcyCoeff").value);
             car.fuel = Math.max(0, car.fuel - conso);
-            window.dbLogLiveEventCloud(window.carIdMapping[id], `Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, window.isFCY?"🟨 FCY":"🟢 VERT");
+            
+            let labelLogMeteo = "VERT";
+            if(window.isFCY) labelLogMeteo = "🟨 FCY";
+            else if(window.weatherMode === "pluie_moderee") labelLogMeteo = "🌧️ PLUIE";
+            else if(window.weatherMode === "forte_pluie") labelLogMeteo = "⛈️ ORAGE";
+
+            window.dbLogLiveEventCloud(window.carIdMapping[id], `Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, labelLogMeteo);
             window.dbPushFullRaceState();
         }
 
@@ -983,7 +1072,9 @@
             if(laps <= 0 || fuelRemis <= 0) return;
             const resultConso = fuelRemis / laps;
             
-            document.getElementById(`c_${id}_${pIdx}_${weather}`).value = resultConso.toFixed(2);
+            if (!window.fleetState[id].conso[pIdx]) window.fleetState[id].conso[pIdx] = {};
+            window.fleetState[id].conso[pIdx][weather] = resultConso;
+            
             window.dbPushFullRaceState();
             alert(`Ajustement validé : ${resultConso.toFixed(2)} L/tr.`);
         }
@@ -991,13 +1082,13 @@
         function saveCarConfig(id) {
             const car = window.fleetState[id];
             car.conso["1"].sec = parseFloat(document.getElementById(`c_${id}_1_sec`).value);
-            car.conso["1"].pluie = parseFloat(document.getElementById(`c_${id}_1_pluie`).value);
+            car.conso["1"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_1_pluie`).value);
             car.conso["2"].sec = parseFloat(document.getElementById(`c_${id}_2_sec`).value);
-            car.conso["2"].pluie = parseFloat(document.getElementById(`c_${id}_2_pluie`).value);
+            car.conso["2"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_2_pluie`).value);
             car.conso["3"].sec = parseFloat(document.getElementById(`c_${id}_3_sec`).value);
-            car.conso["3"].pluie = parseFloat(document.getElementById(`c_${id}_3_pluie`).value);
+            car.conso["3"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_3_pluie`).value);
             car.conso["4"].sec = parseFloat(document.getElementById(`c_${id}_4_sec`).value);
-            car.conso["4"].pluie = parseFloat(document.getElementById(`c_${id}_4_pluie`).value);
+            car.conso["4"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_4_pluie`).value);
             
             car.rotation[0] = document.getElementById(`r_${id}_1`).value;
             car.rotation[1] = document.getElementById(`r_${id}_2`).value;
@@ -1007,7 +1098,6 @@
             window.dbPushFullRaceState();
         }
 
-        function saveCarConfig(id) { window.dbPushFullRaceState(); }
         function navigateToPage(targetPageId, activeNavId) {
             document.getElementById('page-fleet').style.display = 'none';
             document.getElementById('page-intel').style.display = 'none';
@@ -1029,7 +1119,7 @@
         function formatPitTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}.${Math.floor((s%1)*10)}`; }
 
         // =======================================================================
-        // 2. LA FONCTION D'APPLICATION DES CIRCUITS
+        // 3. LOGIQUE D'APPLICATION DES CIRCUITS (AVEC LE DEUXIÈME SEUIL DE PLUIE)
         // =======================================================================
         window.dbAppliquerCircuit = function(circuitKey) {
             const circuit = window.circuitsDatabase[circuitKey];
@@ -1041,19 +1131,24 @@
             ["v1", "v2", "v3", "v4"].forEach(id => {
                 if (!window.fleetState || !window.fleetState[id]) return;
                 const car = window.fleetState[id];
-                if (!car.conso) car.conso = [];
 
                 for (let p = 1; p <= 4; p++) {
                     const consoTheorique = circuit.conso[p - 1];
-                    if (!car.conso[p]) car.conso[p] = { sec: 1.77, pluie: 1.15 };
+                    
+                    if (!car.conso[p]) car.conso[p] = {};
                     
                     car.conso[p].sec = consoTheorique.sec;
-                    car.conso[p].pluie = consoTheorique.pluie;
+                    car.conso[p].pluie_moderee = consoTheorique.pluie_moderee;
+                    car.conso[p].forte_pluie = consoTheorique.forte_pluie;
 
+                    // On rafraîchit visuellement les boîtes du muret des stands
                     const inputSec = document.getElementById(`c_${id}_${p}_sec`);
                     const inputPluie = document.getElementById(`c_${id}_${p}_pluie`);
+                    
                     if (inputSec) inputSec.value = consoTheorique.sec;
-                    if (inputPluie) inputPluie.value = consoTheorique.pluie;
+                    if (inputPluie) {
+                        inputPluie.value = consoTheorique[window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
+                    }
                 }
                 car.fuel = circuit.maxFuel;
             });
@@ -1061,18 +1156,9 @@
             if (typeof window.dbPushFullRaceState === "function") { window.dbPushFullRaceState(); }
 
             if (typeof window.dbLogLiveEventCloud === "function") {
-                window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Consommations théoriques appliquées aux 4 voitures)`, `${circuit.maxFuel}.0 L`, "TRACK");
-            } else {
-                const URL_LOGS = "https://live-4-race-default-rtdb.europe-west1.firebasedatabase.app/logs";
-                const now_ms = Date.now();
-                const time_str = new Date().toLocaleTimeString('fr-FR');
-                fetch(`${URL_LOGS}/${now_ms}.json`, {
-                    method: 'PUT',
-                    body: JSON.stringify({ time: time_str, carNum: "SYS", action: `🗺️ Configuration : ${circuit.name}`, fuel: `${circuit.maxFuel} L`, status: "⚙️ CONFIG" })
-                }).catch(e => console.log(e));
+                window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Modèles SEC/PLUIE injectés)`, `${circuit.maxFuel}.0 L`, "TRACK");
             }
-
-            alert(`✅ Configuration réussie pour ${circuit.name} ! Les paramètres ont été transmis aux 4 voitures et synchronisés.`);
+            alert(`✅ Configuration réussie pour ${circuit.name} ! Modèles Sec, Pluie modérée et Forte Pluie synchronisés.`);
         };
     </script>
 </body>
