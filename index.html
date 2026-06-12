@@ -280,7 +280,13 @@
                 </div>
             </div>
         </div>
-
+        <div id="rc-message-paddock" class="col-12" style="background-color: #EAB308; color: #000000; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; margin-bottom: -5px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span>📢</span>
+        <span id="rc-text-content">RC_MESSAGE: En attente de synchronisation du paddock 4-RACE...</span>
+    </div>
+    <span id="rc-time-badge" style="font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 3px;">--:--:--</span>
+    </div>
         <div class="log-section col-12">
             <div class="card-title">Flux d'Événements Général Écurie - LIVE CLOUD</div>
             <div style="overflow-x: auto; max-height: 200px;"><table><thead><tr><th>Heure</th><th>Voiture</th><th>Action</th><th>Carburant</th><th>Piste</th></tr></thead><tbody id="fleetLogBody"></tbody></table></div>
@@ -596,15 +602,31 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        window.dbToggleTrackState = function() {
+     window.dbToggleTrackState = function() {
             window.isFCY = !window.isFCY;
+            const msg = window.isFCY ? "⚠️ DRAPEAU JAUNE / FULL COURSE YELLOW EN COURS - SÉCURISER LES ÉCARTS !" : "🟢 PISTE DÉGAGÉE - RETOUR AU RYTHME DE COURSE";
             update(ref(db, 'race_state'), { isFCY: window.isFCY });
+            
+            // Envoi au bandeau jaune
+            const tStr = new Date().toLocaleTimeString('fr-FR');
+            if (typeof window.updateRaceControlBanner === "function") {
+                window.updateRaceControlBanner(msg, tStr);
+            }
         };
 
         // GESTION MULTI-ÉTATS DE LA MÉTÉO SUR FIREBASE
-        window.dbChangeWeatherState = function(valeurMeteo) {
-            update(ref(db, 'race_state'), { weatherMode: valeurMeteo });
-        };
+      window.dbChangeWeatherState = function(valeurMeteo) {
+        let msgMeteo = "☀️ Piste sèche déclarée par le muret des stands.";
+        if (valeurMeteo === "pluie_moderee") msgMeteo = "🌧️ Pluie modérée signalée. Prudence au freinage de la Source.";
+        if (valeurMeteo === "forte_pluie") msgMeteo = "⛈️ Forte pluie / Conditions d'orage sur le circuit !";
+        
+        update(ref(db, 'race_state'), { weatherMode: valeurMeteo });
+        
+        const tStr = new Date().toLocaleTimeString('fr-FR');
+        if (typeof window.updateRaceControlBanner === "function") {
+            window.updateRaceControlBanner(msgMeteo, tStr);
+        }
+    };
 
         window.dbResetEntireRace = function() {
             const conf = confirm("⚠️ COCKPIT TEAM 4-RACE :\n\nÊtes-vous sûr à 100% de vouloir effacer toutes les données (litres, tours actuels, fiches de chronos et historique complet) pour démarrer une nouvelle session de course ?");
@@ -1158,7 +1180,24 @@
             if (typeof window.dbLogLiveEventCloud === "function") {
                 window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Modèles SEC/PLUIE injectés)`, `${circuit.maxFuel}.0 L`, "TRACK");
             }
+
+            window.updateRaceControlBanner(`Circuit configuré sur ${circuit.name}. Consos théoriques appliquées.`, new Date().toLocaleTimeString('fr-FR'));
             alert(`✅ Configuration réussie pour ${circuit.name} ! Modèles Sec, Pluie modérée et Forte Pluie synchronisés.`);
+        };
+                // FONCTION DE PROPAGATION DU BANDEAU JAUNE RIVALISANT RIS-TIMING
+        window.updateRaceControlBanner = function(texte, heureStr) {
+            const bannerText = document.getElementById("rc-text-content");
+            const bannerTime = document.getElementById("rc-time-badge");
+            const bannerDiv = document.getElementById("rc-message-paddock");
+            
+            if (bannerText) bannerText.innerText = "RC_MESSAGE: " + texte;
+            if (bannerTime) bannerTime.innerText = heureStr || new Date().toLocaleTimeString('fr-FR');
+            
+            // Petite animation de flash pour attirer l'œil du stratège au muret des stands
+            if (bannerDiv) {
+                bannerDiv.style.opacity = "0.3";
+                setTimeout(() => { bannerDiv.style.opacity = "1"; }, 150);
+            }
         };
     </script>
 </body>
