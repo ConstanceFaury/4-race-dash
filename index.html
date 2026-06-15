@@ -1222,10 +1222,10 @@
 
         function applyGlobalCustomizationLocal() {
             for (let id in window.fleetState) {
-                window.pilotsDatabase[id]["1"] = document.getElementById(`s_${id}_1`).value;
-                window.pilotsDatabase[id]["2"] = document.getElementById(`s_${id}_2`).value;
-                window.pilotsDatabase[id]["3"] = document.getElementById(`s_${id}_3`).value;
-                window.pilotsDatabase[id]["4"] = document.getElementById(`s_${id}_4`).value;
+                window.pilotsDatabase[id].1 = document.getElementById(`s_${id}_1`).value;
+                window.pilotsDatabase[id].2 = document.getElementById(`s_${id}_2`).value;
+                window.pilotsDatabase[id].3 = document.getElementById(`s_${id}_3`).value;
+                window.pilotsDatabase[id].4 = document.getElementById(`s_${id}_4`).value;
             }
 
             window.carIdMapping.v1 = document.getElementById("setup-v1").value;
@@ -1245,8 +1245,16 @@
                 document.querySelectorAll(`.p3_${id}`).forEach(el => el.innerText = db["3"]);
                 document.querySelectorAll(`.p4_${id}`).forEach(el => el.innerText = db["4"]);
 
-                const sCalc = document.getElementById(`calc_p_${id}`);
-                if(sCalc) sCalc.innerHTML = `<option value="1">${db["1"]}</option><option value="2">${db["2"]}</option><option value="3">${db["3"]}</option><option value="4">${db["4"]}</option>`;
+                // 🎯 RECONNEXION DU CALCULATEUR FLASH EMBARQUÉ PAR VOITURE
+                const sCalcFlash = document.getElementById(`select-flash-pilote-${id}`);
+                if(sCalcFlash) {
+                    sCalcFlash.innerHTML = `
+                        <option value="1">${db["1"]}</option>
+                        <option value="2">${db["2"]}</option>
+                        <option value="3">${db["3"]}</option>
+                        <option value="4">${db["4"]}</option>
+                    `;
+                }
                 
                 for(let r=1; r<=4; r++) {
                     const sRot = document.getElementById(`r_${id}_${r}`);
