@@ -745,6 +745,15 @@
             }
 
             window.isFCY = data.isFCY;
+            
+            // 📢 GESTION EN DIRECT DU BANDEAU DE LA DIRECTION DE COURSE (RC_MESSAGE)
+            if (data.rc_comment) {
+                document.getElementById("rc-text-content").innerText = "RC_MESSAGE: " + data.rc_comment;
+            }
+            if (data.rc_time) {
+                document.getElementById("rc-time-badge").innerText = data.rc_time;
+            }
+
             window.weatherMode = data.weatherMode || "sec";
             window.enemyDatabase = data.enemyDatabase || [];
 
