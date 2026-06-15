@@ -1148,8 +1148,14 @@
             if (typeof window.dbLogLiveEventCloud === "function") {
                 window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
             }
-            if (typeof window.dbPushFullRaceState === "function") {
-                window.dbPushFullRaceState(); // Moteur Firebase qui renvoie l'état "En Piste" à tous les écrans
+           // Remplace la fin de ta fonction window.dbAppliquerCircuit par ceci :
+            if (typeof window.dbPushFullRaceState === "function") { 
+                // On pousse les valeurs de référence en même temps que le changement de circuit
+                update(ref(db, 'race_state'), {
+                    track_ref_sec: circuit.refSecSec,
+                    track_ref_pluie: circuit.refSecPluie
+                });
+                window.dbPushFullRaceState(); 
             }
         };
 
