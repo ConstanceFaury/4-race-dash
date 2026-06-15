@@ -827,6 +827,59 @@
 
             window.weatherMode = data.weatherMode || "sec";
             window.enemyDatabase = data.enemyDatabase || [];
+            window.weatherMode = data.weatherMode || "sec";
+            window.enemyDatabase = data.enemyDatabase || []; // <-- Tu as cette ligne
+
+            // 🛠️ REMETTRE CE BLOC QUI A ÉTÉ EFFACÉ :
+            // Rafraîchir le tableau des concurrents avec les données du Cloud
+            const tbodyEnemy = document.getElementById("enemy-table-body");
+            if (tbodyEnemy) {
+                tbodyEnemy.innerHTML = "";
+                window.enemyDatabase.forEach((enemy, index) => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td style="color: #ffffff; font-weight: bold; padding: 8px;">#${enemy.carNum}</td>
+                        <td style="color: #aaa;">Concurrent</td>
+                        <td style="color: #EAB308; font-weight: bold;">${enemy.maxTurns} trs</td>
+                        <td style="color: #10b981;">${(42.0 / enemy.maxTurns).toFixed(2)} L/tr</td>
+                        <td style="color: ${enemy.maxTurns >= 21 ? '#ef4444' : '#10b981'}; font-weight: bold;">
+                            ${enemy.maxTurns >= 21 ? '🔥 MENACE' : '🟢 FAIBLE'}
+                        </td>
+                        <td><button onclick="window.deleteEnemy(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer;">❌</button></td>
+                    `;
+                    tbodyEnemy.appendChild(row);
+                });
+            }
+
+            // Calcul de la moyenne générale (Nos 4 voitures + Concurrents)
+            let totalConsoGlobale = 0;
+            let totalVoituresComptees = 0;
+
+            // 1. Somme de nos voitures
+            for (let id in window.fleetState) {
+                if (data.cars && data.cars[id]) {
+                    const cCar = data.cars[id];
+                    const rot = cCar.rotation || ["1"];
+                    const pIdx = rot[0];
+                    const cConso = cCar.conso[pIdx][window.weatherMode] || cCar.conso[pIdx]["sec"] || 1.77;
+                    totalConsoGlobale += parseFloat(cConso);
+                    totalVoituresComptees++;
+                }
+            }
+
+            // 2. Somme des concurrents
+            window.enemyDatabase.forEach(enemy => {
+                totalConsoGlobale += (42.0 / enemy.maxTurns);
+                totalVoituresComptees++;
+            });
+
+            // 3. Affichage du gros compteur orange
+            const elMoyenne = document.getElementById("global-average-display");
+            if (elMoyenne) {
+                const moyenneFinale = totalVoituresComptees > 0 ? (totalConsoGlobale / totalVoituresComptees) : 0;
+                elMoyenne.innerText = `${moyenneFinale.toFixed(2)} L`;
+            }
+            // ────────────────────────────────────────────────────────
 
             document.getElementById('trackState').innerText = window.isFCY ? "🟨 FCY EN COURS" : "🟢 Piste Dégagée";
             document.getElementById('trackState').className = window.isFCY ? "track-status fcy" : "track-status";
@@ -1022,6 +1075,32 @@
                     timerDiv.style.color = "var(--state-green)"; 
                 }
             }, 100);
+        };
+
+        // 🚀 RECONSTRUIRE L'ACTION DU BOUTON ORANGE ET DE LA SUPPRESSION
+        window.spyAndAnalyzeEnemy = function() {
+            const num = document.getElementById("enemy-car-num").value.trim();
+            const turns = parseInt(document.getElementById("enemy-car-turns").value) || 0;
+            
+            if (num === "" || turns <= 0) {
+                alert("⚠️ Données invalides");
+                return;
+            }
+            
+            const newEnemy = { carNum: num, maxTurns: turns };
+            const updatedDatabase = [...(window.enemyDatabase || []), newEnemy];
+            
+            // Envoi direct sur Firebase pour synchroniser tous les écrans du muret
+            update(ref(db, 'race_state'), { enemyDatabase: updatedDatabase });
+            
+            document.getElementById("enemy-car-num").value = "";
+            document.getElementById("enemy-car-turns").value = "";
+        };
+        
+        window.deleteEnemy = function(index) {
+            const updatedDatabase = [...window.enemyDatabase];
+            updatedDatabase.splice(index, 1);
+            update(ref(db, 'race_state'), { enemyDatabase: updatedDatabase });
         };
     </script>
 
