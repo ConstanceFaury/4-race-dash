@@ -1189,13 +1189,9 @@
             if (typeof window.dbLogLiveEventCloud === "function") {
                 window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
             }
-           // Remplace la fin de ta fonction window.dbAppliquerCircuit par ceci :
+
+            // Synchro propre de l'état sans écraser ou faire planter le circuit
             if (typeof window.dbPushFullRaceState === "function") { 
-                // On pousse les valeurs de référence en même temps que le changement de circuit
-                update(ref(db, 'race_state'), {
-                    track_ref_sec: circuit.refSecSec,
-                    track_ref_pluie: circuit.refSecPluie
-                });
                 window.dbPushFullRaceState(); 
             }
         };
@@ -1297,7 +1293,14 @@
                 car.fuel = circuit.maxFuel;
             });
 
-            if (typeof window.dbPushFullRaceState === "function") { window.dbPushFullRaceState(); }
+            // 📢 C'EST ICI QUE L'ON TRANSMET LES VALEURS DE RÉFÉRENCE DE MANIÈRE SÉCURISÉE AU CLOUD
+            if (typeof window.dbPushFullRaceState === "function") { 
+                update(ref(db, 'race_state'), {
+                    track_ref_sec: circuit.refSecSec,
+                    track_ref_pluie: circuit.refSecPluie
+                });
+                window.dbPushFullRaceState(); 
+            }
 
             if (typeof window.dbLogLiveEventCloud === "function") {
                 window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Modèles SEC/PLUIE injectés)`, `${circuit.maxFuel}.0 L`, "TRACK");
@@ -1306,7 +1309,8 @@
             window.updateRaceControlBanner(`Circuit configuré sur ${circuit.name}. Consos théoriques appliquées.`, new Date().toLocaleTimeString('fr-FR'));
             alert(`✅ Configuration réussie pour ${circuit.name} ! Modèles Sec, Pluie modérée et Forte Pluie synchronisés.`);
         };
-                // FONCTION DE PROPAGATION DU BANDEAU JAUNE RIVALISANT RIS-TIMING
+
+        // FONCTION DE PROPAGATION DU BANDEAU JAUNE RIVALISANT RIS-TIMING
         window.updateRaceControlBanner = function(texte, heureStr) {
             const bannerText = document.getElementById("rc-text-content");
             const bannerTime = document.getElementById("rc-time-badge");
@@ -1322,92 +1326,92 @@
             }
         };
 
-       // =======================================================================
-// 4. LOGIQUE DU PADDOCK MODE (VERROUILLAGE ABSOLU ÉCRAN BOX / MURET)
-// =======================================================================
-window.isReadOnlyMode = false;
+        // =======================================================================
+        // 4. LOGIQUE DU PADDOCK MODE (VERROUILLAGE ABSOLU ÉCRAN BOX / MURET)
+        // =======================================================================
+        window.isReadOnlyMode = false;
 
-window.togglePaddockMode = function() {
-    window.isReadOnlyMode = !window.isReadOnlyMode;
-    
-    const btnMode = document.getElementById("btn-paddock-mode");
-    
-    // 1. On cible tous les boutons d'action et éléments de saisie des pages
-    const elementsAction = document.querySelectorAll(
-        '.btn-quick, .btn-action, .btn-calculator, input, select'
-    );
-    
-    // 2. On cible spécifiquement les commandes stratégiques du Header (FCY, Météo, Reset)
-    const headerFCY = document.getElementById("trackState");
-    const headerReset = document.querySelector(".reset-status");
-    const headerMeteo = document.getElementById("weatherStateSelect");
-    
-    if (window.isReadOnlyMode) {
-        // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
-        if (btnMode) {
-            btnMode.innerText = "🔒 Mode Lecture (Box)";
-            btnMode.style.backgroundColor = "#EF4444"; // Rouge alerte
-            btnMode.style.color = "#ffffff";
-        }
-        
-        // Verrouillage des inputs, sélecteurs et masquage des boutons de passage de ligne
-        elementsAction.forEach(el => {
-            if (el.id !== "btn-paddock-mode") {
-                if (el.tagName === "INPUT" || el.tagName === "SELECT") {
-                    el.disabled = true;
-                } else {
-                    el.style.visibility = "hidden";
+        window.togglePaddockMode = function() {
+            window.isReadOnlyMode = !window.isReadOnlyMode;
+            
+            const btnMode = document.getElementById("btn-paddock-mode");
+            
+            // 1. On cible tous les boutons d'action et éléments de saisie des pages
+            const elementsAction = document.querySelectorAll(
+                '.btn-quick, .btn-action, .btn-calculator, input, select'
+            );
+            
+            // 2. On cible spécifiquement les commandes stratégiques du Header (FCY, Météo, Reset)
+            const headerFCY = document.getElementById("trackState");
+            const headerReset = document.querySelector(".reset-status");
+            const headerMeteo = document.getElementById("weatherStateSelect");
+            
+            if (window.isReadOnlyMode) {
+                // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
+                if (btnMode) {
+                    btnMode.innerText = "🔒 Mode Lecture (Box)";
+                    btnMode.style.backgroundColor = "#EF4444"; // Rouge alerte
+                    btnMode.style.color = "#ffffff";
                 }
-            }
-        });
-        
-        // Verrouillage sécurité du header (FCY, Reset, Météo)
-        if (headerFCY) {
-            headerFCY.style.pointerEvents = "none"; // Rend le bouton incliquable
-            headerFCY.style.opacity = "0.6";        // Effet visuel désactivé
-        }
-        if (headerReset) {
-            headerReset.style.pointerEvents = "none";
-            headerReset.style.opacity = "0.3";
-        }
-        if (headerMeteo) {
-            headerMeteo.disabled = true; // Bloque le menu déroulant météo à 3 états
-        }
-        
-        console.log("🔒 Paddock Mode activé : FCY, Météo, Reset et commandes verrouillés.");
-    } else {
-        // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
-        if (btnMode) {
-            btnMode.innerText = "🔓 Mode Administrateur";
-            btnMode.style.backgroundColor = "#1a1a1a";
-            btnMode.style.color = "#ffffff";
-        }
-        
-        // On réactive et réaffiche tout
-        elementsAction.forEach(el => {
-            if (el.tagName === "INPUT" || el.tagName === "SELECT") {
-                el.disabled = false;
+                
+                // Verrouillage des inputs, sélecteurs et masquage des boutons de passage de ligne
+                elementsAction.forEach(el => {
+                    if (el.id !== "btn-paddock-mode") {
+                        if (el.tagName === "INPUT" || el.tagName === "SELECT") {
+                            el.disabled = true;
+                        } else {
+                            el.style.visibility = "hidden";
+                        }
+                    }
+                });
+                
+                // Verrouillage sécurité du header (FCY, Reset, Météo)
+                if (headerFCY) {
+                    headerFCY.style.pointerEvents = "none"; // Rend le bouton incliquable
+                    headerFCY.style.opacity = "0.6";        // Effet visuel désactivé
+                }
+                if (headerReset) {
+                    headerReset.style.pointerEvents = "none";
+                    headerReset.style.opacity = "0.3";
+                }
+                if (headerMeteo) {
+                    headerMeteo.disabled = true; // Bloque le menu déroulant météo à 3 états
+                }
+                
+                console.log("🔒 Paddock Mode activé : FCY, Météo, Reset et commandes verrouillés.");
             } else {
-                el.style.visibility = "visible";
+                // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
+                if (btnMode) {
+                    btnMode.innerText = "🔓 Mode Administrateur";
+                    btnMode.style.backgroundColor = "#1a1a1a";
+                    btnMode.style.color = "#ffffff";
+                }
+                
+                // On réactive et réaffiche tout
+                elementsAction.forEach(el => {
+                    if (el.tagName === "INPUT" || el.tagName === "SELECT") {
+                        el.disabled = false;
+                    } else {
+                        el.style.visibility = "visible";
+                    }
+                });
+                
+                // Réactivation des commandes du header
+                if (headerFCY) {
+                    headerFCY.style.pointerEvents = "auto";
+                    headerFCY.style.opacity = "1";
+                }
+                if (headerReset) {
+                    headerReset.style.pointerEvents = "auto";
+                    headerReset.style.opacity = "1";
+                }
+                if (headerMeteo) {
+                    headerMeteo.disabled = false;
+                }
+                
+                console.log("🔓 Mode Administrateur activé : Toutes les commandes muret sont disponibles.");
             }
-        });
-        
-        // Réactivation des commandes du header
-        if (headerFCY) {
-            headerFCY.style.pointerEvents = "auto";
-            headerFCY.style.opacity = "1";
-        }
-        if (headerReset) {
-            headerReset.style.pointerEvents = "auto";
-            headerReset.style.opacity = "1";
-        }
-        if (headerMeteo) {
-            headerMeteo.disabled = false;
-        }
-        
-        console.log("🔓 Mode Administrateur activé : Toutes les commandes muret sont disponibles.");
-    }
-};
+        };
     </script>
 </body>
 </html>
