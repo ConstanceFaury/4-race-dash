@@ -745,7 +745,9 @@
             });
         };
 
-        // ÉCOUTE PERMANENTE DU CLOUD
+       // =======================================================================
+        // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE
+        // =======================================================================
         onValue(ref(db, 'race_state'), (snapshot) => {
             const data = snapshot.val();
             if (!data) {
@@ -762,18 +764,19 @@
             window.isFCY = data.isFCY;
             window.isRedFlag = data.isRedFlag || false; // 🔴 Récupération du drapeau rouge
 
-                // Mise à jour visuelle du bouton Drapeau Rouge
-                const btnRed = document.getElementById('redFlagState');
-                if (btnRed) {
-                    btnRed.innerText = window.isRedFlag ? "🚨 DRAPEAU ROUGE ACTIF" : "🔴 DRAPEAU ROUGE";
-                    btnRed.style.backgroundColor = window.isRedFlag ? "#ef4444" : "#222";
-                    btnRed.style.color = window.isRedFlag ? "#000000" : "#ef4444";
-                    if (window.isRedFlag) {
-                        btnRed.style.animation = "blink 0.8s infinite";
-                    } else {
-                        btnRed.style.animation = "none";
-                    }
+            // Mise à jour visuelle du bouton Drapeau Rouge
+            const btnRed = document.getElementById('redFlagState');
+            if (btnRed) {
+                btnRed.innerText = window.isRedFlag ? "🚨 DRAPEAU ROUGE ACTIF" : "🔴 DRAPEAU ROUGE";
+                btnRed.style.backgroundColor = window.isRedFlag ? "#ef4444" : "#222";
+                btnRed.style.color = window.isRedFlag ? "#000000" : "#ef4444";
+                if (window.isRedFlag) {
+                    btnRed.style.animation = "blink 0.8s infinite";
+                } else {
+                    btnRed.style.animation = "none";
                 }
+            }
+
             // 📢 GESTION EN DIRECT DU BANDEAU DE LA DIRECTION DE COURSE (RC_MESSAGE)
             if (data.rc_comment) {
                 document.getElementById("rc-text-content").innerText = "RC_MESSAGE: " + data.rc_comment;
@@ -797,6 +800,7 @@
                 else if(window.weatherMode === "forte_pluie") wSelect.className = "weather-select-top rain-heavy";
             }
 
+            // --- DEBUT DE LA BOUCLE PAR VOITURE (Chassis #1 à #4) ---
             for (let id in window.fleetState) {
                 if (data.cars && data.cars[id]) {
                     const cloudCar = data.cars[id];
@@ -808,17 +812,55 @@
                     localCar.rotation = cloudCar.rotation;
                     localCar.conso = cloudCar.conso;
 
-                    // 🚨 AXE OPTIMISATION : CALCUL DE L'HEURE DE FIN DE RELAIS AU PRORATA DU PIVOT CIRCUIT
-                    const currentConso = cloudCar.conso[cloudCar.rotation[0]][window.weatherMode] || cloudCar.conso[cloudCar.rotation[0]]["sec"];
-                    const toursRestants = Math.floor(cloudCar.fuel / currentConso);
-                    const elTargetTime = document.getElementById(`target-time-${id}`);
+                    // 🧮 1. EXTRATION DE LA CONSO DU PILOTE ET SÉCURISATION DU SWITCH PREDICTIF FCY
+                    const rotation = cloudCar.rotation || ["1"];
+                    const piloteActifIdx = rotation[0];
+                    const consoData = cloudCar.conso || {};
+                    
+                    // Conso standard selon la météo
+                    let consoStandard = 1.77; 
+                    if (consoData[piloteActifIdx] && consoData[piloteActifIdx][window.weatherMode]) {
+                        consoStandard = parseFloat(consoData[piloteActifIdx][window.weatherMode]);
+                    }
 
+                    // Conso prédictive sous FCY (Calquée sur la formule Python à 50% du Sec)
+                    let consoFCY = consoStandard * 0.50;
+                    if (consoData[piloteActifIdx] && consoData[piloteActifIdx]["sec"]) {
+                        consoFCY = parseFloat(consoData[piloteActifIdx]["sec"]) * 0.50;
+                    }
+
+                    // 🧠 2. BASCOULE AUTOMATIQUE DU CALCUL SELON DRAPEAU EN COURS
+                    const isFcyActif = window.isFCY || false;
+                    const consoAppliquee = isFcyActif ? consoFCY : consoStandard;
+                    const toursRestants = consoAppliquee > 0 ? Math.floor(cloudCar.fuel / consoAppliquee) : 0;
+
+                    // 🎨 3. METAMORPHOSE VISUELLE DES TOURS ET CHANGEMENT DE COULEUR
+                    const txtTours = document.getElementById(`fleet-tours-${id}`);
+                    if (txtTours) {
+                        const conteneurTours = txtTours.parentElement;
+                        if (conteneurTours) {
+                            if (isFcyActif) {
+                                // Mode FCY actif -> Changement du titre en Jaune et calcul économique
+                                conteneurTours.innerHTML = `⚠️ Tours (FCY) : <span id="fleet-tours-${id}" style="font-weight: bold; color: #f59e0b;">${toursRestants}</span>`;
+                            } else {
+                                // Mode Normal -> Titre standard et chiffre en vert émeraude original
+                                conteneurTours.innerHTML = `Tours restants: <span id="fleet-tours-${id}" style="font-weight: bold; color: #10b981;">${toursRestants}</span>`;
+                            }
+                        }
+                    }
+
+                    // 🚨 4. RECALCUL AUTOMATIQUE DE L'HEURE CIBLE "STOP ESTIMÉ"
+                    const elTargetTime = document.getElementById(`target-time-${id}`);
                     if (toursRestants > 0 && elTargetTime) {
                         const refSec = parseFloat(data.track_ref_sec) || 185.0;
                         const refPluie = parseFloat(data.track_ref_pluie) || 205.0;
-                        const tempsReferenceTour = (window.weatherMode === "sec") ? refSec : refPluie;
+                        let tempsReferenceTour = (window.weatherMode === "sec") ? refSec : refPluie;
 
-                        // Ajout du temps restant en millisecondes à l'heure courante du PC
+                        // Si la piste est sous FCY, on roule beaucoup moins vite (on majore de 40% le temps au tour)
+                        if (isFcyActif) {
+                            tempsReferenceTour = tempsReferenceTour * 1.40;
+                        }
+
                         const tempsTotalRestantMS = toursRestants * tempsReferenceTour * 1000;
                         const heureCible = new Date(Date.now() + tempsTotalRestantMS);
 
@@ -831,6 +873,7 @@
                         elTargetTime.innerText = "🚨 PANNE IMMINENTE";
                     }
 
+                    // ─── 5. SYNCHRONISATION DES CHRONOS ET DES COMPTEURS INTERFACE ───
                     document.getElementById(`setup-${id}`).value = cloudCar.carNumInput;
                     document.getElementById(`fleet-pos-${id}`).innerText = cloudCar.position || "-";
                     document.getElementById(`fleet-best-${id}`).innerText = cloudCar.bestLap || "--:--.---";
@@ -839,7 +882,6 @@
                         document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
                         document.getElementById(`c_${id}_${p}_sec`).value = cloudCar.conso[p].sec;
                         
-                        // Rétrocompatibilité d'affichage sur l'input pluie visuel
                         if (cloudCar.conso[p].pluie_moderee !== undefined) {
                             document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p][window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
                         } else {
@@ -847,6 +889,7 @@
                         }
                     }
 
+                    // ─── 6. DETECTION DU STATUT DE LA PITLANE ───
                     if (cloudCar.isInsidePit && !localCar.isInsidePit) {
                         localCar.isInsidePit = true;
                         localCar.pitSeconds = cloudCar.pitSeconds;
@@ -861,7 +904,6 @@
             }
             applyGlobalCustomizationLocal();
         });
-
         onValue(ref(db, 'logs'), (snapshot) => {
             const logs = snapshot.val();
             const tbody = document.getElementById('fleetLogBody');
