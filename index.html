@@ -772,10 +772,13 @@
         }
     };
 
-        window.dbResetEntireRace = function() {
+      window.dbResetEntireRace = function() {
             const conf = confirm("⚠️ COCKPIT TEAM 4-RACE :\n\nÊtes-vous sûr à 100% de vouloir effacer toutes les données (litres, tours actuels, fiches de chronos et historique complet) pour démarrer une nouvelle session de course ?");
             if(conf) {
-                const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value) || 42.0;
+                // 🗺️ On va chercher le circuit sélectionné pour appliquer les bonnes consos
+                const circuitSelectionne = document.getElementById("setup-circuit").value || "SPA";
+                const circuitData = window.circuitsDatabase[circuitSelectionne] || window.circuitsDatabase["SPA"];
+                const fuelMaxSetting = 42.0; // 🔒 VERROUILLAGE ABSOLU À 42 LITRES POUR TOUTES LES COURSES
 
                 remove(ref(db, 'logs'));
                 remove(ref(db, 'race_state')).then(() => {
@@ -787,13 +790,27 @@
                         window.fleetState[id].hasAlerted = false;
                         window.fleetState[id].rotation = ["1", "2", "3", "4"];
                         clearInterval(window.fleetState[id].interval);
+
+                        // Injection de la conso cible du circuit dans la case SEC de chaque pilote
+                        for (let p = 1; p <= 4; p++) {
+                            if (!window.fleetState[id].conso[p]) window.fleetState[id].conso[p] = {};
+                            window.fleetState[id].conso[p].sec = circuitData.conso[p - 1].sec;
+                        }
                     }
                     window.isFCY = false;
                     window.weatherMode = "sec";
                     window.enemyDatabase = [];
                     
                     window.dbPushFullRaceState();
-                    window.dbLogLiveEventCloud("SYSTEM", "🔄 DEPART DE LA COURSE : RESERVOIRS RECHARGES AU MAX", `${fuelMaxSetting.toFixed(1)} L`, "START");
+
+                    // Synchronisation des références chronos pour le script Python
+                    update(ref(db, 'race_state'), {
+                        track_ref_sec: circuitData.refSecSec,
+                        track_ref_pluie: circuitData.refSecPluie,
+                        maxFuel: fuelMaxSetting // Force le cloud à rester synchronisé à 42L
+                    });
+
+                    window.dbLogLiveEventCloud("SYSTEM", `🔄 DEPART DE LA COURSE (${circuitData.name}) : RÉSERVOIR CONFIGURÉ SUR 42L MAX`, `${fuelMaxSetting.toFixed(1)} L`, "START");
                     setTimeout(() => { location.reload(); }, 300);
                 });
             }
@@ -841,18 +858,14 @@
             });
         };
 
-       // =======================================================================
-        // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE
-        // =======================================================================
-// =======================================================================
-        // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE
+ // =======================================================================
+        // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE (VERSION FINALE MOYENNE GLOBALISÉE)
         // =======================================================================
         onValue(ref(db, 'race_state'), (snapshot) => {
             const data = snapshot.val();
             if (!data) {
-                const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value) || 42.0;
                 for(let id in window.fleetState) {
-                    window.fleetState[id].fuel = fuelMaxSetting;
+                    window.fleetState[id].fuel = 42.0;
                     window.fleetState[id].currentLap = 0;
                     window.fleetState[id].isInsidePit = false;
                 }
@@ -860,8 +873,8 @@
                 return;
             }
 
-            window.isFCY = data.isFCY;
-            window.isRedFlag = data.isRedFlag || false; // 🔴 Récupération du drapeau rouge
+            window.isFCY = data.isFCY || false;
+            window.isRedFlag = data.isRedFlag || false;
 
             // Mise à jour visuelle du bouton Drapeau Rouge
             const btnRed = document.getElementById('redFlagState');
@@ -869,78 +882,22 @@
                 btnRed.innerText = window.isRedFlag ? "🚨 DRAPEAU ROUGE ACTIF" : "🔴 DRAPEAU ROUGE";
                 btnRed.style.backgroundColor = window.isRedFlag ? "#ef4444" : "#222";
                 btnRed.style.color = window.isRedFlag ? "#000000" : "#ef4444";
-                if (window.isRedFlag) {
-                    btnRed.style.animation = "blink 0.8s infinite";
-                } else {
-                    btnRed.style.animation = "none";
-                }
+                btnRed.style.animation = window.isRedFlag ? "blink 0.8s infinite" : "none";
             }
 
-            // 📢 GESTION EN DIRECT DU BANDEAU DE LA DIRECTION DE COURSE (RC_MESSAGE)
-            if (data.rc_comment) {
-                document.getElementById("rc-text-content").innerText = "RC_MESSAGE: " + data.rc_comment;
-            }
-            if (data.rc_time) {
-                document.getElementById("rc-time-badge").innerText = data.rc_time;
-            }
+            if (data.rc_comment) document.getElementById("rc-text-content").innerText = "RC_MESSAGE: " + data.rc_comment;
+            if (data.rc_time) document.getElementById("rc-time-badge").innerText = data.rc_time;
 
             window.weatherMode = data.weatherMode || "sec";
             window.enemyDatabase = data.enemyDatabase || [];
 
-            // 🛠️ Rafraîchir le tableau des concurrents avec les données du Cloud
-            const tbodyEnemy = document.getElementById("enemy-table-body");
-            if (tbodyEnemy) {
-                tbodyEnemy.innerHTML = "";
-                window.enemyDatabase.forEach((enemy, index) => {
-                    const row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td style="color: #ffffff; font-weight: bold; padding: 8px;">#${enemy.carNum}</td>
-                        <td style="color: #aaa;">Concurrent</td>
-                        <td style="color: #EAB308; font-weight: bold;">${enemy.maxTurns} trs</td>
-                        <td style="color: #10b981;">${(42.0 / enemy.maxTurns).toFixed(2)} L/tr</td>
-                        <td style="color: ${enemy.maxTurns >= 21 ? '#ef4444' : '#10b981'}; font-weight: bold;">
-                            ${enemy.maxTurns >= 21 ? '🔥 MENACE' : '🟢 FAIBLE'}
-                        </td>
-                        <td><button onclick="window.deleteEnemy(${index})" style="background:none; border:none; color:#ef4444; cursor:pointer;">❌</button></td>
-                    `;
-                    tbodyEnemy.appendChild(row);
-                });
-            }
-
-            // Calcul de la moyenne générale (Nos 4 voitures + Concurrents)
+            // 🧮 INITIALISATION DES COMPTEURS POUR LA MOYENNE GÉNÉRALE DU TRACÉ
             let totalConsoGlobale = 0;
             let totalVoituresComptees = 0;
-
-            // 1. Somme de nos voitures
-            for (let id in window.fleetState) {
-                if (data.cars && data.cars[id]) {
-                    const cCar = data.cars[id];
-                    const rot = cCar.rotation || ["1"];
-                    const pIdx = rot[0];
-                    const cConso = (cCar.conso && cCar.conso[pIdx]) ? (cCar.conso[pIdx][window.weatherMode] || cCar.conso[pIdx]["sec"] || 1.77) : 1.77;
-                    totalConsoGlobale += parseFloat(cConso);
-                    totalVoituresComptees++;
-                }
-            }
-
-            // 2. Somme des concurrents
-            window.enemyDatabase.forEach(enemy => {
-                totalConsoGlobale += (42.0 / enemy.maxTurns);
-                totalVoituresComptees++;
-            });
-
-            // 3. Affichage du gros compteur orange
-            const elMoyenne = document.getElementById("global-average-display");
-            if (elMoyenne) {
-                const moyenneFinale = totalVoituresComptees > 0 ? (totalConsoGlobale / totalVoituresComptees) : 0;
-                elMoyenne.innerText = `${moyenneFinale.toFixed(2)} L`;
-            }
-            // ────────────────────────────────────────────────────────
 
             document.getElementById('trackState').innerText = window.isFCY ? "🟨 FCY EN COURS" : "🟢 Piste Dégagée";
             document.getElementById('trackState').className = window.isFCY ? "track-status fcy" : "track-status";
             
-            // Mise à jour visuelle dynamique du sélecteur météo haut
             const wSelect = document.getElementById('weatherStateSelect');
             if (wSelect) {
                 wSelect.value = window.weatherMode;
@@ -949,76 +906,69 @@
                 else if(window.weatherMode === "forte_pluie") wSelect.className = "weather-select-top rain-heavy";
             }
 
-            // --- DEBUT DE LA BOUCLE PAR VOITURE (Chassis #1 à #4) ---
+            // --- BOUCLE PAR VOITURE (Chassis #1 à #4) ---
             for (let id in window.fleetState) {
                 if (data.cars && data.cars[id]) {
                     const cloudCar = data.cars[id];
                     const localCar = window.fleetState[id];
 
-                    localCar.fuel = cloudCar.fuel;
-                    localCar.currentLap = cloudCar.currentLap;
-                    localCar.hasAlerted = cloudCar.hasAlerted;
-                    localCar.rotation = cloudCar.rotation || ["1"];
-                    localCar.conso = cloudCar.conso || {};
+                    localCar.fuel = parseFloat(cloudCar.fuel) || 42.0;
+                    localCar.currentLap = parseInt(cloudCar.currentLap) || 0;
+                    localCar.hasAlerted = cloudCar.hasAlerted || false;
+                    localCar.rotation = cloudCar.rotation || ["1", "2", "3", "4"];
+                    localCar.conso = cloudCar.conso || localCar.conso;
 
-                    // 🧮 1. EXTRATION DE LA CONSO DU PILOTE ET SÉCURISATION DU SWITCH PREDICTIF FCY
-                   // 🧠 LOGIQUE DES FACTEURS EXTÊMES SUR L'INTERFACE HTML
-                    const rotation = cloudCar.rotation || ["1"];
-                    const piloteActifIdx = rotation[0];
-                    const consoData = cloudCar.conso || {};
+                    // Extration de la conso étalon sec du pilote actif
+                    const rotation = localCar.rotation;
+                    const piloteActifIdx = rotation[0] || "1";
+                    const consoData = localCar.conso || {};
                     
-                    // Conso de base unique (Sec)
                     let consoBase = 1.77;
                     if (consoData[piloteActifIdx] && consoData[piloteActifIdx]["sec"]) {
                         consoBase = parseFloat(consoData[piloteActifIdx]["sec"]);
                     }
 
-                    // Application des coefficients (La forte pluie consomme moins que le FCY !)
+                    // Application des coefficients de réduction météo extrêmes
                     let facteurMeteo = 1.0;
                     if (window.weatherMode === "pluie_moderee") {
                         facteurMeteo = 0.80; // Baisse de 20%
                     } else if (window.weatherMode === "forte_pluie") {
-                        facteurMeteo = 0.40; // Baisse de 60% (vitesse < 80km/h)
+                        facteurMeteo = 0.40; // Baisse de 60% (Déluge <80km/h)
                     }
 
                     const consoStandardAjustee = consoBase * facteurMeteo;
                     const consoFCY = consoBase * 0.50;
 
-                    // Choix de la conso finale selon l'état de la piste
+                    // Choix de la consommation finale selon le contexte de piste
                     const isFcyActif = window.isFCY || false;
                     let consoAppliquee = isFcyActif ? consoFCY : consoStandardAjustee;
                     if (window.isRedFlag) consoAppliquee = 0;
 
-                    // Somme pour la moyenne générale globale
+                    // On applique localement pour la fiche stratégie
+                    if (localCar.conso[piloteActifIdx]) {
+                        localCar.conso[piloteActifIdx][window.weatherMode] = consoStandardAjustee;
+                    }
+
+                    // ➕ 1. AJOUT DE NOS PROPRES VOITURES DANS LA MOYENNE GÉNÉRALE
                     totalConsoGlobale += parseFloat(consoAppliquee);
                     totalVoituresComptees++;
 
-                    // Calcul des tours restants (Le chiffre va exploser sous la forte pluie !)
-                    const toursRestants = consoAppliquee > 0 ? Math.floor(cloudCar.fuel / consoAppliquee) : 0;
+                    const toursRestants = consoAppliquee > 0 ? Math.floor(localCar.fuel / consoAppliquee) : 0;
 
-                    // 🎨 3. METAMORPHOSE VISUELLE DES TOURS ET CHANGEMENT DE COULEUR
-                    const txtTours = document.getElementById(`fleet-tours-${id}`);
-                    if (txtTours) {
-                        const conteneurTours = txtTours.parentElement;
-                        if (conteneurTours) {
-                            if (isFcyActif) {
-                                conteneurTours.innerHTML = `⚠️ Tours (FCY) : <span id="fleet-tours-${id}" style="font-weight: bold; color: #f59e0b;">${toursRestants}</span>`;
-                            } else {
-                                conteneurTours.innerHTML = `Tours restants: <span id="fleet-tours-${id}" style="font-weight: bold; color: #10b981;">${toursRestants}</span>`;
-                            }
-                        }
+                    const txtLaps = document.getElementById(`laps-${id}`);
+                    if (txtLaps) {
+                        txtLaps.innerText = toursRestants;
+                        txtLaps.style.color = isFcyActif ? "#f59e0b" : "#fff";
                     }
 
-                    // 🚨 4. RECALCUL AUTOMATIQUE DE L'HEURE CIBLE "STOP ESTIMÉ"
+                    // Recalcul de l'heure cible "STOP ESTIMÉ"
                     const elTargetTime = document.getElementById(`target-time-${id}`);
                     if (toursRestants > 0 && elTargetTime) {
                         const refSec = parseFloat(data.track_ref_sec) || 185.0;
                         const refPluie = parseFloat(data.track_ref_pluie) || 205.0;
                         let tempsReferenceTour = (window.weatherMode === "sec") ? refSec : refPluie;
 
-                        if (isFcyActif) {
-                            tempsReferenceTour = tempsReferenceTour * 1.40;
-                        }
+                        if (isFcyActif) tempsReferenceTour = tempsReferenceTour * 1.40;
 
                         const tempsTotalRestantMS = toursRestants * tempsReferenceTour * 1000;
                         const heureCible = new Date(Date.now() + tempsTotalRestantMS);
@@ -1029,49 +979,38 @@
 
                         elTargetTime.innerText = `🚨 STOP ESTIMÉ : ${hh}:${mm}:${ss}`;
                     } else if (elTargetTime) {
-                        elTargetTime.innerText = "🚨 PANNE IMMINENTE";
+                        elTargetTime.innerText = window.isRedFlag ? "🚨 COURSE EN PAUSE" : "🚨 PANNE IMMINENTE";
                     }
 
-                    // ─── 5. SYNCHRONISATION DES CHRONOS ET DES COMPTEURS INTERFACE ───
-                    document.getElementById(`setup-${id}`).value = cloudCar.carNumInput || "";
-                    document.getElementById(`fleet-pos-${id}`).innerText = cloudCar.position || "-";
-                    document.getElementById(`fleet-best-${id}`).innerText = cloudCar.bestLap || "--:--.---";
+                    // Synchronisation RIS-Timing
+                    if (document.getElementById(`fleet-pos-${id}`)) document.getElementById(`fleet-pos-${id}`).innerText = cloudCar.position || "-";
+                    if (document.getElementById(`fleet-best-${id}`)) document.getElementById(`fleet-best-${id}`).innerText = cloudCar.bestLap || "--:--.---";
                     
-                    // 🚀 APPORT DU DELTA
-                    const deltaValue = cloudCar.deltaBest || "--";
-                    const elDelta = document.getElementById(`fleet-delta-${id}`);
-                    
-                    if (elDelta) {
-                        elDelta.innerText = deltaValue;
-                        if (deltaValue === "0.000" || deltaValue.startsWith("-")) {
-                            elDelta.style.color = "#a855f7"; 
-                        } else if (deltaValue === "--") {
-                            elDelta.style.color = "#555";    
-                        } else {
-                            elDelta.style.color = "#ef4444"; 
-                        }
+                    const txtDelta = document.getElementById(`fleet-delta-${id}`);
+                    if (txtDelta) {
+                        const deltaValue = cloudCar.deltaBest || "--";
+                        txtDelta.innerText = deltaValue;
+                        if (deltaValue === "0.000" || deltaValue.startsWith("-")) txtDelta.style.color = "#a855f7";
+                        else if (deltaValue === "--") txtDelta.style.color = "#555";
+                        else txtDelta.style.color = "#ef4444";
                     }
 
-                    // ─── SYNCHRONISATION DES ENTRÉES PILOTES ET CONSOS ───
+                    // Synchronisation des prénoms et consos
                     for (let p = 1; p <= 4; p++) {
                         if (cloudCar.pilotsInputs && cloudCar.pilotsInputs[p] !== undefined) {
                             document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
                         }
                         if (cloudCar.conso && cloudCar.conso[p]) {
-                            document.getElementById(`c_${id}_${p}_sec`).value = cloudCar.conso[p].sec || 1.77;
-                            
-                            if (cloudCar.conso[p].pluie_moderee !== undefined) {
-                                document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p][window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
-                            } else {
-                                document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie || 1.15;
+                            if (document.getElementById(`c_${id}_${p}_sec`)) {
+                                document.getElementById(`c_${id}_${p}_sec`).value = cloudCar.conso[p].sec || 1.77;
                             }
                         }
                     }
 
-                    // ─── 6. DETECTION DU STATUT DE LA PITLANE ───
+                    // Pit Lane
                     if (cloudCar.isInsidePit && !localCar.isInsidePit) {
                         localCar.isInsidePit = true;
-                        localCar.pitSeconds = cloudCar.pitSeconds;
+                        localCar.pitSeconds = cloudCar.pitSeconds || 0;
                         window.applyPitVisualsOn(id);
                         window.startLocalPitTimer(id);
                     } else if (!cloudCar.isInsidePit && localCar.isInsidePit) {
@@ -1081,8 +1020,33 @@
                     }
                 }
             }
-            applyGlobalCustomizationLocal();
+
+            // ➕ 2. AJOUT DES CONCURRENTS ESPIONNÉS DANS LA MOYENNE GÉNÉRALE
+            window.enemyDatabase.forEach(enemy => {
+                const enemyTurns = parseInt(enemy.maxTurns) || 21;
+                const enemyConso = 42.0 / enemyTurns; // Basé sur le réservoir étalon de 42L
+                totalConsoGlobale += enemyConso;
+                totalVoituresComptees++;
+            });
+
+            // 🎯 3. CALCUL ET AFFICHAGE SYNCHRONISÉ SUR LES DEUX COMPTEURS DE L'ÉCRAN
+            const moyenneFinale = totalVoituresComptees > 0 ? (totalConsoGlobale / totalVoituresComptees) : 0;
+            
+            // Compteur n°1 : Le gros widget orange de l'onglet Intel
+            const elMeanValueIntel = document.getElementById("globalMeanValue");
+            if (elMeanValueIntel) elMeanValueIntel.innerText = `${moyenneFinale.toFixed(2)} L`;
+
+            // Compteur n°2 : Le widget d'en-tête de la page de Supervision Flotte (s'il existe dans ton code)
+            const elAverageFleetHeader = document.getElementById("global-average-display");
+            if (elAverageFleetHeader) elAverageFleetHeader.innerText = `${moyenneFinale.toFixed(2)} L`;
+
+            // Propagation de la stratégie
+            for (let id in window.fleetState) { 
+                if (typeof updateCarStrategyLocal === "function") updateCarStrategyLocal(id); 
+            }
+            if (typeof rebuildIntelTableLocal === "function") rebuildIntelTableLocal();
         });
+        
         onValue(ref(db, 'logs'), (snapshot) => {
             const logs = snapshot.val();
             const tbody = document.getElementById('fleetLogBody');
