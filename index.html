@@ -594,18 +594,55 @@
                     <div class="config-group"><label class="p4_v3">Pilote 4 Pluie</label><input type="number" id="c_v3_4_pluie" value="1.15" step="0.01" onchange="saveCarConfig('v3')"></div>
                 </div>
             </div>
-            <div class="card col-4" style="border: 1px dashed var(--4race-coral);">
-                <div class="card-title" style="color: var(--4race-coral);">⚡ Calculateur Flash Conso (Essais)</div>
-                <div class="config-row">
-                    <div class="config-group"><label>Pilote</label><select id="calc_p_v3"></select></div>
-                    <div class="config-group"><label>Météo</label><select id="calc_w_v3"><option value="sec">Sec ☀️</option><option value="pluie_moderee">Pluie modérée</option><option value="forte_pluie">Forte pluie</option></select></div>
-                </div>
-                <div class="config-row" style="margin-top:10px;">
-                    <div class="config-group"><label>Tours</label><input type="number" id="calc_laps_v3" value="10" min="1"></div>
-                    <div class="config-group"><label>Litres rajoutés</label><input type="number" id="calc_fuel_v3" value="18.2" step="0.1"></div>
-                </div>
-                <button class="btn-calculator" onclick="runLiveInjection('v3')">⚡ Calculer & Injecter</button>
+           <div class="card mb-3" style="background-color: #2c3e50; border: 1px solid #4f5d6c; margin-top: 10px;">
+    <div class="card-header" style="background-color: #1a252f; color: #00bc8c; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; align-items: center; padding: 6px 10px;">
+        <span>🧮 CALCULATEUR FLASH RELAIS</span>
+        <span id="flash-result-${id}" style="color: #f39c12; font-family: monospace; font-size: 13px; font-weight: bold;">--.- L/tr</span>
+    </div>
+    <div class="card-body" style="padding: 10px;">
+        
+        <div class="mb-2">
+            <label style="color: #fff; font-size: 11px; font-weight: bold; margin-bottom: 2px; display: block;">Pilote concerné :</label>
+            <select id="select-flash-pilote-${id}" class="form-select form-select-sm" style="background-color: #34495e; color: #fff; border: 1px solid #4b6584; font-size: 11px; padding: 2px 6px;">
+                <option value="1">Pilote 1</option>
+                <option value="2">Pilote 2</option>
+                <option value="3">Pilote 3</option>
+                <option value="4">Pilote 4</option>
+            </select>
+        </div>
+
+        <div class="mb-2">
+            <label style="color: #fff; font-size: 11px; font-weight: bold; margin-bottom: 2px; display: block;">Essence brûlée sur le relais (L) :</label>
+            <input type="number" id="input-flash-litres-${id}" class="form-control form-control-sm" step="0.01" placeholder="ex: 34.50" style="background-color: #222; color: #fff; border: 1px solid #444; text-align: center; font-weight: bold; font-family: monospace; font-size: 11px; padding: 2px 6px;">
+        </div>
+
+        <label style="color: #00bc8c; font-size: 10px; font-weight: bold; text-transform: uppercase; margin-bottom: 4px; display: block;">Détail des tours :</label>
+        <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 3px 0;">
+            <div style="display: table-cell; width: 25%;">
+                <label style="font-size: 8px; display: block; color: #00bc8c; text-align: center; font-weight: bold;">SEC</label>
+                <input type="number" id="input-flash-sec-${id}" class="form-control form-control-sm" value="0" min="0" style="background-color: #222; color: #fff; border: 1px solid #444; text-align: center; padding: 2px 0; font-size: 11px;">
             </div>
+            <div style="display: table-cell; width: 25%;">
+                <label style="font-size: 8px; display: block; color: #3498db; text-align: center; font-weight: bold;">PLUIE</label>
+                <input type="number" id="input-flash-pluie-${id}" class="form-control form-control-sm" value="0" min="0" style="background-color: #222; color: #fff; border: 1px solid #444; text-align: center; padding: 2px 0; font-size: 11px;">
+            </div>
+            <div style="display: table-cell; width: 25%;">
+                <label style="font-size: 8px; display: block; color: #9b59b6; text-align: center; font-weight: bold;">DÉLUGE</label>
+                <input type="number" id="input-flash-deluge-${id}" class="form-control form-control-sm" value="0" min="0" style="background-color: #222; color: #fff; border: 1px solid #444; text-align: center; padding: 2px 0; font-size: 11px;">
+            </div>
+            <div style="display: table-cell; width: 25%;">
+                <label style="font-size: 8px; display: block; color: #f1c40f; text-align: center; font-weight: bold;">FCY</label>
+                <input type="number" id="input-flash-fcy-${id}" class="form-control form-control-sm" value="0" min="0" style="background-color: #222; color: #fff; border: 1px solid #444; text-align: center; padding: 2px 0; font-size: 11px;">
+            </div>
+        </div>
+
+        <div style="margin-top: 8px; display: flex; gap: 4px;">
+            <button type="button" class="btn btn-warning btn-sm" onclick="executerCalculFlashVoiture('${id}')" style="flex: 1; font-weight: bold; font-size: 10px; background-color: #e67e22; border: none; color: #fff; padding: 4px 0;">🧮 CALCULER</button>
+            <button type="button" id="btn-apply-flash-${id}" class="btn btn-success btn-sm" onclick="injecterFlashDansVoiture('${id}')" disabled style="flex: 1; font-weight: bold; font-size: 10px; background-color: #7f8c8d; border: none; color: #fff; padding: 4px 0;">📥 INJECTER</button>
+        </div>
+
+    </div>
+</div>
             <div class="card col-4">
                 <div class="card-title">📋 Rotation des Prochains Relais</div>
                 <div class="config-row">
@@ -906,25 +943,38 @@
                     localCar.conso = cloudCar.conso || {};
 
                     // 🧮 1. EXTRATION DE LA CONSO DU PILOTE ET SÉCURISATION DU SWITCH PREDICTIF FCY
+                   // 🧠 LOGIQUE DES FACTEURS EXTÊMES SUR L'INTERFACE HTML
                     const rotation = cloudCar.rotation || ["1"];
                     const piloteActifIdx = rotation[0];
                     const consoData = cloudCar.conso || {};
                     
-                    // Conso standard selon la météo
-                    let consoStandard = 1.77; 
-                    if (consoData[piloteActifIdx] && consoData[piloteActifIdx][window.weatherMode]) {
-                        consoStandard = parseFloat(consoData[piloteActifIdx][window.weatherMode]);
-                    }
-
-                    // Conso prédictive sous FCY (Calquée sur la formule Python à 50% du Sec)
-                    let consoFCY = consoStandard * 0.50;
+                    // Conso de base unique (Sec)
+                    let consoBase = 1.77;
                     if (consoData[piloteActifIdx] && consoData[piloteActifIdx]["sec"]) {
-                        consoFCY = parseFloat(consoData[piloteActifIdx]["sec"]) * 0.50;
+                        consoBase = parseFloat(consoData[piloteActifIdx]["sec"]);
                     }
 
-                    // 🧠 2. BASCOULE AUTOMATIQUE DU CALCUL SELON DRAPEAU EN COURS
+                    // Application des coefficients (La forte pluie consomme moins que le FCY !)
+                    let facteurMeteo = 1.0;
+                    if (window.weatherMode === "pluie_moderee") {
+                        facteurMeteo = 0.80; // Baisse de 20%
+                    } else if (window.weatherMode === "forte_pluie") {
+                        facteurMeteo = 0.40; // Baisse de 60% (vitesse < 80km/h)
+                    }
+
+                    const consoStandardAjustee = consoBase * facteurMeteo;
+                    const consoFCY = consoBase * 0.50;
+
+                    // Choix de la conso finale selon l'état de la piste
                     const isFcyActif = window.isFCY || false;
-                    const consoAppliquee = isFcyActif ? consoFCY : consoStandard;
+                    let consoAppliquee = isFcyActif ? consoFCY : consoStandardAjustee;
+                    if (window.isRedFlag) consoAppliquee = 0;
+
+                    // Somme pour la moyenne générale globale
+                    totalConsoGlobale += parseFloat(consoAppliquee);
+                    totalVoituresComptees++;
+
+                    // Calcul des tours restants (Le chiffre va exploser sous la forte pluie !)
                     const toursRestants = consoAppliquee > 0 ? Math.floor(cloudCar.fuel / consoAppliquee) : 0;
 
                     // 🎨 3. METAMORPHOSE VISUELLE DES TOURS ET CHANGEMENT DE COULEUR
