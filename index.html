@@ -788,6 +788,9 @@
        // =======================================================================
         // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE
         // =======================================================================
+// =======================================================================
+        // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE
+        // =======================================================================
         onValue(ref(db, 'race_state'), (snapshot) => {
             const data = snapshot.val();
             if (!data) {
@@ -827,11 +830,8 @@
 
             window.weatherMode = data.weatherMode || "sec";
             window.enemyDatabase = data.enemyDatabase || [];
-            window.weatherMode = data.weatherMode || "sec";
-            window.enemyDatabase = data.enemyDatabase || []; // <-- Tu as cette ligne
 
-            // 🛠️ REMETTRE CE BLOC QUI A ÉTÉ EFFACÉ :
-            // Rafraîchir le tableau des concurrents avec les données du Cloud
+            // 🛠️ Rafraîchir le tableau des concurrents avec les données du Cloud
             const tbodyEnemy = document.getElementById("enemy-table-body");
             if (tbodyEnemy) {
                 tbodyEnemy.innerHTML = "";
@@ -861,7 +861,7 @@
                     const cCar = data.cars[id];
                     const rot = cCar.rotation || ["1"];
                     const pIdx = rot[0];
-                    const cConso = cCar.conso[pIdx][window.weatherMode] || cCar.conso[pIdx]["sec"] || 1.77;
+                    const cConso = (cCar.conso && cCar.conso[pIdx]) ? (cCar.conso[pIdx][window.weatherMode] || cCar.conso[pIdx]["sec"] || 1.77) : 1.77;
                     totalConsoGlobale += parseFloat(cConso);
                     totalVoituresComptees++;
                 }
@@ -902,8 +902,8 @@
                     localCar.fuel = cloudCar.fuel;
                     localCar.currentLap = cloudCar.currentLap;
                     localCar.hasAlerted = cloudCar.hasAlerted;
-                    localCar.rotation = cloudCar.rotation;
-                    localCar.conso = cloudCar.conso;
+                    localCar.rotation = cloudCar.rotation || ["1"];
+                    localCar.conso = cloudCar.conso || {};
 
                     // 🧮 1. EXTRATION DE LA CONSO DU PILOTE ET SÉCURISATION DU SWITCH PREDICTIF FCY
                     const rotation = cloudCar.rotation || ["1"];
@@ -933,10 +933,8 @@
                         const conteneurTours = txtTours.parentElement;
                         if (conteneurTours) {
                             if (isFcyActif) {
-                                // Mode FCY actif -> Changement du titre en Jaune et calcul économique
                                 conteneurTours.innerHTML = `⚠️ Tours (FCY) : <span id="fleet-tours-${id}" style="font-weight: bold; color: #f59e0b;">${toursRestants}</span>`;
                             } else {
-                                // Mode Normal -> Titre standard et chiffre en vert émeraude original
                                 conteneurTours.innerHTML = `Tours restants: <span id="fleet-tours-${id}" style="font-weight: bold; color: #10b981;">${toursRestants}</span>`;
                             }
                         }
@@ -949,7 +947,6 @@
                         const refPluie = parseFloat(data.track_ref_pluie) || 205.0;
                         let tempsReferenceTour = (window.weatherMode === "sec") ? refSec : refPluie;
 
-                        // Si la piste est sous FCY, on roule beaucoup moins vite (on majore de 40% le temps au tour)
                         if (isFcyActif) {
                             tempsReferenceTour = tempsReferenceTour * 1.40;
                         }
@@ -967,45 +964,38 @@
                     }
 
                     // ─── 5. SYNCHRONISATION DES CHRONOS ET DES COMPTEURS INTERFACE ───
-                    document.getElementById(`setup-${id}`).value = cloudCar.carNumInput;
-                    document.getElementById(`fleet-pos-${id}`).innerText = cloudCar.position || "-";
-                    document.getElementById(`fleet-best-${id}`).innerText = cloudCar.bestLap || "--:--.---";
-
-                    // ─── LIGNES D'ORIGINE DU SCRIPT ───
-                    document.getElementById(`setup-${id}`).value = cloudCar.carNumInput;
+                    document.getElementById(`setup-${id}`).value = cloudCar.carNumInput || "";
                     document.getElementById(`fleet-pos-${id}`).innerText = cloudCar.position || "-";
                     document.getElementById(`fleet-best-${id}`).innerText = cloudCar.bestLap || "--:--.---";
                     
-                    // 🚀 APPORT DU DELTA (À PLACER ICI)
+                    // 🚀 APPORT DU DELTA
                     const deltaValue = cloudCar.deltaBest || "--";
                     const elDelta = document.getElementById(`fleet-delta-${id}`);
                     
                     if (elDelta) {
                         elDelta.innerText = deltaValue;
                         if (deltaValue === "0.000" || deltaValue.startsWith("-")) {
-                            // Record ou égalisation : Violet F1
                             elDelta.style.color = "#a855f7"; 
                         } else if (deltaValue === "--") {
-                            // En attente de données : Gris sombre
                             elDelta.style.color = "#555";    
                         } else {
-                            // En retard sur le meilleur temps : Rouge Alerte
                             elDelta.style.color = "#ef4444"; 
                         }
                     }
 
-                    // ─── RÉSIDU DU CODE (LA BOUCLE DES PILOTES COMMENCE JUSTE APRÈS) ───
+                    // ─── SYNCHRONISATION DES ENTRÉES PILOTES ET CONSOS ───
                     for (let p = 1; p <= 4; p++) {
-                        document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
-                     
-                    for (let p = 1; p <= 4; p++) {
-                        document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
-                        document.getElementById(`c_${id}_${p}_sec`).value = cloudCar.conso[p].sec;
-                        
-                        if (cloudCar.conso[p].pluie_moderee !== undefined) {
-                            document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p][window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
-                        } else {
-                            document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie || 1.15;
+                        if (cloudCar.pilotsInputs && cloudCar.pilotsInputs[p] !== undefined) {
+                            document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
+                        }
+                        if (cloudCar.conso && cloudCar.conso[p]) {
+                            document.getElementById(`c_${id}_${p}_sec`).value = cloudCar.conso[p].sec || 1.77;
+                            
+                            if (cloudCar.conso[p].pluie_moderee !== undefined) {
+                                document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p][window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
+                            } else {
+                                document.getElementById(`c_${id}_${p}_pluie`).value = cloudCar.conso[p].pluie || 1.15;
+                            }
                         }
                     }
 
