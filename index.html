@@ -772,6 +772,9 @@
                     localCar.conso = cloudCar.conso;
 
                     document.getElementById(`setup-${id}`).value = cloudCar.carNumInput;
+                    document.getElementById(`fleet-pos-${id}`).innerText = cloudCar.position || "-";
+                    document.getElementById(`fleet-best-${id}`).innerText = cloudCar.bestLap || "--:--.---";
+                    
                     for (let p = 1; p <= 4; p++) {
                         document.getElementById(`s_${id}_${p}`).value = cloudCar.pilotsInputs[p];
                         document.getElementById(`c_${id}_${p}_sec`).value = cloudCar.conso[p].sec;
