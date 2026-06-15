@@ -1220,9 +1220,9 @@
         };
         window.enemyDatabase = []; window.isFCY = false; window.weatherMode = "sec";
 
-       function applyGlobalCustomizationLocal() {
+   function applyGlobalCustomizationLocal() {
             for (let id in window.fleetState) {
-                // Correction de la syntaxe avec les crochets pour éviter le plantage du script
+                // SÉCURISATION : Utilisation des crochets obligatoires pour les propriétés numériques
                 window.pilotsDatabase[id]["1"] = document.getElementById(`s_${id}_1`).value;
                 window.pilotsDatabase[id]["2"] = document.getElementById(`s_${id}_2`).value;
                 window.pilotsDatabase[id]["3"] = document.getElementById(`s_${id}_3`).value;
@@ -1246,7 +1246,7 @@
                 document.querySelectorAll(`.p3_${id}`).forEach(el => el.innerText = db["3"]);
                 document.querySelectorAll(`.p4_${id}`).forEach(el => el.innerText = db["4"]);
 
-                // Reconnexion du nouveau calculateur flash embarqué
+                // Réattribution dynamique des vrais prénoms dans les menus déroulants du nouveau Calculateur Flash
                 const sCalcFlash = document.getElementById(`select-flash-pilote-${id}`);
                 if(sCalcFlash) {
                     sCalcFlash.innerHTML = `
@@ -1269,6 +1269,86 @@
             if (typeof rebuildIntelTableLocal === "function") rebuildIntelTableLocal();
         }
 
+        // Tableau pour stocker les résultats de calcul indépendants de chaque voiture
+let dernierCalculParVoiture = {};
+
+window.executerCalculFlashVoiture = function(id) {
+    const essenceBrulee = parseFloat(document.getElementById(`input-flash-litres-${id}`).value) || 0;
+    const tSec = parseInt(document.getElementById(`input-flash-sec-${id}`).value) || 0;
+    const tPluie = parseInt(document.getElementById(`input-flash-pluie-${id}`).value) || 0;
+    const tDeluge = parseInt(document.getElementById(`input-flash-deluge-${id}`).value) || 0;
+    const tFcy = parseInt(document.getElementById(`input-flash-fcy-${id}`).value) || 0;
+
+    const totalTours = tSec + tPluie + tDeluge + tFcy;
+
+    if (essenceBrulee <= 0 || totalTours === 0) {
+        alert("⚠️ Renseigne l'essence brûlée et les tours de ce châssis pour lancer le calcul !");
+        return;
+    }
+
+    // Calcul des tours équivalents SEC (Application de tes facteurs de réduction exacts)
+    // Sec = 1.0 | Pluie modérée = 0.80 | Forte pluie (Déluge) = 0.40 | FCY = 0.50
+    const toursEquivalentsSec = (tSec * 1.0) + (tPluie * 0.80) + (tDeluge * 0.40) + (tFcy * 0.50);
+
+    // Détermination de la conso de référence sur le Sec
+    const consoEtalonSec = essenceBrulee / toursEquivalentsSec;
+
+    // Sauvegarde du résultat pour cette voiture précise
+    dernierCalculParVoiture[id] = consoEtalonSec;
+
+    // Mise à jour de l'affichage dans l'en-tête de la carte de CETTE voiture
+    const resultSpan = document.getElementById(`flash-result-${id}`);
+    if (resultSpan) {
+        resultSpan.innerText = `${consoEtalonSec.toFixed(3)} L/tr`;
+        resultSpan.style.color = "#00bc8c";
+    }
+
+    // Activation du bouton d'injection pour cette voiture
+    const btnInjecter = document.getElementById(`btn-apply-flash-${id}`);
+    if (btnInjecter) {
+        btnInjecter.disabled = false;
+        btnInjecter.style.backgroundColor = "#2ecc71"; // Vert actif
+        btnInjecter.style.color = "#ffffff";
+    }
+};
+
+window.injecterFlashDansVoiture = function(id) {
+    const consoAInjecter = dernierCalculParVoiture[id];
+    if (!consoAInjecter) return;
+
+    // Récupération du numéro de pilote sélectionné dans le menu Flash de cette voiture
+    const piloteIdx = document.getElementById(`select-flash-pilote-${id}`).value;
+
+    // Ciblage de l'input de consommation "Sec" de ce pilote sur CETTE voiture précise
+    const inputConsoSec = document.getElementById(`c_${id}_${piloteIdx}_sec`);
+
+    if (inputConsoSec) {
+        inputConsoSec.value = consoAInjecter.toFixed(2);
+        
+        // Déclenchement de l'événement de mise à jour automatique vers Firebase
+        inputConsoSec.dispatchEvent(new Event('change'));
+        
+        alert(`🎯 Calculateur Voiture ${id.toUpperCase()} :\nLa consommation étalon SEC (${consoAInjecter.toFixed(2)} L/tr) a été injectée pour le Pilote ${piloteIdx}.`);
+        
+        // Nettoyage et reset du petit module de la voiture
+        document.getElementById(`input-flash-litres-${id}`).value = "";
+        document.getElementById(`input-flash-sec-${id}`).value = "0";
+        document.getElementById(`input-flash-pluie-${id}`).value = "0";
+        document.getElementById(`input-flash-deluge-${id}`).value = "0";
+        document.getElementById(`input-flash-fcy-${id}`).value = "0";
+        document.getElementById(`flash-result-${id}`).innerText = "--.- L/tr";
+        document.getElementById(`flash-result-${id}`).style.color = "#f39c12";
+        
+        const btnInjecter = document.getElementById(`btn-apply-flash-${id}`);
+        if (btnInjecter) {
+            btnInjecter.disabled = true;
+            btnInjecter.style.backgroundColor = "#7f8c8d";
+        }
+        delete dernierCalculParVoiture[id];
+    } else {
+        alert(`❌ Erreur d'injection : Impossible de trouver la case d'ID "c_${id}_${piloteIdx}_sec".`);
+    }
+};
         function updateCarStrategyLocal(id) {
             const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
             const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
