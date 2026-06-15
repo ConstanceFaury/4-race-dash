@@ -1205,26 +1205,24 @@
         };
         window.enemyDatabase = []; window.isFCY = false; window.weatherMode = "sec";
 
-  // =======================================================================
-        // 👤 GESTION ET PROPAGATION DES ÉQUIPAGES (PROPRE ET ATTACHÉE À WINDOW)
-        // =======================================================================
 // =======================================================================
-        // 👤 GESTION ET PROPAGATION DES ÉQUIPAGES (VERSION VERROUILLÉE ET CORRIGÉE)
+        // 👤 GESTION SÉCURISÉE ET PROPAGATION AUTOMATIQUE DES ÉQUIPAGES
         // =======================================================================
         window.applyGlobalCustomizationLocal = function() {
+            // 🛡️ ÉTAPE 1 : Sauvegarde des prénoms UNIQUEMENT si les cases existent à l'écran
             for (let id in window.fleetState) {
-                // Sécurisation avec gestion de secours si l'interface met du temps à charger au démarrage
                 const el1 = document.getElementById(`s_${id}_1`);
                 const el2 = document.getElementById(`s_${id}_2`);
                 const el3 = document.getElementById(`s_${id}_3`);
                 const el4 = document.getElementById(`s_${id}_4`);
 
-                window.pilotsDatabase[id]["1"] = el1 ? el1.value : (window.pilotsDatabase[id]["1"] || "Pilote 1");
-                window.pilotsDatabase[id]["2"] = el2 ? el2.value : (window.pilotsDatabase[id]["2"] || "Pilote 2");
-                window.pilotsDatabase[id]["3"] = el3 ? el3.value : (window.pilotsDatabase[id]["3"] || "Pilote 3");
-                window.pilotsDatabase[id]["4"] = el4 ? el4.value : (window.pilotsDatabase[id]["4"] || "Pilote 4");
+                if (el1 && el1.value) window.pilotsDatabase[id]["1"] = el1.value;
+                if (el2 && el2.value) window.pilotsDatabase[id]["2"] = el2.value;
+                if (el3 && el3.value) window.pilotsDatabase[id]["3"] = el3.value;
+                if (el4 && el4.value) window.pilotsDatabase[id]["4"] = el4.value;
             }
 
+            // 🏎️ ÉTAPE 2 : Mise à jour des numéros de Châssis (#531, #183...)
             if (document.getElementById("setup-v1")) window.carIdMapping.v1 = document.getElementById("setup-v1").value;
             if (document.getElementById("setup-v2")) window.carIdMapping.v2 = document.getElementById("setup-v2").value;
             if (document.getElementById("setup-v3")) window.carIdMapping.v3 = document.getElementById("setup-v3").value;
@@ -1235,37 +1233,47 @@
             document.querySelectorAll(".lbl-v3").forEach(el => el.innerText = "#" + window.carIdMapping.v3);
             document.querySelectorAll(".lbl-v4").forEach(el => el.innerText = "#" + window.carIdMapping.v4);
 
+            // 🔄 ÉTAPE 3 : Propagation de force dans ABSOLUMENT TOUS les menus déroulants
             for(let id in window.fleetState) {
                 const db = window.pilotsDatabase[id];
+                
+                // Mise à jour des textes d'affichage simples
                 document.querySelectorAll(`.p1_${id}`).forEach(el => el.innerText = db["1"]);
                 document.querySelectorAll(`.p2_${id}`).forEach(el => el.innerText = db["2"]);
                 document.querySelectorAll(`.p3_${id}`).forEach(el => el.innerText = db["3"]);
                 document.querySelectorAll(`.p4_${id}`).forEach(el => el.innerText = db["4"]);
 
-                // 🎯 RECONNEXION ET PROPAGATION DES VRAIS PRÉNOMS DANS LE SÉLECTEUR FLASH BLUE
+                // 🎯 RECONNEXION FORCEE DU CALCULATEUR FLASH (BOÎTE BLEUE)
                 const sCalcFlash = document.getElementById(`select-flash-pilote-${id}`);
                 if(sCalcFlash) {
-                    const memoireSelection = sCalcFlash.value || "1"; // Évite de réinitialiser le choix en cours
+                    const valeurSauvegardee = sCalcFlash.value || "1";
                     sCalcFlash.innerHTML = `
-                        <option value="1" ${memoireSelection === '1' ? 'selected' : ''}>${db["1"]}</option>
-                        <option value="2" ${memoireSelection === '2' ? 'selected' : ''}>${db["2"]}</option>
-                        <option value="3" ${memoireSelection === '3' ? 'selected' : ''}>${db["3"]}</option>
-                        <option value="4" ${memoireSelection === '4' ? 'selected' : ''}>${db["4"]}</option>
+                        <option value="1" ${valeurSauvegardee === '1' ? 'selected' : ''}>${db["1"]}</option>
+                        <option value="2" ${valeurSauvegardee === '2' ? 'selected' : ''}>${db["2"]}</option>
+                        <option value="3" ${valeurSauvegardee === '3' ? 'selected' : ''}>${db["3"]}</option>
+                        <option value="4" ${valeurSauvegardee === '4' ? 'selected' : ''}>${db["4"]}</option>
                     `;
                 }
                 
+                // 🎯 RECONNEXION FORCEE DE LA ROTATION DES RELAIS (BOÎTE DE DROITE)
                 for(let r=1; r<=4; r++) {
                     const sRot = document.getElementById(`r_${id}_${r}`);
                     if(sRot) {
-                        const selectedVal = window.fleetState[id].rotation[r-1];
-                        sRot.innerHTML = `<option value="1" ${selectedVal=='1'?'selected':''}>${db["1"]}</option><option value="2" ${selectedVal=='2'?'selected':''}>${db["2"]}</option><option value="3" ${selectedVal=='3'?'selected':''}>${db["3"]}</option><option value="4" ${selectedVal=='4'?'selected':''}>${db["4"]}</option>`;
+                        const selectedVal = window.fleetState[id].rotation[r-1] || String(r);
+                        sRot.innerHTML = `
+                            <option value="1" ${selectedVal == '1' ? 'selected' : ''}>${db["1"]}</option>
+                            <option value="2" ${selectedVal == '2' ? 'selected' : ''}>${db["2"]}</option>
+                            <option value="3" ${selectedVal == '3' ? 'selected' : ''}>${db["3"]}</option>
+                            <option value="4" ${selectedVal == '4' ? 'selected' : ''}>${db["4"]}</option>
+                        `;
                     }
                 }
             }
+            
+            // Relance de la mise à jour des calculs de stratégie
             for (let id in window.fleetState) { updateCarStrategyLocal(id); }
             if (typeof rebuildIntelTableLocal === "function") rebuildIntelTableLocal();
         };
-
         // =======================================================================
         // 🧮 MODULE DE DEBRIEFING FLASH CONSO INDÉPENDANT ET EXPORTÉ AU NAVIGATEUR
         // =======================================================================
