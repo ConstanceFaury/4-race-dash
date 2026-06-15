@@ -184,12 +184,16 @@
         </div>
     </div>
 
-    <div id="page-fleet" class="page-content active grid">
+  <div id="page-fleet" class="page-content active grid">
         <div class="fleet-grid" style="grid-column: span 12;">
             <div id="card-v1" class="car-card">
                 <div class="car-header">
                     <button class="car-number-link lbl-v1" onclick="navigateToPage('page-v1', 'nav-v1')">#531</button>
                     <span id="badge-v1" class="car-status-badge badge-piste">En Piste</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
+                    <div><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span><strong id="fleet-pos-v1" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong></div>
+                    <div style="text-align: right;"><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span><strong id="fleet-best-v1" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong></div>
                 </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v1" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
@@ -199,13 +203,13 @@
                     <div class="fuel-bar-container"><div id="bar-v1" class="fuel-bar"></div></div>
                 </div>
                 <div id="opt-box-v1" class="pit-options-box">
-                        <label><input type="radio" name="fuel-mode-v1" id="rad-full-v1" checked onclick="document.getElementById('input-litres-v1').disabled = true;"> ⛽ Plein Complet</label>
-                        <label style="display: flex; align-items: center; gap: 5px;">
-                            <input type="radio" name="fuel-mode-v1" id="rad-partial-v1" onclick="document.getElementById('input-litres-v1').disabled = false;"> 📥 Ajouter (L) :
-                            <input type="number" id="input-litres-v1" value="15" step="0.5" disabled style="width: 60px; padding: 2px; background: #222; border: 1px solid #444; color: #fff; text-align: center; border-radius: 3px;">
-                        </label>
-                        <label><input type="checkbox" id="chk-pilot-v1" checked> 👤 Chgt Pilote</label>
-                    </div>
+                    <label><input type="radio" name="fuel-mode-v1" id="rad-full-v1" checked onclick="document.getElementById('input-litres-v1').disabled = true;"> ⛽ Plein Complet</label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="fuel-mode-v1" id="rad-partial-v1" onclick="document.getElementById('input-litres-v1').disabled = false;"> 📥 Ajouter (L) :
+                        <input type="number" id="input-litres-v1" value="15" step="0.5" disabled style="width: 60px; padding: 2px; background: #222; border: 1px solid #444; color: #fff; text-align: center; border-radius: 3px;">
+                    </label>
+                    <label><input type="checkbox" id="chk-pilot-v1" checked> 👤 Chgt Pilote</label>
+                </div>
                 <div id="pit-timer-v1" class="pit-mini-timer">00:00.0</div>
                 <div class="car-actions">
                     <button id="btn-lap-v1" class="btn-quick btn-quick-lap" onclick="triggerCarLap('v1')">Passage Ligne</button>
@@ -218,6 +222,10 @@
                 <div class="car-header">
                     <button class="car-number-link lbl-v2" onclick="navigateToPage('page-v2', 'nav-v2')">#183</button>
                     <span id="badge-v2" class="car-status-badge badge-piste">En Piste</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
+                    <div><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span><strong id="fleet-pos-v2" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong></div>
+                    <div style="text-align: right;"><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span><strong id="fleet-best-v2" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong></div>
                 </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v2" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
@@ -247,6 +255,10 @@
                     <button class="car-number-link lbl-v3" onclick="navigateToPage('page-v3', 'nav-v3')">#156</button>
                     <span id="badge-v3" class="car-status-badge badge-piste">En Piste</span>
                 </div>
+                <div style="display: flex; justify-content: space-between; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
+                    <div><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span><strong id="fleet-pos-v3" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong></div>
+                    <div style="text-align: right;"><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span><strong id="fleet-best-v3" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong></div>
+                </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v3" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
                     <div id="fuel-val-v3" class="fuel-main-value">42.0L</div>
@@ -254,7 +266,7 @@
                     <div id="predict-box-v3" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
                     <div class="fuel-bar-container"><div id="bar-v3" class="fuel-bar"></div></div>
                 </div>
-               <div id="opt-box-v3" class="pit-options-box">
+                <div id="opt-box-v3" class="pit-options-box">
                     <label><input type="radio" name="fuel-mode-v3" id="rad-full-v3" checked onclick="document.getElementById('input-litres-v3').disabled = true;"> ⛽ Plein Complet</label>
                     <label style="display: flex; align-items: center; gap: 5px;">
                         <input type="radio" name="fuel-mode-v3" id="rad-partial-v3" onclick="document.getElementById('input-litres-v3').disabled = false;"> 📥 Ajouter (L) :
@@ -275,6 +287,10 @@
                     <button class="car-number-link lbl-v4" onclick="navigateToPage('page-v4', 'nav-v4')">#40</button>
                     <span id="badge-v4" class="car-status-badge badge-piste">En Piste</span>
                 </div>
+                <div style="display: flex; justify-content: space-between; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
+                    <div><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span><strong id="fleet-pos-v4" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong></div>
+                    <div style="text-align: right;"><span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span><strong id="fleet-best-v4" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong></div>
+                </div>
                 <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v4" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
                 <div class="fuel-display-box">
                     <div id="fuel-val-v4" class="fuel-main-value">42.0L</div>
@@ -282,7 +298,7 @@
                     <div id="predict-box-v4" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
                     <div class="fuel-bar-container"><div id="bar-v4" class="fuel-bar"></div></div>
                 </div>
-               <div id="opt-box-v4" class="pit-options-box">
+                <div id="opt-box-v4" class="pit-options-box">
                     <label><input type="radio" name="fuel-mode-v4" id="rad-full-v4" checked onclick="document.getElementById('input-litres-v4').disabled = true;"> ⛽ Plein Complet</label>
                     <label style="display: flex; align-items: center; gap: 5px;">
                         <input type="radio" name="fuel-mode-v4" id="rad-partial-v4" onclick="document.getElementById('input-litres-v4').disabled = false;"> 📥 Ajouter (L) :
@@ -299,18 +315,17 @@
             </div>
         </div>
         <div id="rc-message-paddock" class="col-12" style="background-color: #EAB308; color: #000000; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; margin-bottom: -5px;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span>📢</span>
-        <span id="rc-text-content">RC_MESSAGE: En attente de synchronisation du paddock 4-RACE...</span>
-    </div>
-    <span id="rc-time-badge" style="font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 3px;">--:--:--</span>
-    </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span>📢</span>
+                <span id="rc-text-content">RC_MESSAGE: En attente de synchronisation du paddock 4-RACE...</span>
+            </div>
+            <span id="rc-time-badge" style="font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 3px;">--:--:--</span>
+        </div>
         <div class="log-section col-12">
             <div class="card-title">Flux d'Événements Général Écurie - LIVE CLOUD</div>
             <div style="overflow-x: auto; max-height: 200px;"><table><thead><tr><th>Heure</th><th>Voiture</th><th>Action</th><th>Carburant</th><th>Piste</th></tr></thead><tbody id="fleetLogBody"></tbody></table></div>
         </div>
     </div>
-
     <div id="page-intel" class="page-content grid">
         <div class="card col-4">
             <div class="card-title">🕵️ Enregistrer un Arrêt Concurrent</div>
