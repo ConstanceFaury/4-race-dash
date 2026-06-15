@@ -153,13 +153,16 @@
         <div>
             <h1>Timing Dash <span class="logo-4">4</span><span class="logo-race">-RACE</span> <span class="logo-sub">CLASSIC AND RACING CARS SERVICES // LIVE TRACK SYNC</span></h1>
         </div>
-        <div class="controls-top">
+       <div class="controls-top">
             <select id="weatherStateSelect" class="weather-select-top" onchange="dbChangeWeatherState(this.value)">
                 <option value="sec" selected>☀️ SEC</option>
                 <option value="pluie_moderee">🌧️ PLUIE MODÉRÉE (-10%)</option>
                 <option value="forte_pluie">⛈️ FORTE PLUIE</option>
             </select>
             <div id="trackState" class="track-status" onclick="dbToggleTrackState()">🟢 Piste Dégagée</div>
+            
+            <div id="redFlagState" style="padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: #222; color: #ef4444; border: 1px solid #ef4444; cursor: pointer; font-size: 13px;" onclick="dbToggleRedFlag()">🔴 SC / DRAPEAU ROUGE</div>
+            
             <div class="reset-status" onclick="dbResetEntireRace()">🔄 Reset Nouvelle Course</div>
         </div>
     </header>
@@ -646,6 +649,18 @@
                 window.updateRaceControlBanner(msg, tStr);
             }
         };
+        window.dbToggleRedFlag = function() {
+            window.isRedFlag = !window.isRedFlag;
+            const msg = window.isRedFlag ? "🔴 DRAPEAU ROUGE / INTERRUPTION DE COURSE - INTERDICTION DE SORTIR DES STANDS !" : "🟢 FIN DU DRAPEAU ROUGE - PRÉPARATION À LA RELANCE";
+            
+            // Envoi de l'état au Cloud Firebase
+            update(ref(db, 'race_state'), { isRedFlag: window.isRedFlag });
+            
+            const tStr = new Date().toLocaleTimeString('fr-FR');
+            if (typeof window.updateRaceControlBanner === "function") {
+                window.updateRaceControlBanner(msg, tStr);
+            }
+        };
 
         // GESTION MULTI-ÉTATS DE LA MÉTÉO SUR FIREBASE
       window.dbChangeWeatherState = function(valeurMeteo) {
@@ -745,7 +760,20 @@
             }
 
             window.isFCY = data.isFCY;
-            
+            window.isRedFlag = data.isRedFlag || false; // 🔴 Récupération du drapeau rouge
+
+                // Mise à jour visuelle du bouton Drapeau Rouge
+                const btnRed = document.getElementById('redFlagState');
+                if (btnRed) {
+                    btnRed.innerText = window.isRedFlag ? "🚨 DRAPEAU ROUGE ACTIF" : "🔴 DRAPEAU ROUGE";
+                    btnRed.style.backgroundColor = window.isRedFlag ? "#ef4444" : "#222";
+                    btnRed.style.color = window.isRedFlag ? "#000000" : "#ef4444";
+                    if (window.isRedFlag) {
+                        btnRed.style.animation = "blink 0.8s infinite";
+                    } else {
+                        btnRed.style.animation = "none";
+                    }
+                }
             // 📢 GESTION EN DIRECT DU BANDEAU DE LA DIRECTION DE COURSE (RC_MESSAGE)
             if (data.rc_comment) {
                 document.getElementById("rc-text-content").innerText = "RC_MESSAGE: " + data.rc_comment;
