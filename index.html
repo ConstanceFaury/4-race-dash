@@ -1223,6 +1223,9 @@
   // =======================================================================
         // 👤 GESTION ET PROPAGATION DES ÉQUIPAGES (PROPRE ET ATTACHÉE À WINDOW)
         // =======================================================================
+// =======================================================================
+        // 👤 GESTION ET PROPAGATION DES ÉQUIPAGES (VERSION VERROUILLÉE ET CORRIGÉE)
+        // =======================================================================
         window.applyGlobalCustomizationLocal = function() {
             for (let id in window.fleetState) {
                 // Sécurisation avec gestion de secours si l'interface met du temps à charger au démarrage
@@ -1279,9 +1282,9 @@
         };
 
         // =======================================================================
-        // 🧮 MODULE DE DEBRIEFING FLASH CONSO (GLOBALISÉ POUR SÉCURISER LES CLIQUES)
+        // 🧮 MODULE DE DEBRIEFING FLASH CONSO INDÉPENDANT ET EXPORTÉ AU NAVIGATEUR
         // =======================================================================
-        window.dernierCalculParVoiture = {};
+        window.dernierCalculParVoiture = window.dernierCalculParVoiture || {};
 
         window.executerCalculFlashVoiture = function(id) {
             const essenceBrulee = parseFloat(document.getElementById(`input-flash-litres-${id}`).value) || 0;
@@ -1298,7 +1301,6 @@
             }
 
             // Calcul des tours équivalents SEC (Application de tes facteurs de réduction exacts)
-            // Sec = 1.0 | Pluie modérée = 0.80 | Forte pluie (Déluge) = 0.40 | FCY = 0.50
             const toursEquivalentsSec = (tSec * 1.0) + (tPluie * 0.80) + (tDeluge * 0.40) + (tFcy * 0.50);
 
             // Détermination de la conso de référence sur le Sec
