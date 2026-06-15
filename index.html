@@ -780,6 +780,29 @@
                     localCar.rotation = cloudCar.rotation;
                     localCar.conso = cloudCar.conso;
 
+                    // 🚨 AXE OPTIMISATION : CALCUL DE L'HEURE DE FIN DE RELAIS AU PRORATA DU PIVOT CIRCUIT
+                    const currentConso = cloudCar.conso[cloudCar.rotation[0]][window.weatherMode] || cloudCar.conso[cloudCar.rotation[0]]["sec"];
+                    const toursRestants = Math.floor(cloudCar.fuel / currentConso);
+                    const elTargetTime = document.getElementById(`target-time-${id}`);
+
+                    if (toursRestants > 0 && elTargetTime) {
+                        const refSec = parseFloat(data.track_ref_sec) || 185.0;
+                        const refPluie = parseFloat(data.track_ref_pluie) || 205.0;
+                        const tempsReferenceTour = (window.weatherMode === "sec") ? refSec : refPluie;
+
+                        // Ajout du temps restant en millisecondes à l'heure courante du PC
+                        const tempsTotalRestantMS = toursRestants * tempsReferenceTour * 1000;
+                        const heureCible = new Date(Date.now() + tempsTotalRestantMS);
+
+                        const hh = String(heureCible.getHours()).padStart(2, '0');
+                        const mm = String(heureCible.getMinutes()).padStart(2, '0');
+                        const ss = String(heureCible.getSeconds()).padStart(2, '0');
+
+                        elTargetTime.innerText = `🚨 STOP ESTIMÉ : ${hh}:${mm}:${ss}`;
+                    } else if (elTargetTime) {
+                        elTargetTime.innerText = "🚨 PANNE IMMINENTE";
+                    }
+
                     document.getElementById(`setup-${id}`).value = cloudCar.carNumInput;
                     document.getElementById(`fleet-pos-${id}`).innerText = cloudCar.position || "-";
                     document.getElementById(`fleet-best-${id}`).innerText = cloudCar.bestLap || "--:--.---";
@@ -1054,7 +1077,25 @@
                     tbody.innerHTML += `<tr><td><strong>Relais ${i+1}</strong></td><td>${window.pilotsDatabase[id][pIdx]}</td><td>~ ${l} tours (Fin au Tour ${trackerLap})</td><td>${i===0?car.fuel.toFixed(1)+' L restants':'Plein ('+fuelMaxSetting+' L)'}</td></tr>`;
                 }
             }
-        }
+            // 🚨 AJOUT OPTIMISATION DANS LA STRATÉGIE LOCAL INTERFACE
+            const elTargetLocal = document.getElementById(`target-time-${id}`);
+            if (lapsLeft > 0 && elTargetLocal) {
+                // Secours Spa si les variables Cloud ne sont pas encore instanciées en local
+                const refSec = 185.0; 
+                const tempsReferenceTour = refSec; 
+
+                const tempsTotalRestantMS = lapsLeft * tempsReferenceTour * 1000;
+                const heureCible = new Date(Date.now() + tempsTotalRestantMS);
+                
+                const hh = String(heureCible.getHours()).padStart(2, '0');
+                const mm = String(heureCible.getMinutes()).padStart(2, '0');
+                const ss = String(heureCible.getSeconds()).padStart(2, '0');
+                
+                elTargetLocal.innerText = `🚨 STOP ESTIMÉ : ${hh}:${mm}:${ss}`;
+            } else if (elTargetLocal) {
+                elTargetLocal.innerText = "🚨 PANNE IMMINENTE";
+            }
+        } // Fin de la fonction updateCarStrategyLocal
 
         function rebuildIntelTableLocal() {
             const tbody = document.getElementById("intelTableBody"); tbody.innerHTML = "";
