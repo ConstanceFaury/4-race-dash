@@ -1358,7 +1358,7 @@
         // 4. LOGIQUE DU PADDOCK MODE (VERROUILLAGE ABSOLU ÉCRAN BOX / MURET)
         // =======================================================================
         window.isReadOnlyMode = false;
-
+        
         window.togglePaddockMode = function() {
             window.isReadOnlyMode = !window.isReadOnlyMode;
             
@@ -1369,10 +1369,11 @@
                 '.btn-quick, .btn-action, .btn-calculator, input, select'
             );
             
-            // 2. On cible spécifiquement les commandes stratégiques du Header (FCY, Météo, Reset)
+            // 2. On cible spécifiquement les commandes stratégiques du Header (FCY, Météo, Reset, Drapeau Rouge)
             const headerFCY = document.getElementById("trackState");
             const headerReset = document.querySelector(".reset-status");
             const headerMeteo = document.getElementById("weatherStateSelect");
+            const headerRedFlag = document.getElementById("redFlagState"); // 🔴 AJOUT : Ciblage du bouton Drapeau Rouge
             
             if (window.isReadOnlyMode) {
                 // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
@@ -1393,7 +1394,7 @@
                     }
                 });
                 
-                // Verrouillage sécurité du header (FCY, Reset, Météo)
+                // Verrouillage sécurité du header (FCY, Reset, Météo, Drapeau Rouge)
                 if (headerFCY) {
                     headerFCY.style.pointerEvents = "none"; // Rend le bouton incliquable
                     headerFCY.style.opacity = "0.6";        // Effet visuel désactivé
@@ -1405,8 +1406,13 @@
                 if (headerMeteo) {
                     headerMeteo.disabled = true; // Bloque le menu déroulant météo à 3 états
                 }
+                if (headerRedFlag) {
+                    // 🔴 SÉCURITÉ : Bloque le bouton Drapeau Rouge en mode lecture
+                    headerRedFlag.style.pointerEvents = "none";
+                    headerRedFlag.style.opacity = "0.4";
+                }
                 
-                console.log("🔒 Paddock Mode activé : FCY, Météo, Reset et commandes verrouillés.");
+                print("🔒 Paddock Mode activé : FCY, Météo, Reset, Drapeau Rouge et commandes verrouillés.");
             } else {
                 // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
                 if (btnMode) {
@@ -1436,8 +1442,13 @@
                 if (headerMeteo) {
                     headerMeteo.disabled = false;
                 }
+                if (headerRedFlag) {
+                    // 🔓 Réactivation du bouton Drapeau Rouge pour le muret
+                    headerRedFlag.style.pointerEvents = "auto";
+                    headerRedFlag.style.opacity = "1";
+                }
                 
-                console.log("🔓 Mode Administrateur activé : Toutes les commandes muret sont disponibles.");
+                print("🔓 Mode Administrator activé : Toutes les commandes muret sont disponibles.");
             }
         };
     </script>
