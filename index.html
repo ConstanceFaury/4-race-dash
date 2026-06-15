@@ -482,7 +482,12 @@
     </div>
 
     <div id="car-pages-container">
-        <div class="card col-4" style="border: 1px solid #4f5d6c;">
+        <!-- =======================================================================
+             🏎️ PAGE VOITURE 1 : #531
+             ======================================================================= -->
+        <div id="page-v1" class="page-content grid">
+            <!-- 📊 FICHE CONSOS NETTOYÉE & CALCULATEUR FLASH - #531 -->
+            <div class="card col-4" style="border: 1px solid #4f5d6c;">
                 <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v1">#531</span></div>
                 <div class="config-row">
                     <div class="config-group"><label class="p1_v1">Pilote 1</label><input type="number" id="c_v1_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
@@ -493,13 +498,14 @@
                     <div class="config-group"><label class="p4_v1">Pilote 4</label><input type="number" id="c_v1_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
                 </div>
 
+                <!-- 🧮 CALCULATEUR FLASH RELAIS EMBARQUÉ -->
                 <div style="background-color: #1a252f; border-radius: 6px; padding: 10px; border: 1px solid #34495e;">
                     <div style="color: #00bc8c; font-weight: bold; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>🧮 DEBRIEF FLASH CONSO</span>
                         <span id="flash-result-v1" style="color: #f39c12; font-family: monospace;">--.- L/tr</span>
                     </div>
                     <div class="mb-2">
-                        <select id="select-flash-pilote-v1" class="form-select form-select-sm" style="background-color: #2c3e50; color: #fff; border: 1px solid #4b6584; font-size: 11px; width: 100%; padding: 4px;">
+                        <select id="select-flash-pilote-v1" class="form-select form-select-sm" style="background-color: #2c3e50; color: #fff; border: 1px solid #4b6584; font-size: 11px; width: 100%; padding: 4px; border-radius: 4px;">
                             <option value="1" class="p1_v1">Pilote 1</option>
                             <option value="2" class="p2_v1">Pilote 2</option>
                             <option value="3" class="p3_v1">Pilote 3</option>
@@ -507,13 +513,13 @@
                         </select>
                     </div>
                     <div class="mb-2">
-                        <input type="number" id="input-flash-litres-v1" class="form-control form-control-sm" step="0.01" placeholder="Essence brûlée (L)" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; font-size: 11px; width: 100%; padding: 4px;">
+                        <input type="number" id="input-flash-litres-v1" class="form-control form-control-sm" step="0.01" placeholder="Essence brûlée (L)" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; font-size: 11px; width: 100%; padding: 4px; border-radius: 4px;">
                     </div>
                     <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 2px 0;">
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #00bc8c; text-align: center;">SEC</label><input type="number" id="input-flash-sec-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #3498db; text-align: center;">PLUIE</label><input type="number" id="input-flash-pluie-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #9b59b6; text-align: center;">DÉLUGE</label><input type="number" id="input-flash-deluge-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #f1c40f; text-align: center;">FCY</label><input type="number" id="input-flash-fcy-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #00bc8c; text-align: center; font-weight: bold;">SEC</label><input type="number" id="input-flash-sec-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #3498db; text-align: center; font-weight: bold;">PLUIE</label><input type="number" id="input-flash-pluie-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #9b59b6; text-align: center; font-weight: bold;">DÉLUGE</label><input type="number" id="input-flash-deluge-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #f1c40f; text-align: center; font-weight: bold;">FCY</label><input type="number" id="input-flash-fcy-v1" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
                     </div>
                     <div style="margin-top: 8px; display: flex; gap: 4px;">
                         <button type="button" onclick="executerCalculFlashVoiture('v1')" style="flex: 1; font-weight: bold; font-size: 10px; background-color: #e67e22; border: none; color: #fff; padding: 5px 0; border-radius: 4px; cursor: pointer;">🧮 CALCULER</button>
@@ -521,6 +527,7 @@
                     </div>
                 </div>
             </div>
+            
             <div class="card col-4">
                 <div class="card-title">📋 Rotation des Prochains Relais</div>
                 <div class="config-row">
@@ -535,7 +542,11 @@
             <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v1"></tbody></table></div>
         </div>
 
+        <!-- =======================================================================
+             🏎️ PAGE VOITURE 2 : #183
+             ======================================================================= -->
         <div id="page-v2" class="page-content grid">
+            <!-- 📊 FICHE CONSOS NETTOYÉE & CALCULATEUR FLASH - #183 -->
             <div class="card col-4" style="border: 1px solid #4f5d6c;">
                 <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v2">#183</span></div>
                 <div class="config-row">
@@ -547,13 +558,14 @@
                     <div class="config-group"><label class="p4_v2">Pilote 4</label><input type="number" id="c_v2_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
                 </div>
 
+                <!-- 🧮 CALCULATEUR FLASH RELAIS EMBARQUÉ -->
                 <div style="background-color: #1a252f; border-radius: 6px; padding: 10px; border: 1px solid #34495e;">
                     <div style="color: #00bc8c; font-weight: bold; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>🧮 DEBRIEF FLASH CONSO</span>
                         <span id="flash-result-v2" style="color: #f39c12; font-family: monospace;">--.- L/tr</span>
                     </div>
                     <div class="mb-2">
-                        <select id="select-flash-pilote-v2" class="form-select form-select-sm" style="background-color: #2c3e50; color: #fff; border: 1px solid #4b6584; font-size: 11px; width: 100%; padding: 4px;">
+                        <select id="select-flash-pilote-v2" class="form-select form-select-sm" style="background-color: #2c3e50; color: #fff; border: 1px solid #4b6584; font-size: 11px; width: 100%; padding: 4px; border-radius: 4px;">
                             <option value="1" class="p1_v2">Pilote 1</option>
                             <option value="2" class="p2_v2">Pilote 2</option>
                             <option value="3" class="p3_v2">Pilote 3</option>
@@ -561,13 +573,13 @@
                         </select>
                     </div>
                     <div class="mb-2">
-                        <input type="number" id="input-flash-litres-v2" class="form-control form-control-sm" step="0.01" placeholder="Essence brûlée (L)" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; font-size: 11px; width: 100%; padding: 4px;">
+                        <input type="number" id="input-flash-litres-v2" class="form-control form-control-sm" step="0.01" placeholder="Essence brûlée (L)" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; font-size: 11px; width: 100%; padding: 4px; border-radius: 4px;">
                     </div>
                     <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 2px 0;">
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #00bc8c; text-align: center;">SEC</label><input type="number" id="input-flash-sec-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #3498db; text-align: center;">PLUIE</label><input type="number" id="input-flash-pluie-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #9b59b6; text-align: center;">DÉLUGE</label><input type="number" id="input-flash-deluge-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #f1c40f; text-align: center;">FCY</label><input type="number" id="input-flash-fcy-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #00bc8c; text-align: center; font-weight: bold;">SEC</label><input type="number" id="input-flash-sec-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #3498db; text-align: center; font-weight: bold;">PLUIE</label><input type="number" id="input-flash-pluie-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #9b59b6; text-align: center; font-weight: bold;">DÉLUGE</label><input type="number" id="input-flash-deluge-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #f1c40f; text-align: center; font-weight: bold;">FCY</label><input type="number" id="input-flash-fcy-v2" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
                     </div>
                     <div style="margin-top: 8px; display: flex; gap: 4px;">
                         <button type="button" onclick="executerCalculFlashVoiture('v2')" style="flex: 1; font-weight: bold; font-size: 10px; background-color: #e67e22; border: none; color: #fff; padding: 5px 0; border-radius: 4px; cursor: pointer;">🧮 CALCULER</button>
@@ -575,8 +587,7 @@
                     </div>
                 </div>
             </div>
-                <button class="btn-calculator" onclick="runLiveInjection('v2')">⚡ Calculer & Injecter</button>
-            </div>
+            
             <div class="card col-4">
                 <div class="card-title">📋 Rotation des Prochains Relais</div>
                 <div class="config-row">
@@ -591,8 +602,12 @@
             <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v2"></tbody></table></div>
         </div>
 
+        <!-- =======================================================================
+             🏎️ PAGE VOITURE 3 : #156
+             ======================================================================= -->
         <div id="page-v3" class="page-content grid">
-          <div class="card col-4" style="border: 1px solid #4f5d6c;">
+            <!-- 📊 FICHE CONSOS NETTOYÉE & CALCULATEUR FLASH - #156 -->
+            <div class="card col-4" style="border: 1px solid #4f5d6c;">
                 <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v3">#156</span></div>
                 <div class="config-row">
                     <div class="config-group"><label class="p1_v3">Pilote 1</label><input type="number" id="c_v3_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
@@ -603,6 +618,7 @@
                     <div class="config-group"><label class="p4_v3">Pilote 4</label><input type="number" id="c_v3_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
                 </div>
 
+                <!-- 🧮 CALCULATEUR FLASH RELAIS EMBARQUÉ -->
                 <div style="background-color: #1a252f; border-radius: 6px; padding: 10px; border: 1px solid #34495e;">
                     <div style="color: #00bc8c; font-weight: bold; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>🧮 DEBRIEF FLASH CONSO</span>
@@ -646,8 +662,12 @@
             <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v3"></tbody></table></div>
         </div>
 
+        <!-- =======================================================================
+             🏎️ PAGE VOITURE 4 : #40
+             ======================================================================= -->
         <div id="page-v4" class="page-content grid">
-           <div class="card col-4" style="border: 1px solid #4f5d6c;">
+            <!-- 📊 FICHE CONSOS NETTOYÉE & CALCULATEUR FLASH - #40 -->
+            <div class="card col-4" style="border: 1px solid #4f5d6c;">
                 <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v4">#40</span></div>
                 <div class="config-row">
                     <div class="config-group"><label class="p1_v4">Pilote 1</label><input type="number" id="c_v4_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
@@ -658,13 +678,14 @@
                     <div class="config-group"><label class="p4_v4">Pilote 4</label><input type="number" id="c_v4_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
                 </div>
 
+                <!-- 🧮 CALCULATEUR FLASH RELAIS EMBARQUÉ -->
                 <div style="background-color: #1a252f; border-radius: 6px; padding: 10px; border: 1px solid #34495e;">
                     <div style="color: #00bc8c; font-weight: bold; font-size: 11px; display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>🧮 DEBRIEF FLASH CONSO</span>
                         <span id="flash-result-v4" style="color: #f39c12; font-family: monospace;">--.- L/tr</span>
                     </div>
                     <div class="mb-2">
-                        <select id="select-flash-pilote-v4" class="form-select form-select-sm" style="background-color: #2c3e50; color: #fff; border: 1px solid #4b6584; font-size: 11px; width: 100%; padding: 4px;">
+                        <select id="select-flash-pilote-v4" class="form-select form-select-sm" style="background-color: #2c3e50; color: #fff; border: 1px solid #4b6584; font-size: 11px; width: 100%; padding: 4px; border-radius: 4px;">
                             <option value="1" class="p1_v4">Pilote 1</option>
                             <option value="2" class="p2_v4">Pilote 2</option>
                             <option value="3" class="p3_v4">Pilote 3</option>
@@ -672,13 +693,13 @@
                         </select>
                     </div>
                     <div class="mb-2">
-                        <input type="number" id="input-flash-litres-v4" class="form-control form-control-sm" step="0.01" placeholder="Essence brûlée (L)" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; font-size: 11px; width: 100%; padding: 4px;">
+                        <input type="number" id="input-flash-litres-v4" class="form-control form-control-sm" step="0.01" placeholder="Essence brûlée (L)" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; font-size: 11px; width: 100%; padding: 4px; border-radius: 4px;">
                     </div>
                     <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 2px 0;">
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #00bc8c; text-align: center;">SEC</label><input type="number" id="input-flash-sec-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #3498db; text-align: center;">PLUIE</label><input type="number" id="input-flash-pluie-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #9b59b6; text-align: center;">DÉLUGE</label><input type="number" id="input-flash-deluge-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #f1c40f; text-align: center;">FCY</label><input type="number" id="input-flash-fcy-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #00bc8c; text-align: center; font-weight: bold;">SEC</label><input type="number" id="input-flash-sec-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #3498db; text-align: center; font-weight: bold;">PLUIE</label><input type="number" id="input-flash-pluie-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #9b59b6; text-align: center; font-weight: bold;">DÉLUGE</label><input type="number" id="input-flash-deluge-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
+                        <div style="display: table-cell; width: 25%;"><label style="font-size: 8px; display: block; color: #f1c40f; text-align: center; font-weight: bold;">FCY</label><input type="number" id="input-flash-fcy-v4" value="0" min="0" style="background-color: #000; color: #fff; border: 1px solid #444; text-align: center; width: 100%; font-size: 11px; border-radius: 4px;"></div>
                     </div>
                     <div style="margin-top: 8px; display: flex; gap: 4px;">
                         <button type="button" onclick="executerCalculFlashVoiture('v4')" style="flex: 1; font-weight: bold; font-size: 10px; background-color: #e67e22; border: none; color: #fff; padding: 5px 0; border-radius: 4px; cursor: pointer;">🧮 CALCULER</button>
@@ -686,6 +707,7 @@
                     </div>
                 </div>
             </div>
+            
             <div class="card col-4">
                 <div class="card-title">📋 Rotation des Prochains Relais</div>
                 <div class="config-row">
@@ -699,7 +721,7 @@
             </div>
             <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v4"></tbody></table></div>
         </div>
-    </div>
+    </div> <!-- Fin car-pages-container -->
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
