@@ -404,6 +404,11 @@
             </div>
         </div>
 
+        <div class="card col-12" style="padding: 15px; text-align: center;">
+            <button type="button" onclick="window.modifierFlotteVisuelle(true)" style="background-color: #22C55E; color: #000; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">➕ AFFICHER</button>
+            <button type="button" onclick="window.modifierFlotteVisuelle(false)" style="background-color: #EF4444; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">❌ MASQUER</button>
+        </div>
+
         <div class="card col-12" style="border: 1px solid #222;">
             <div class="card-title" style="color: var(--4race-white);">👤 Gestion des Équipages (4 Pilotes Distincts par Voiture)</div>
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
@@ -1089,21 +1094,25 @@
     </script>
 
     <script>
-        window.carIdMapping = { "v1": "531", "v2": "183", "v3": "156", "v4": "40" };
+        window.carIdMapping = { "v1": "531", "v2": "183", "v3": "156", "v4": "40", "v5": "05", "v6": "06" };
         window.pilotsDatabase = {
             "v1": { "1": "Alex", "2": "Hugo", "3": "Max", "4": "Yanis" },
             "v2": { "1": "Thomas", "2": "Loïc", "3": "Antoine", "4": "Séb" },
             "v3": { "1": "Julien", "2": "Romain", "3": "Nico", "4": "Mathieu" },
-            "v4": { "1": "Arthur", "2": "Pierre", "3": "Dylan", "4": "Franck" }
+            "v4": { "1": "Arthur", "2": "Pierre", "3": "Dylan", "4": "Franck" },
+            "v5": { "1": "Pilote", "2": "Pilote", "3": "Pilote", "4": "Pilote" },
+            "v6": { "1": "Pilote", "2": "Pilote", "3": "Pilote", "4": "Pilote" }
         };
 
         window.fleetState = {
-            "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.10, forte_pluie:1.10}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
-            "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "4": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20} }, hasAlerted: false },
-            "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
-            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false }
+            "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
+            "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
+            "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
+            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
+            "v5": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
+            "v6": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false }
         };
-        
+     
         // =======================================================================
         // 1. BASE DE DONNÉES COMPLÈTE : SEC / PLUIE MODÉRÉE / FORTE PLUIE
         // =======================================================================
@@ -1731,6 +1740,64 @@
                 }
                 
                console.log("🔓 Mode Administrator activé : Toutes les commandes muret sont disponibles.");
+            }
+        };
+
+        window.carsVisiblesCompteur = 4; // Nombre par défaut au démarrage
+
+        window.modifierFlotteVisuelle = function(actionAjouter) {
+            if (actionAjouter && window.carsVisiblesCompteur < 6) {
+                window.carsVisiblesCompteur++;
+            } else if (!actionAjouter && window.carsVisiblesCompteur > 1) {
+                window.navigateToPage('page-fleet', 'nav-fleet');
+                window.carsVisiblesCompteur--;
+            } else return;
+
+            for (let i = 1; i <= 6; i++) {
+                const displayState = (i <= window.carsVisiblesCompteur) ? '' : 'none';
+                if(document.getElementById(`card-v${i}`)) document.getElementById(`card-v${i}`).style.display = displayState;
+                if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
+                if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
+                if(document.getElementById(`page-v${i}`)) document.getElementById(`page-v${i}`).style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
+            }
+            
+            const fleetGrid = document.querySelector(".fleet-grid");
+            if (fleetGrid) fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 3)}, 1fr)`;
+        };
+        
+        // =======================================================================
+        // 🔒 LOGIQUE DE MASQUAGE CHIRURGICAL (POUR 6 VOITURES MAX)
+        // =======================================================================
+        window.modifierFlotteVisuelle = function(actionAjouter) {
+            // Nombre de voitures que tu veux gérer (ici 6)
+            const MAX_VOITURES = 6;
+            
+            // On compte combien sont actuellement visibles (en regardant le style des cartes)
+            let visibles = 0;
+            for(let i = 1; i <= MAX_VOITURES; i++) {
+                const card = document.getElementById(`card-v${i}`);
+                if(card && card.style.display !== 'none') visibles++;
+            }
+
+            // Calcul du nouveau nombre
+            let nouveauNombre = actionAjouter ? (visibles + 1) : (visibles - 1);
+            if (nouveauNombre < 1) nouveauNombre = 1;
+            if (nouveauNombre > MAX_VOITURES) nouveauNombre = MAX_VOITURES;
+
+            // Application du masquage
+            for (let i = 1; i <= MAX_VOITURES; i++) {
+                const displayState = (i <= nouveauNombre) ? '' : 'none';
+                
+                if(document.getElementById(`card-v${i}`)) document.getElementById(`card-v${i}`).style.display = displayState;
+                if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
+                if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
+                if(document.getElementById(`page-v${i}`)) document.getElementById(`page-v${i}`).style.display = (i <= nouveauNombre) ? 'grid' : 'none';
+            }
+            
+            // Ajustement de la grille d'accueil
+            const fleetGrid = document.querySelector(".fleet-grid");
+            if (fleetGrid) {
+                fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(nouveauNombre, 4)}, 1fr)`;
             }
         };
     </script>
