@@ -175,7 +175,9 @@
         <button id="nav-v2" class="tab-btn" onclick="navigateToPage('page-v2', 'nav-v2')">🏎️ <span class="lbl-v2">#183</span></button>
         <button id="nav-v3" class="tab-btn" onclick="navigateToPage('page-v3', 'nav-v3')">🏎️ <span class="lbl-v3">#156</span></button>
         <button id="nav-v4" class="tab-btn" onclick="navigateToPage('page-v4', 'nav-v4')">🏎️ <span class="lbl-v4">#40</span></button>
-        
+        <button id="nav-v5" class="tab-btn" onclick="navigateToPage('page-v5', 'nav-v5')" style="display: none;">🏎️ <span class="lbl-v5">#05</span></button>
+        <button id="nav-v6" class="tab-btn" onclick="navigateToPage('page-v6', 'nav-v6')" style="display: none;">🏎️ <span class="lbl-v6">#06</span></button>
+     
         <button id="btn-paddock-mode" class="tab-btn" onclick="window.togglePaddockMode()" style="margin-left: auto; border: 1px solid #333; color: #fff; background-color: #1a1a1a;">🔓 Mode Administrateur</button>
     </nav>
 
@@ -1778,32 +1780,52 @@
             if (fleetGrid) fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 3)}, 1fr)`;
         };
         
+      // =======================================================================
+        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ (VERSION AUTO-APPLIQUÉE)
         // =======================================================================
-        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ
-        // =======================================================================
-        window.carsVisiblesCompteur = 4;
+        window.carsVisiblesCompteur = 4; // Définit le nombre de voitures au démarrage
 
+        // Cette fonction gère le compteur ET applique le style immédiatement
         window.modifierFlotteVisuelle = function(actionAjouter) {
             if (actionAjouter && window.carsVisiblesCompteur < 6) {
                 window.carsVisiblesCompteur++;
             } else if (!actionAjouter && window.carsVisiblesCompteur > 1) {
+                // Si on masque la page actuelle, on revient à la page flotte
                 window.navigateToPage('page-fleet', 'nav-fleet');
                 window.carsVisiblesCompteur--;
             } else return;
 
+            // Application immédiate du masquage
+            appliquerMasquageVisuel();
+        };
+
+        // Fonction séparée pour appliquer le style (appelée par modifierFlotteVisuelle)
+        window.appliquerMasquageVisuel = function() {
             for (let i = 1; i <= 6; i++) {
                 const displayState = (i <= window.carsVisiblesCompteur) ? '' : 'none';
+                
+                // Masquage/Affichage des éléments HTML
                 if(document.getElementById(`card-v${i}`)) document.getElementById(`card-v${i}`).style.display = displayState;
                 if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
                 if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
-                if(document.getElementById(`page-v${i}`)) document.getElementById(`page-v${i}`).style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
+                
+                // Masquage/Affichage de la page correspondante
+                const page = document.getElementById(`page-v${i}`);
+                if(page) page.style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
             }
             
+            // Ajustement dynamique de la grille d'accueil
             const fleetGrid = document.querySelector(".fleet-grid");
             if (fleetGrid) {
                 fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 4)}, 1fr)`;
             }
         };
+
+        // Initialisation : Applique le masquage au chargement de la page pour ne montrer que 4 voitures
+        window.addEventListener('load', () => {
+            window.carsVisiblesCompteur = 4;
+            window.appliquerMasquageVisuel();
+        });
     </script>
 </body>
 </html>
