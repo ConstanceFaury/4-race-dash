@@ -175,9 +175,7 @@
         <button id="nav-v2" class="tab-btn" onclick="navigateToPage('page-v2', 'nav-v2')">🏎️ <span class="lbl-v2">#183</span></button>
         <button id="nav-v3" class="tab-btn" onclick="navigateToPage('page-v3', 'nav-v3')">🏎️ <span class="lbl-v3">#156</span></button>
         <button id="nav-v4" class="tab-btn" onclick="navigateToPage('page-v4', 'nav-v4')">🏎️ <span class="lbl-v4">#40</span></button>
-        <button id="nav-v5" class="tab-btn" onclick="navigateToPage('page-v5', 'nav-v5')">🏎️ #05</button>
-        <button id="nav-v6" class="tab-btn" onclick="navigateToPage('page-v6', 'nav-v6')">🏎️ #06</button>
-            
+        
         <button id="btn-paddock-mode" class="tab-btn" onclick="window.togglePaddockMode()" style="margin-left: auto; border: 1px solid #333; color: #fff; background-color: #1a1a1a;">🔓 Mode Administrateur</button>
     </nav>
 
@@ -699,49 +697,6 @@
             </div>
             <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v4"></tbody></table></div>
         </div>
-        
-        <div id="page-v5" class="page-content grid" style="display: none;">
-            <div class="card col-4" style="border: 1px solid #4f5d6c;">
-                <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v5">#05</span></div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p1_v5">Pilote 1</label><input type="number" id="c_v5_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v5')"></div>
-                    <div class="config-group"><label class="p2_v5">Pilote 2</label><input type="number" id="c_v5_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v5')"></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p3_v5">Pilote 3</label><input type="number" id="c_v5_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v5')"></div>
-                    <div class="config-group"><label class="p4_v5">Pilote 4</label><input type="number" id="c_v5_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v5')"></div>
-                </div>
-            </div>
-        
-            <div class="card col-4" style="background-color: #141416; border: 1px solid #34495e;">
-                <div style="color: #00bc8c; font-weight: bold; font-size: 12px; margin-bottom: 12px; font-style: italic;">
-                    <span>🧮 DEBRIEF FLASH CONSO</span>
-                    <span id="flash-result-v5" style="color: #f39c12; font-family: monospace; float: right;">--.- L/tr</span>
-                </div>
-                <select id="select-flash-pilote-v5" class="form-select" style="width: 100%; padding: 8px; background: #0A0A0C; color: #fff;"></select>
-                <input type="number" id="input-flash-litres-v5" placeholder="Essence brûlée (L)" style="width: 100%; margin: 10px 0; padding: 8px; background: #0A0A0C; color: #fff; border: 1px solid #333;">
-                <button type="button" onclick="executerCalculFlashVoiture('v5')" class="btn-calculator">🧮 CALCULER</button>
-                <button type="button" id="btn-apply-flash-v5" onclick="injecterFlashDansVoiture('v5')" disabled class="btn-action" style="margin-top: 5px;">📥 INJECTER</button>
-            </div>
-        
-            <div class="card col-4">
-                <div class="card-title">📋 Rotation des Prochains Relais</div>
-                <div class="config-row"><div class="config-group"><label>Relais Actuel</label><select id="r_v5_1" onchange="saveCarConfig('v5')"></select></div><div class="config-group"><label>Relais N+1</label><select id="r_v5_2" onchange="saveCarConfig('v5')"></select></div></div>
-                <div class="config-row"><div class="config-group"><label>Relais N+2</label><select id="r_v5_3" onchange="saveCarConfig('v5')"></select></div><div class="config-group"><label>Relais N+3</label><select id="r_v5_4" onchange="saveCarConfig('v5')"></select></div></div>
-            </div>
-        
-            <div class="card col-12">
-                <div class="card-title">🔮 Planificateur Prédictif</div>
-                <table><thead><tr><th>Relais</th><th>Pilote</th><th>Autonomie</th><th>Carburant</th></tr></thead><tbody id="plan-body-v5"></tbody></table>
-            </div>
-        </div>
-
-        <div id="page-v6" class="page-content grid" style="display: none;">
-            <div class="card col-12">
-                <div class="card-title">🏎️ Configuration et Analyse Voiture 6 (<span class="lbl-v6">#06</span>)</div>
-                <p style="color: #666; font-style: italic;">Page en cours d'initialisation pour la V6.</p>
-            </div>
-        </div>
     </div>
 
     <script type="module">
@@ -1134,7 +1089,7 @@
     </script>
 
     <script>
-        window.carIdMapping = { "v1": "531", "v2": "183", "v3": "156", "v4": "40", "v5": "05", "v6": "06" };
+        window.carIdMapping = { "v1": "531", "v2": "183", "v3": "156", "v4": "40" };
         window.pilotsDatabase = {
             "v1": { "1": "Alex", "2": "Hugo", "3": "Max", "4": "Yanis" },
             "v2": { "1": "Thomas", "2": "Loïc", "3": "Antoine", "4": "Séb" },
