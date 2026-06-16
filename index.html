@@ -1281,7 +1281,7 @@
             }
 
             // Calcul des tours équivalents SEC (Application de tes facteurs de réduction exacts)
-            const toursEquivalentsSec = (tSec * 1.0) + (tPluie * 0.80) + (tDeluge * 0.40) + (tFcy * 0.50);
+            const toursEquivalentsSec = (tSec * 1.0) + (tPluie * 0.75) + (tFcy * 0.50) + (tDeluge * 0.40);
 
             // Détermination de la conso de référence sur le Sec
             const consoEtalonSec = essenceBrulee / toursEquivalentsSec;
@@ -1342,81 +1342,86 @@
                 alert(`❌ Erreur d'injection : Impossible de trouver la case d'ID "c_${id}_${piloteIdx}_sec".`);
             }
         };
-        function updateCarStrategyLocal(id) {
-            const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
-            const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
-            const fcyCoeff = parseFloat(document.getElementById("setup-fcyCoeff").value);
-            const alertLimit = parseInt(document.getElementById("setup-alertLimit").value);
+     function updateCarStrategyLocal(id) {
+    const car = window.fleetState[id]; 
+    const pilotIdx = car.rotation[0]; 
+    const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
+    const alertLimit = parseInt(document.getElementById("setup-alertLimit").value);
 
-            // Sélection dynamique de l'indice de consommation météo
-            let currentConso = 1.77;
-            if (car.conso[pilotIdx]) {
-                currentConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"];
+    // --- LOGIQUE HIÉRARCHIQUE DES COEFFICIENTS (SEC > PLUIE > FCY > DÉLUGE) ---
+    let facteurMeteo = 1.0; // SEC (1.0)
+    
+    if (window.weatherMode === "forte_pluie") {
+        facteurMeteo = 0.40; // DÉLUGE
+    } else if (window.isFCY && !car.isInsidePit) {
+        facteurMeteo = 0.50; // FCY
+    } else if (window.weatherMode === "pluie_moderee") {
+        facteurMeteo = 0.75; // PLUIE
+    }
+
+    // Calcul de la consommation réelle
+    let currentConso = 1.77;
+    if (car.conso[pilotIdx]) {
+        currentConso = (car.conso[pilotIdx]["sec"] || 1.77) * facteurMeteo;
+    }
+    // --------------------------------------------------------------------------
+
+    let lapsLeft = Math.floor(car.fuel / currentConso); if (lapsLeft < 0) lapsLeft = 0;
+    let targetStopLap = car.currentLap + lapsLeft;
+    document.getElementById(`predict-box-${id}`).innerText = `🎯 Arrêt idéal : Tour ${targetStopLap}`;
+
+    document.getElementById(`fleet-pilot-${id}`).innerText = window.pilotsDatabase[id][pilotIdx];
+    document.getElementById(`fuel-val-${id}`).innerText = car.fuel.toFixed(1) + "L";
+    document.getElementById(`laps-${id}`).innerText = lapsLeft;
+    
+    const cardEl = document.getElementById(`card-${id}`);
+    const badgeEl = document.getElementById(`badge-${id}`);
+
+    if(!car.isInsidePit) {
+        if (car.fuel <= 0.1) {
+            badgeEl.innerText = "Réservoir Vide"; badgeEl.className = "car-status-badge";
+            cardEl.className = "car-card";
+            car.hasAlerted = false;
+        } else if (lapsLeft <= alertLimit) {
+            badgeEl.innerText = "ALERTE ESSENCE"; badgeEl.className = "car-status-badge badge-alert-fuel";
+            cardEl.className = "car-card state-alert";
+            if (!car.hasAlerted && lapsLeft > 0) {
+                car.hasAlerted = true;
+                triggerRacePopup("fuel", "⚠️ ALERTE ESSENCE CRITIQUE", `La voiture #${window.carIdMapping[id]} (${window.pilotsDatabase[id][pilotIdx]}) n'a plus que ${lapsLeft} tours d'autonomie ! BOX CE TOUR !`);
             }
-            if (window.isFCY && !car.isInsidePit) currentConso *= fcyCoeff;
+        } else {
+            badgeEl.innerText = window.isFCY ? "FCY Slow" : (window.weatherMode !== "sec" ? "Piste Humide" : "En Piste");
+            badgeEl.className = window.isFCY ? "car-status-badge badge-fcy" : "car-status-badge badge-piste";
+            cardEl.className = window.isFCY ? "car-card state-fcy" : "car-card";
+            car.hasAlerted = false;
+        }
+    }
+    document.getElementById(`bar-${id}`).style.width = ((car.fuel / fuelMaxSetting) * 100) + '%';
 
-            let lapsLeft = Math.floor(car.fuel / currentConso); if (lapsLeft < 0) lapsLeft = 0;
-            let targetStopLap = car.currentLap + lapsLeft;
-            document.getElementById(`predict-box-${id}`).innerText = `🎯 Arrêt idéal : Tour ${targetStopLap}`;
-
-            document.getElementById(`fleet-pilot-${id}`).innerText = window.pilotsDatabase[id][pilotIdx];
-            document.getElementById(`fuel-val-${id}`).innerText = car.fuel.toFixed(1) + "L";
-            document.getElementById(`laps-${id}`).innerText = lapsLeft;
+    const tbody = document.getElementById(`plan-body-${id}`);
+    if(tbody) {
+        tbody.innerHTML = ""; let trackerLap = car.currentLap;
+        for(let i=0; i<4; i++) {
+            let pIdx = car.rotation[i]; 
+            // On réapplique la logique de calcul dans le planificateur aussi
+            let baseConso = car.conso[pIdx]["sec"] || 1.77;
+            let c = baseConso * facteurMeteo; 
             
-            const cardEl = document.getElementById(`card-${id}`);
-            const badgeEl = document.getElementById(`badge-${id}`);
-
-            if(!car.isInsidePit) {
-                if (car.fuel <= 0.1) {
-                    badgeEl.innerText = "Réservoir Vide"; badgeEl.className = "car-status-badge";
-                    cardEl.className = "car-card";
-                    car.hasAlerted = false;
-                } else if (lapsLeft <= alertLimit) {
-                    badgeEl.innerText = "ALERTE ESSENCE"; badgeEl.className = "car-status-badge badge-alert-fuel";
-                    cardEl.className = "car-card state-alert";
-                    if (!car.hasAlerted && lapsLeft > 0) {
-                        car.hasAlerted = true;
-                        triggerRacePopup("fuel", "⚠️ ALERTE ESSENCE CRITIQUE", `La voiture #${window.carIdMapping[id]} (${window.pilotsDatabase[id][pilotIdx]}) n'a plus que ${lapsLeft} tours d'autonomie ! BOX CE TOUR !`);
-                    }
-                } else {
-                    badgeEl.innerText = window.isFCY ? "FCY Slow" : "En Piste";
-                    badgeEl.className = window.isFCY ? "car-status-badge badge-fcy" : "car-status-badge badge-piste";
-                    cardEl.className = window.isFCY ? "car-card state-fcy" : "car-card";
-                    car.hasAlerted = false;
-                }
-            }
-            document.getElementById(`bar-${id}`).style.width = ((car.fuel / fuelMaxSetting) * 100) + '%';
-
-            const tbody = document.getElementById(`plan-body-${id}`);
-            if(tbody) {
-                tbody.innerHTML = ""; let trackerLap = car.currentLap;
-                for(let i=0; i<4; i++) {
-                    let pIdx = car.rotation[i]; 
-                    let c = car.conso[pIdx][window.weatherMode] || car.conso[pIdx]["sec"]; 
-                    if(i===0 && window.isFCY) c *= fcyCoeff;
-                    let l = (i===0) ? Math.floor(car.fuel / c) : Math.floor(fuelMaxSetting / c); trackerLap += l;
-                    tbody.innerHTML += `<tr><td><strong>Relais ${i+1}</strong></td><td>${window.pilotsDatabase[id][pIdx]}</td><td>~ ${l} tours (Fin au Tour ${trackerLap})</td><td>${i===0?car.fuel.toFixed(1)+' L restants':'Plein ('+fuelMaxSetting+' L)'}</td></tr>`;
-                }
-            }
-            // 🚨 AJOUT OPTIMISATION DANS LA STRATÉGIE LOCAL INTERFACE
-            const elTargetLocal = document.getElementById(`target-time-${id}`);
-            if (lapsLeft > 0 && elTargetLocal) {
-                // Secours Spa si les variables Cloud ne sont pas encore instanciées en local
-                const refSec = 185.0; 
-                const tempsReferenceTour = refSec; 
-
-                const tempsTotalRestantMS = lapsLeft * tempsReferenceTour * 1000;
-                const heureCible = new Date(Date.now() + tempsTotalRestantMS);
-                
-                const hh = String(heureCible.getHours()).padStart(2, '0');
-                const mm = String(heureCible.getMinutes()).padStart(2, '0');
-                const ss = String(heureCible.getSeconds()).padStart(2, '0');
-                
-                elTargetLocal.innerText = `🚨 STOP ESTIMÉ : ${hh}:${mm}:${ss}`;
-            } else if (elTargetLocal) {
-                elTargetLocal.innerText = "🚨 PANNE IMMINENTE";
-            }
-        } // Fin de la fonction updateCarStrategyLocal
+            let l = (i===0) ? Math.floor(car.fuel / c) : Math.floor(fuelMaxSetting / c); trackerLap += l;
+            tbody.innerHTML += `<tr><td><strong>Relais ${i+1}</strong></td><td>${window.pilotsDatabase[id][pIdx]}</td><td>~ ${l} tours (Fin au Tour ${trackerLap})</td><td>${i===0?car.fuel.toFixed(1)+' L restants':'Plein ('+fuelMaxSetting+' L)'}</td></tr>`;
+        }
+    }
+    
+    const elTargetLocal = document.getElementById(`target-time-${id}`);
+    if (lapsLeft > 0 && elTargetLocal) {
+        const refSec = 185.0; 
+        const tempsTotalRestantMS = lapsLeft * refSec * 1000;
+        const heureCible = new Date(Date.now() + tempsTotalRestantMS);
+        elTargetLocal.innerText = `🚨 STOP ESTIMÉ : ${String(heureCible.getHours()).padStart(2, '0')}:${String(heureCible.getMinutes()).padStart(2, '0')}:${String(heureCible.getSeconds()).padStart(2, '0')}`;
+    } else if (elTargetLocal) {
+        elTargetLocal.innerText = "🚨 PANNE IMMINENTE";
+    }
+}// Fin de la fonction updateCarStrategyLocal
 
         function rebuildIntelTableLocal() {
             const tbody = document.getElementById("intelTableBody"); tbody.innerHTML = "";
