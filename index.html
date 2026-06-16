@@ -145,6 +145,18 @@
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes flash-card { 0%, 100% { box-shadow: 0 0 4px rgba(239,68,68,0); } 50% { box-shadow: 0 0 20px rgba(239,68,68,0.5); background-color: #1c0a0a; } }
+        /* Animation de clignotement pour le Drapeau Rouge */
+        @keyframes clignotementRouge {
+            0% { border-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
+            50% { border-color: #1a1a1a; box-shadow: none; }
+            100% { border-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
+        }
+        
+        /* Classe dynamique appliquée aux cartes */
+        .car-card.state-red-flag {
+            border: 2px solid #ef4444 !important;
+            animation: clignotementRouge 1s infinite ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -161,7 +173,7 @@
             </select>
             <div id="trackState" class="track-status" onclick="dbToggleTrackState()">🟢 Piste Dégagée</div>
             
-            <div id="redFlagState" style="padding: 6px 15px; border-radius: 4px; font-weight: bold; text-transform: uppercase; background-color: #222; color: #ef4444; border: 1px solid #ef4444; cursor: pointer; font-size: 13px;" onclick="dbToggleRedFlag()">🔴 SC / DRAPEAU ROUGE</div>
+           <button id="redFlagState" onclick="window.toggleRedFlagSystem()">🚩 Drapeau Rouge</button>
             
             <div class="reset-status" onclick="dbResetEntireRace()">🔄 Reset Nouvelle Course</div>
         </div>
@@ -732,19 +744,29 @@
                 window.updateRaceControlBanner(msg, tStr);
             }
         };
-        window.dbToggleRedFlag = function() {
+     window.dbToggleRedFlag = function() {
             window.isRedFlag = !window.isRedFlag;
             const msg = window.isRedFlag ? "🔴 DRAPEAU ROUGE / INTERRUPTION DE COURSE - INTERDICTION DE SORTIR DES STANDS !" : "🟢 FIN DU DRAPEAU ROUGE - PRÉPARATION À LA RELANCE";
             
-            // Envoi de l'état au Cloud Firebase
+            // 📲 1. Envoi de l'état au Cloud Firebase
             update(ref(db, 'race_state'), { isRedFlag: window.isRedFlag });
             
+            // 🚨 2. AJOUT VISUEL : Clignotement des contours des tableaux de voitures
+            const carCards = document.querySelectorAll('.car-card');
+            carCards.forEach(card => {
+                if (window.isRedFlag) {
+                    card.classList.add('state-red-flag');
+                } else {
+                    card.classList.remove('state-red-flag');
+                }
+            });
+
+            // 📢 3. Mise à jour de la bannière Direction de Course
             const tStr = new Date().toLocaleTimeString('fr-FR');
             if (typeof window.updateRaceControlBanner === "function") {
                 window.updateRaceControlBanner(msg, tStr);
             }
         };
-
         // GESTION MULTI-ÉTATS DE LA MÉTÉO SUR FIREBASE
       window.dbChangeWeatherState = function(valeurMeteo) {
         let msgMeteo = "☀️ Piste sèche déclarée par le muret des stands.";
@@ -846,7 +868,7 @@
         };
 
 // =======================================================================
-        // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE (CORRIGÉE PLUS HAUT DANS LE CODE)
+        // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE (VERSION CORRIGÉE AVEC ALERTE COULEUR)
         // =======================================================================
         onValue(ref(db, 'race_state'), (snapshot) => {
             const data = snapshot.val();
@@ -863,6 +885,7 @@
             window.isFCY = data.isFCY || false;
             window.isRedFlag = data.isRedFlag || false;
 
+            // --- SYNCHRONISATION DU BOUTON ET DES CARTES DE DRAPEAU ROUGE ---
             const btnRed = document.getElementById('redFlagState');
             if (btnRed) {
                 btnRed.innerText = window.isRedFlag ? "🚨 DRAPEAU ROUGE ACTIF" : "🔴 DRAPEAU ROUGE";
@@ -870,6 +893,17 @@
                 btnRed.style.color = window.isRedFlag ? "#000000" : "#ef4444";
                 btnRed.style.animation = window.isRedFlag ? "blink 0.8s infinite" : "none";
             }
+
+            // Application immédiate du clignotement rouge sur toutes les cartes en direct du Cloud
+            const carCards = document.querySelectorAll('.car-card');
+            carCards.forEach(card => {
+                if (window.isRedFlag) {
+                    card.classList.add('state-red-flag');
+                } else {
+                    card.classList.remove('state-red-flag');
+                }
+            });
+            // ----------------------------------------------------------------
 
             if (data.rc_comment) document.getElementById("rc-text-content").innerText = "RC_MESSAGE: " + data.rc_comment;
             if (data.rc_time) document.getElementById("rc-time-badge").innerText = data.rc_time;
@@ -914,16 +948,16 @@
                         consoBase = parseFloat(localCar.conso[piloteActifIdx]["sec"]);
                     }
 
-                    // Application des coefficients météo automatiques
+                    // COHÉRENCE : Application des coefficients météo validés (0.75, 0.40)
                     let facteurMeteo = 1.0;
                     if (window.weatherMode === "pluie_moderee") {
-                        facteurMeteo = 0.80;
+                        facteurMeteo = 0.75; // Corrigé de 0.80 à 0.75
                     } else if (window.weatherMode === "forte_pluie") {
                         facteurMeteo = 0.40;
                     }
 
                     const consoStandardAjustee = consoBase * facteurMeteo;
-                    const consoFCY = consoBase * 0.50;
+                    const consoFCY = consoBase * 0.50; // Aligné avec ton coefficient FCY à 0.50
 
                     const isFcyActif = window.isFCY || false;
                     let consoAppliquee = isFcyActif ? consoFCY : consoStandardAjustee;
@@ -1013,7 +1047,6 @@
             const elAverageFleetHeader = document.getElementById("global-average-display");
             if (elAverageFleetHeader) elAverageFleetHeader.innerText = `${moyenneFinale.toFixed(2)} L`;
 
-            // ⚠️ CETTE LIGNE PEUT MAINTENANT S'EXÉCUTER SANS CRASHER !
             if (typeof window.applyGlobalCustomizationLocal === "function") {
                 window.applyGlobalCustomizationLocal();
             }
