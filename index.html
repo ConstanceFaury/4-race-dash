@@ -845,34 +845,48 @@ div.car-card.state-red-flag,
         };
 
         window.dbPushFullRaceState = function() {
-            const statePayload = {
-                weatherMode: window.weatherMode,
-                isFCY: window.isFCY,
-                enemyDatabase: window.enemyDatabase,
-                cars: {}
-            };
+    const statePayload = {
+        weatherMode: window.weatherMode,
+        isFCY: window.isFCY,
+        isRedFlag: window.isRedFlag || false,
+        enemyDatabase: window.enemyDatabase,
+        cars: {}
+    };
 
-            for (let id in window.fleetState) {
-                const car = window.fleetState[id];
-                statePayload.cars[id] = {
-                    fuel: car.fuel,
-                    currentLap: car.currentLap,
-                    isInsidePit: car.isInsidePit,
-                    pitSeconds: car.pitSeconds,
-                    hasAlerted: car.hasAlerted,
-                    rotation: car.rotation,
-                    conso: car.conso,
-                    carNumInput: document.getElementById(`setup-${id}`).value,
-                    pilotsInputs: {
-                        1: document.getElementById(`s_${id}_1`).value,
-                        2: document.getElementById(`s_${id}_2`).value,
-                        3: document.getElementById(`s_${id}_3`).value,
-                        4: document.getElementById(`s_${id}_4`).value
-                    }
-                };
+    for (let id in window.fleetState) {
+        const car = window.fleetState[id];
+        
+        // Construction des dictionnaires attendus par le script Python
+        const consoInputsPourPython = {};
+        const consoFcyInputsPourPython = {};
+        
+        for (let p = 1; p <= 4; p++) {
+            const baseSec = parseFloat(car.conso[p].sec) || 1.77;
+            consoInputsPourPython[String(p)] = baseSec;
+            consoFcyInputsPourPython[String(p)] = baseSec * 0.50; // Ton coefficient linéaire FCY à 50%
+        }
+
+        statePayload.cars[id] = {
+            fuel: car.fuel,
+            currentLap: car.currentLap,
+            isInsidePit: car.isInsidePit,
+            pitSeconds: car.pitSeconds,
+            hasAlerted: car.hasAlerted,
+            rotation: car.rotation,
+            conso: car.conso, // Gardé pour la boucle locale d'affichage HTML
+            consoInputs: consoInputsPourPython, // 🎯 LU PAR PYTHON !
+            consoFcyInputs: consoFcyInputsPourPython, // 🎯 LU PAR PYTHON !
+            carNumInput: document.getElementById(`setup-${id}`).value,
+            pilotsInputs: {
+                1: document.getElementById(`s_${id}_1`).value,
+                2: document.getElementById(`s_${id}_2`).value,
+                3: document.getElementById(`s_${id}_3`).value,
+                4: document.getElementById(`s_${id}_4`).value
             }
-            set(ref(db, 'race_state'), statePayload);
         };
+    }
+    set(ref(db, 'race_state'), statePayload);
+};
 
         window.dbLogLiveEventCloud = function(carNum, action, fuel, trackStateLabel) {
             const now = new Date();
@@ -1507,21 +1521,35 @@ window.executerCalculFlashVoiture = function(id) {
             else document.getElementById("globalMeanValue").innerText = "0.00 L";
         }
 
-        function triggerCarLap(id) {
-            const car = window.fleetState[id]; if (car.isInsidePit) return;
-            car.currentLap++; const pilotIdx = car.rotation[0];
-            let conso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"]; 
-            if(window.isFCY) conso *= parseFloat(document.getElementById("setup-fcyCoeff").value);
-            car.fuel = Math.max(0, car.fuel - conso);
-            
-            let labelLogMeteo = "VERT";
-            if(window.isFCY) labelLogMeteo = "🟨 FCY";
-            else if(window.weatherMode === "pluie_moderee") labelLogMeteo = "🌧️ PLUIE";
-            else if(window.weatherMode === "forte_pluie") labelLogMeteo = "⛈️ ORAGE";
+    function triggerCarLap(id) {
+    const car = window.fleetState[id]; 
+    if (car.isInsidePit) return;
+    
+    car.currentLap++; 
+    const pilotIdx = car.rotation[0];
+    
+    // Application de tes coefficients physiques linéaires en mode manuel
+    let facteurMeteo = 1.0;
+    if (window.weatherMode === "pluie_moderee") facteurMeteo = 0.75;
+    else if (window.weatherMode === "forte_pluie") facteurMeteo = 0.40;
+    
+    let conso = (car.conso[pilotIdx]["sec"] || 1.77) * facteurMeteo; 
+    
+    // Mode FCY manuel (coefficient à 50% aligné avec Python)
+    if (window.isFCY) {
+        conso = (car.conso[pilotIdx]["sec"] || 1.77) * 0.50;
+    }
+    
+    car.fuel = Math.max(0, car.fuel - conso);
+    
+    let labelLogMeteo = "VERT";
+    if (window.isFCY) labelLogMeteo = "🟨 FCY";
+    else if (window.weatherMode === "pluie_moderee") labelLogMeteo = "🌧️ PLUIE";
+    else if (window.weatherMode === "forte_pluie") labelLogMeteo = "⛈️ ORAGE";
 
-            window.dbLogLiveEventCloud(window.carIdMapping[id], `Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, labelLogMeteo);
-            window.dbPushFullRaceState();
-        }
+    window.dbLogLiveEventCloud(window.carIdMapping[id], `(MANUEL) Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, labelLogMeteo);
+    window.dbPushFullRaceState();
+}
 
         function enterCarPit(id) {
             const car = window.fleetState[id]; 
