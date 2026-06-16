@@ -358,6 +358,90 @@
                     <button id="btn-exit-v4" class="btn-quick btn-quick-exit" onclick="window.exitCarPit('v4')">🏎️ Repartie !</button>
                 </div>
             </div>
+            
+            <div id="card-v5" class="car-card">
+                <div class="car-header">
+                    <button class="car-number-link lbl-v5" onclick="navigateToPage('page-v5', 'nav-v5')">#531</button>
+                    <span id="badge-v5" class="car-status-badge badge-piste">En Piste</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
+                    <div>
+                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span>
+                        <strong id="fleet-pos-v5" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong>
+                    </div>
+                    
+                    <div style="text-align: right;">
+                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span>
+                        <strong id="fleet-best-v5" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong>
+                        <div style="font-size: 11px; color: #aaa; margin-top: 2px;">
+                            Δ : <span id="fleet-delta-v5" style="font-weight: bold; color: #ef4444;">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v5" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
+                <div class="fuel-display-box">
+                    <div id="fuel-val-v5" class="fuel-main-value">42.0L</div>
+                    <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v5" style="color:#fff;">-</strong></div>
+                    <div id="target-time-v5" style="font-size:11px; color:#FF4719; font-weight:600; margin-top:2px;">🚨 STOP ESTIMÉ : --:--:--</div> <div id="predict-box-v5" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
+                    <div class="fuel-bar-container"><div id="bar-v5" class="fuel-bar"></div></div>
+                </div>
+                <div id="opt-box-v5" class="pit-options-box">
+                    <label><input type="radio" name="fuel-mode-v5" id="rad-full-v5" checked onclick="document.getElementById('input-litres-v5').disabled = true;"> ⛽ Plein Complet</label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="fuel-mode-v5" id="rad-partial-v5" onclick="document.getElementById('input-litres-v5').disabled = false;"> 📥 Ajouter (L) :
+                        <input type="number" id="input-litres-v5" value="15" step="0.5" disabled style="width: 60px; padding: 2px; background: #222; border: 1px solid #444; color: #fff; text-align: center; border-radius: 3px;">
+                    </label>
+                    <label><input type="checkbox" id="chk-pilot-v5" checked> 👤 Chgt Pilote</label>
+                </div>
+                <div id="pit-timer-v5" class="pit-mini-timer">00:00.0</div>
+                <div class="car-actions">
+                    <button id="btn-lap-v5" class="btn-quick btn-quick-lap" onclick="triggerCarLap('v5')">Passage Ligne</button>
+                    <button id="btn-pit-v5" class="btn-quick btn-quick-pit" onclick="enterCarPit('v5')">📥 Entrée Stand</button>
+                    <button id="btn-exit-v5" class="btn-quick btn-quick-exit" onclick="window.exitCarPit('v5')">🏎️ Repartie !</button>
+                </div>
+            </div>
+            
+            <div id="card-v6" class="car-card">
+                <div class="car-header">
+                    <button class="car-number-link lbl-v6" onclick="navigateToPage('page-v6', 'nav-v6')">#531</button>
+                    <span id="badge-v6" class="car-status-badge badge-piste">En Piste</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
+                    <div>
+                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span>
+                        <strong id="fleet-pos-v6" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong>
+                    </div>
+                    
+                    <div style="text-align: right;">
+                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span>
+                        <strong id="fleet-best-v6" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong>
+                        <div style="font-size: 11px; color: #aaa; margin-top: 2px;">
+                            Δ : <span id="fleet-delta-v6" style="font-weight: bold; color: #ef4444;">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v6" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
+                <div class="fuel-display-box">
+                    <div id="fuel-val-v6" class="fuel-main-value">42.0L</div>
+                    <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v6" style="color:#fff;">-</strong></div>
+                    <div id="target-time-v6" style="font-size:11px; color:#FF4719; font-weight:600; margin-top:2px;">🚨 STOP ESTIMÉ : --:--:--</div> <div id="predict-box-v6" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
+                    <div class="fuel-bar-container"><div id="bar-v6" class="fuel-bar"></div></div>
+                </div>
+                <div id="opt-box-v6" class="pit-options-box">
+                    <label><input type="radio" name="fuel-mode-v6" id="rad-full-v6" checked onclick="document.getElementById('input-litres-v6').disabled = true;"> ⛽ Plein Complet</label>
+                    <label style="display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="fuel-mode-v6" id="rad-partial-v6" onclick="document.getElementById('input-litres-v6').disabled = false;"> 📥 Ajouter (L) :
+                        <input type="number" id="input-litres-v6" value="15" step="0.5" disabled style="width: 60px; padding: 2px; background: #222; border: 1px solid #444; color: #fff; text-align: center; border-radius: 3px;">
+                    </label>
+                    <label><input type="checkbox" id="chk-pilot-v6" checked> 👤 Chgt Pilote</label>
+                </div>
+                <div id="pit-timer-v6" class="pit-mini-timer">00:00.0</div>
+                <div class="car-actions">
+                    <button id="btn-lap-v6" class="btn-quick btn-quick-lap" onclick="triggerCarLap('v6')">Passage Ligne</button>
+                    <button id="btn-pit-v6" class="btn-quick btn-quick-pit" onclick="enterCarPit('v6')">📥 Entrée Stand</button>
+                    <button id="btn-exit-v6" class="btn-quick btn-quick-exit" onclick="window.exitCarPit('v6')">🏎️ Repartie !</button>
+                </div>
+            </div>
         </div>
         <div id="rc-message-paddock" class="col-12" style="background-color: #EAB308; color: #000000; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; margin-bottom: -5px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -765,7 +849,7 @@
 
                 remove(ref(db, 'logs'));
                 remove(ref(db, 'race_state')).then(() => {
-                    for(let id in window.fleetState) {
+                    for(let id in ) {
                         window.fleetState[id].fuel = fuelMaxSetting;
                         window.fleetState[id].currentLap = 0;
                         window.fleetState[id].isInsidePit = false;
@@ -1106,13 +1190,13 @@
             "v6": { "1": "Pilote", "2": "Pilote", "3": "Pilote", "4": "Pilote" }
         };
 
-        window.fleetState = {
-            "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
-            "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
-            "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
-            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
-            "v5": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false },
-            "v6": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, hasAlerted: false }
+      window.fleetState = {
+            "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.10, forte_pluie:1.10}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
+            "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "4": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20} }, hasAlerted: false },
+            "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
+            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
+            "v5": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
+            "v6": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false }
         };
      
         // =======================================================================
