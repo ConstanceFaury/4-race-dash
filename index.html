@@ -1266,44 +1266,36 @@
         // =======================================================================
         window.dernierCalculParVoiture = window.dernierCalculParVoiture || {};
 
-        window.executerCalculFlashVoiture = function(id) {
-            const essenceBrulee = parseFloat(document.getElementById(`input-flash-litres-${id}`).value) || 0;
-            const tSec = parseInt(document.getElementById(`input-flash-sec-${id}`).value) || 0;
-            const tPluie = parseInt(document.getElementById(`input-flash-pluie-${id}`).value) || 0;
-            const tDeluge = parseInt(document.getElementById(`input-flash-deluge-${id}`).value) || 0;
-            const tFcy = parseInt(document.getElementById(`input-flash-fcy-${id}`).value) || 0;
+window.executerCalculFlashVoiture = function(id) {
+    const essenceBrulee = parseFloat(document.getElementById(`input-flash-litres-${id}`).value) || 0;
+    const tSec = parseInt(document.getElementById(`input-flash-sec-${id}`).value) || 0;
+    const tPluie = parseInt(document.getElementById(`input-flash-pluie-${id}`).value) || 0;
+    const tDeluge = parseInt(document.getElementById(`input-flash-deluge-${id}`).value) || 0;
+    const tFcy = parseInt(document.getElementById(`input-flash-fcy-${id}`).value) || 0;
 
-            const totalTours = tSec + tPluie + tDeluge + tFcy;
+    const totalTours = tSec + tPluie + tDeluge + tFcy;
 
-            if (essenceBrulee <= 0 || totalTours === 0) {
-                alert("⚠️ Renseigne l'essence brûlée et les tours de ce châssis pour lancer le calcul !");
-                return;
-            }
+    if (essenceBrulee <= 0 || totalTours === 0) {
+        alert("⚠️ Renseigne l'essence brûlée et les tours !");
+        return;
+    }
 
-            // Calcul des tours équivalents SEC (Application de tes facteurs de réduction exacts)
-            const toursEquivalentsSec = (tSec * 1.0) + (tPluie * 0.75) + (tFcy * 0.50) + (tDeluge * 0.40);
+    // ICI : On applique les multiplicateurs de réduction pour obtenir les "tours équivalents SEC"
+    // SEC = 1.0 (Référence)
+    // PLUIE = 0.75 (Consomme 25% de moins qu'en SEC)
+    // FCY = 0.50 (Consomme 50% de moins qu'en SEC)
+    // DÉLUGE = 0.40 (Consomme 60% de moins qu'en SEC)
+    
+    const toursEquivalentsSec = (tSec * 1.0) + (tPluie * 0.75) + (tFcy * 0.50) + (tDeluge * 0.40);
 
-            // Détermination de la conso de référence sur le Sec
-            const consoEtalonSec = essenceBrulee / toursEquivalentsSec;
+    // Conso = Essence / Tours équivalents (Le résultat sera bien plus cohérent)
+    const consoEtalonSec = essenceBrulee / toursEquivalentsSec;
 
-            // Sauvegarde globale pour cette voiture précise
-            window.dernierCalculParVoiture[id] = consoEtalonSec;
-
-            // Mise à jour de l'affichage dans l'en-tête de la carte de CETTE voiture
-            const resultSpan = document.getElementById(`flash-result-${id}`);
-            if (resultSpan) {
-                resultSpan.innerText = `${consoEtalonSec.toFixed(3)} L/tr`;
-                resultSpan.style.color = "#00bc8c";
-            }
-
-            // Activation du bouton d'injection pour cette voiture
-            const btnInjecter = document.getElementById(`btn-apply-flash-${id}`);
-            if (btnInjecter) {
-                btnInjecter.disabled = false;
-                btnInjecter.style.backgroundColor = "#2ecc71"; // Vert actif
-                btnInjecter.style.color = "#ffffff";
-            }
-        };
+    // ... (garde le reste de ta fonction pour l'affichage)
+    window.dernierCalculParVoiture[id] = consoEtalonSec;
+    document.getElementById(`flash-result-${id}`).innerText = `${consoEtalonSec.toFixed(3)} L/tr`;
+    document.getElementById(`btn-apply-flash-${id}`).disabled = false;
+};
 
         window.injecterFlashDansVoiture = function(id) {
             const consoAInjecter = window.dernierCalculParVoiture[id];
