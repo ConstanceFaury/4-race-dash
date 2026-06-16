@@ -1645,13 +1645,19 @@ window.executerCalculFlashVoiture = function(id) {
         };
 
 // =======================================================================
-        // 4. LOGIQUE DU PADDOCK MODE ET SAS DE SÉCURITÉ (VERSION ÉPURÉE MULTI-ACCÈS)
+        // 4. LOGIQUE DU PADDOCK MODE ET SAS DE SÉCURITÉ (VERSION INTEGRALE DISCRETE)
         // =======================================================================
         window.isReadOnlyMode = false;
         
         window.togglePaddockMode = function(forceState) {
-            // On applique directement l'état demandé par l'identification
-            window.isReadOnlyMode = forceState;
+            // Si forceState est fourni (via le SAS de départ), on l'applique.
+            // Si forceState n'est pas fourni, c'est que l'admin a cliqué manuellement sur le bouton rouge !
+            if (typeof forceState !== "undefined") {
+                window.isReadOnlyMode = forceState;
+            } else {
+                // L'admin quitte le muret : on force le mode lecture seule
+                window.isReadOnlyMode = true; 
+            }
             
             const btnMode = document.getElementById("btn-paddock-mode");
             const elementsAction = document.querySelectorAll('.btn-quick, .btn-action, .btn-calculator, input, select');
@@ -1661,11 +1667,31 @@ window.executerCalculFlashVoiture = function(id) {
             const headerRedFlag = document.getElementById("redFlagState");
             
             if (window.isReadOnlyMode) {
-                // 🔒 APPLICATION DU MODE LECTURE SEULE (BOX)
-                if (btnMode) btnMode.style.display = "none"; // Disparition complète du bouton
+                // 🔒 MODE LECTURE SEULE ACTIF (BOX OU MURET VERROUILLÉ)
                 
+                if (btnMode) {
+                    if (forceState === true) {
+                        // 1. Mode BOX pur (via code BOX456) -> On cache COMPLETEMENT le bouton
+                        btnMode.style.display = "none";
+                    } else {
+                        // 2. Mode Muret Verrouillé (via clic Admin) -> On remplace le bouton par l'input discret
+                        btnMode.style.display = "block";
+                        btnMode.style.setProperty("display", "block", "important");
+                        btnMode.innerHTML = `
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <input type="password" id="unlock-admin-code" placeholder="Code Admin" style="width: 110px; padding: 5px; background: #000; border: 1px solid #EF4444; color: #fff; border-radius: 4px; font-size: 11px; text-align: center;">
+                                <button onclick="window.reUnlockAdmin()" style="padding: 5px 10px; background: #EF4444; color: #fff; border: none; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">🔓</button>
+                            </div>
+                        `;
+                        btnMode.style.background = "none";
+                        btnMode.style.border = "none";
+                        btnMode.style.padding = "0";
+                    }
+                }
+                
+                // Verrouillage global des actions (Écran 100% lisible au Box et au Muret)
                 elementsAction.forEach(el => {
-                    if (el.id !== "btn-paddock-mode" && el.id !== "access-code") {
+                    if (el.id !== "btn-paddock-mode" && el.id !== "access-code" && el.id !== "unlock-admin-code") {
                         if (el.tagName === "INPUT" || el.tagName === "SELECT") {
                             el.disabled = true;
                         } else {
@@ -1678,14 +1704,17 @@ window.executerCalculFlashVoiture = function(id) {
                 if (headerReset) { headerReset.style.pointerEvents = "none"; headerReset.style.opacity = "0.3"; }
                 if (headerMeteo) headerMeteo.disabled = true;
                 if (headerRedFlag) { headerRedFlag.style.pointerEvents = "none"; headerRedFlag.style.opacity = "0.4"; }
-                console.log("🔒 Interface configurée en mode Lecture Seule (Box).");
             } else {
-                // 🔓 APPLICATION DU MODE ADMINISTRATEUR (MURET)
+                // 🔓 MODE ADMINISTRATEUR ACTIF (MURET TOTALEMENT OUVERT)
                 if (btnMode) {
-                    btnMode.style.display = "block"; 
-                    btnMode.innerText = "🔓 Mode Administrateur";
-                    btnMode.style.backgroundColor = "#1a1a1a";
+                    btnMode.style.setProperty("display", "block", "important"); 
+                    btnMode.innerHTML = "🔒 Verrouiller le muret";
+                    btnMode.style.backgroundColor = "#EF4444"; // Rouge Alerte pour verrouiller
                     btnMode.style.color = "#ffffff";
+                    btnMode.style.padding = "10px 18px";
+                    btnMode.style.borderRadius = "6px";
+                    btnMode.style.fontWeight = "bold";
+                    btnMode.style.cursor = "pointer";
                 }
                 
                 elementsAction.forEach(el => {
@@ -1700,11 +1729,10 @@ window.executerCalculFlashVoiture = function(id) {
                 if (headerReset) { headerReset.style.pointerEvents = "auto"; headerReset.style.opacity = "1"; }
                 if (headerMeteo) headerMeteo.disabled = false;
                 if (headerRedFlag) { headerRedFlag.style.pointerEvents = "auto"; headerRedFlag.style.opacity = "1"; }
-                console.log("🔓 Interface configurée en mode Administrateur Complet (Muret).");
             }
         };
 
-        // TRAITEMENT DE L'IDENTIFICATION SÉCURISÉE
+        // 🔑 LE BLOC DE SAISIE ET DE VERIFICATION DES CODES (SAS DE DEPART)
         window.checkAccess = function() {
             const codeInput = document.getElementById('access-code');
             if (!codeInput) return;
@@ -1714,16 +1742,27 @@ window.executerCalculFlashVoiture = function(id) {
             
             if (code === "ADMIN123") {
                 if (popup) popup.style.display = "none";
-                window.togglePaddockMode(false); // Code Admin -> Pas de lecture seule (🔓)
+                window.togglePaddockMode(false); // Force le mode ADMIN (Muret ouvert + bouton rouge visible)
             } 
             else if (code === "BOX456") {
                 if (popup) popup.style.display = "none";
-                window.togglePaddockMode(true);  // Code Box -> Lecture seule forcée (🔒)
+                window.togglePaddockMode(true);  // Force le mode BOX (Lecture seule + bouton masqué)
             } 
             else {
                 alert("❌ Code d'accès invalide !");
             }
         };
+
+        // 🔓 LE PETIT BLOC DE DEVERROUILLAGE DISCRET POUR LE MURET
+        window.reUnlockAdmin = function() {
+            const input = document.getElementById("unlock-admin-code");
+            if (input && input.value.trim() === "ADMIN123") {
+                window.togglePaddockMode(false); // On réouvre tout le muret !
+            } else {
+                alert("❌ Code Admin incorrect !");
+            }
+        };
+        
     </script>
 </body>
 </html>
