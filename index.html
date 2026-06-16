@@ -1611,23 +1611,23 @@ window.executerCalculFlashVoiture = function(id) {
         }
 
         function saveCarConfig(id) {
-            const car = window.fleetState[id];
-            car.conso["1"].sec = parseFloat(document.getElementById(`c_${id}_1_sec`).value);
-            car.conso["1"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_1_pluie`).value);
-            car.conso["2"].sec = parseFloat(document.getElementById(`c_${id}_2_sec`).value);
-            car.conso["2"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_2_pluie`).value);
-            car.conso["3"].sec = parseFloat(document.getElementById(`c_${id}_3_sec`).value);
-            car.conso["3"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_3_pluie`).value);
-            car.conso["4"].sec = parseFloat(document.getElementById(`c_${id}_4_sec`).value);
-            car.conso["4"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_4_pluie`).value);
-            
-            car.rotation[0] = document.getElementById(`r_${id}_1`).value;
-            car.rotation[1] = document.getElementById(`r_${id}_2`).value;
-            car.rotation[2] = document.getElementById(`r_${id}_3`).value;
-            car.rotation[3] = document.getElementById(`r_${id}_4`).value;
-            
-            window.dbPushFullRaceState();
+    const car = window.fleetState[id];
+    
+    // On sauvegarde uniquement le SEC pour les 4 pilotes
+    for (let p = 1; p <= 4; p++) {
+        const inputSec = document.getElementById(`c_${id}_${p}_sec`);
+        if (inputSec) {
+            car.conso[String(p)].sec = parseFloat(inputSec.value) || 1.77;
         }
+    }
+    
+    car.rotation[0] = document.getElementById(`r_${id}_1`).value;
+    car.rotation[1] = document.getElementById(`r_${id}_2`).value;
+    car.rotation[2] = document.getElementById(`r_${id}_3`).value;
+    car.rotation[3] = document.getElementById(`r_${id}_4`).value;
+    
+    window.dbPushFullRaceState();
+}
 
         function navigateToPage(targetPageId, activeNavId) {
             document.getElementById('page-fleet').style.display = 'none';
@@ -1649,57 +1649,50 @@ window.executerCalculFlashVoiture = function(id) {
         function closeRacePopup() { document.getElementById("raceAlertPopup").style.display = "none"; }
         function formatPitTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}.${Math.floor((s%1)*10)}`; }
 
-        // =======================================================================
-        // 3. LOGIQUE D'APPLICATION DES CIRCUITS (AVEC LE DEUXIÈME SEUIL DE PLUIE)
-        // =======================================================================
-        window.dbAppliquerCircuit = function(circuitKey) {
-            const circuit = window.circuitsDatabase[circuitKey];
-            if (!circuit) return;
+window.dbAppliquerCircuit = function(circuitKey) {
+    const circuit = window.circuitsDatabase[circuitKey];
+    if (!circuit) return;
 
-            const maxFuelInput = document.getElementById("setup-maxFuel");
-            if (maxFuelInput) { maxFuelInput.value = circuit.maxFuel; }
+    const maxFuelInput = document.getElementById("setup-maxFuel");
+    if (maxFuelInput) { maxFuelInput.value = circuit.maxFuel; }
 
-            ["v1", "v2", "v3", "v4"].forEach(id => {
-                if (!window.fleetState || !window.fleetState[id]) return;
-                const car = window.fleetState[id];
+    ["v1", "v2", "v3", "v4"].forEach(id => {
+        if (!window.fleetState || !window.fleetState[id]) return;
+        const car = window.fleetState[id];
 
-                for (let p = 1; p <= 4; p++) {
-                    const consoTheorique = circuit.conso[p - 1];
-                    
-                    if (!car.conso[p]) car.conso[p] = {};
-                    
-                    car.conso[p].sec = consoTheorique.sec;
-                    car.conso[p].pluie_moderee = consoTheorique.pluie_moderee;
-                    car.conso[p].forte_pluie = consoTheorique.forte_pluie;
+        for (let p = 1; p <= 4; p++) {
+            const consoTheorique = circuit.conso[p - 1];
+            
+            if (!car.conso[p]) car.conso[p] = {};
+            
+            // 🎯 SYSTÈME LINÉAIRE : On stocke les valeurs calculées d'après le SEC
+            car.conso[p].sec = consoTheorique.sec;
+            car.conso[p].pluie_moderee = consoTheorique.sec * 0.75; // 75% du SEC
+            car.conso[p].forte_pluie = consoTheorique.sec * 0.40;   // 40% du SEC
 
-                    // On rafraîchit visuellement les boîtes du muret des stands
-                    const inputSec = document.getElementById(`c_${id}_${p}_sec`);
-                    const inputPluie = document.getElementById(`c_${id}_${p}_pluie`);
-                    
-                    if (inputSec) inputSec.value = consoTheorique.sec;
-                    if (inputPluie) {
-                        inputPluie.value = consoTheorique[window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
-                    }
-                }
-                car.fuel = circuit.maxFuel;
-            });
+            // On rafraîchit visuellement uniquement la boîte SEC du muret
+            const inputSec = document.getElementById(`c_${id}_${p}_sec`);
+            if (inputSec) inputSec.value = consoTheorique.sec;
+        }
+        car.fuel = circuit.maxFuel;
+    });
 
-            // 📢 C'EST ICI QUE L'ON TRANSMET LES VALEURS DE RÉFÉRENCE DE MANIÈRE SÉCURISÉE AU CLOUD
-            if (typeof window.dbPushFullRaceState === "function") { 
-                update(ref(db, 'race_state'), {
-                    track_ref_sec: circuit.refSecSec,
-                    track_ref_pluie: circuit.refSecPluie
-                });
-                window.dbPushFullRaceState(); 
-            }
+    // 📡 TRANSMISSION DES VALEURS DE RÉFÉRENCE AU CLOUD FIREBASE
+    if (typeof window.dbPushFullRaceState === "function") { 
+        update(ref(db, 'race_state'), {
+            track_ref_sec: circuit.refSecSec,
+            track_ref_pluie: circuit.refSecPluie
+        });
+        window.dbPushFullRaceState(); 
+    }
 
-            if (typeof window.dbLogLiveEventCloud === "function") {
-                window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Modèles SEC/PLUIE injectés)`, `${circuit.maxFuel}.0 L`, "TRACK");
-            }
+    if (typeof window.dbLogLiveEventCloud === "function") {
+        window.dbLogLiveEventCloud("SYSTEM", `🗺️ Circuit configuré : ${circuit.name} (Modèle Linéaire SEC/PLUIE)`, `${circuit.maxFuel}.0 L`, "TRACK");
+    }
 
-            window.updateRaceControlBanner(`Circuit configuré sur ${circuit.name}. Consos théoriques appliquées.`, new Date().toLocaleTimeString('fr-FR'));
-            alert(`✅ Configuration réussie pour ${circuit.name} ! Modèles Sec, Pluie modérée et Forte Pluie synchronisés.`);
-        };
+    window.updateRaceControlBanner(`Circuit configuré sur ${circuit.name}. Consos théoriques appliquées.`, new Date().toLocaleTimeString('fr-FR'));
+    alert(`✅ Configuration réussie pour ${circuit.name} ! Modèle linéaire appliqué (Pluie 75%, Forte Pluie 40%).`);
+};
 
         // FONCTION DE PROPAGATION DU BANDEAU JAUNE RIVALISANT RIS-TIMING
         window.updateRaceControlBanner = function(texte, heureStr) {
