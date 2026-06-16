@@ -1641,30 +1641,26 @@
             alert(`Ajustement validé : ${resultConso.toFixed(2)} L/tr.`);
         }
 
-        function saveCarConfig(id) {
-            const car = window.fleetState[id];
-            car.conso["1"].sec = parseFloat(document.getElementById(`c_${id}_1_sec`).value);
-            car.conso["1"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_1_pluie`).value);
-            car.conso["2"].sec = parseFloat(document.getElementById(`c_${id}_2_sec`).value);
-            car.conso["2"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_2_pluie`).value);
-            car.conso["3"].sec = parseFloat(document.getElementById(`c_${id}_3_sec`).value);
-            car.conso["3"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_3_pluie`).value);
-            car.conso["4"].sec = parseFloat(document.getElementById(`c_${id}_4_sec`).value);
-            car.conso["4"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_4_pluie`).value);
-            car.conso["5"].sec = parseFloat(document.getElementById(`c_${id}_5_sec`).value);
-            car.conso["5"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_5_pluie`).value);
-            car.conso["6"].sec = parseFloat(document.getElementById(`c_${id}_6_sec`).value);
-            car.conso["6"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_6_pluie`).value);
-            
-            car.rotation[0] = document.getElementById(`r_${id}_1`).value;
-            car.rotation[1] = document.getElementById(`r_${id}_2`).value;
-            car.rotation[2] = document.getElementById(`r_${id}_3`).value;
-            car.rotation[3] = document.getElementById(`r_${id}_4`).value;
-            car.rotation[4] = document.getElementById(`r_${id}_5`).value;
-            car.rotation[5] = document.getElementById(`r_${id}_6`).value;
-            
-            window.dbPushFullRaceState();
-        }
+       window.saveCarConfig = function(id) {
+    const car = window.fleetState[id];
+    if (!car) return;
+
+    // Sauvegarde des consos pour les 4 pilotes de la voiture
+    for (let p = 1; p <= 4; p++) {
+        const inputSec = document.getElementById(`c_${id}_${p}_sec`);
+        const inputPluie = document.getElementById(`c_${id}_${p}_pluie`);
+        if (inputSec) car.conso[String(p)].sec = parseFloat(inputSec.value);
+        if (inputPluie) car.conso[String(p)][window.weatherMode] = parseFloat(inputPluie.value);
+    }
+    
+    // Sauvegarde de la rotation des relais
+    for (let r = 1; r <= 4; r++) {
+        const sRot = document.getElementById(`r_${id}_${r}`);
+        if (sRot) car.rotation[r-1] = sRot.value;
+    }
+    
+    window.dbPushFullRaceState();
+};
 
   function navigateToPage(targetPageId, activeNavId) {
     // 1. On cache TOUTES les pages de contenu
