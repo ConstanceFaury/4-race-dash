@@ -403,57 +403,17 @@
                 </select>
             </div>
         </div>
-
-        <div class="card col-12" style="border: 1px solid #222;">
-            <div class="card-title" style="color: var(--4race-white);">👤 Gestion des Équipages (4 Pilotes Distincts par Voiture)</div>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
-                <div style="background:#000; padding:12px; border-radius:6px; border:1px solid #222;">
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--4race-coral);" class="lbl-v1">#531</div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 1</label><input type="text" id="s_v1_1" value="Alex" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 2</label><input type="text" id="s_v1_2" value="Hugo" onchange="dbPushFullRaceState()"></div>
-                    </div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 3</label><input type="text" id="s_v1_3" value="Max" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 4</label><input type="text" id="s_v1_4" value="Yanis" onchange="dbPushFullRaceState()"></div>
+        
+        <div class="card col-12" style="border: 1px solid #34495e; background-color: #141416; display: flex; justify-content: space-between; align-items: center; flex-direction: row; padding: 15px;">
+                    <div style="font-weight: bold; font-size: 13px; color: #00bc8c;">🛠️ CONFIGURATION DE LA FLOTTE ACTIVÉE</div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" onclick="window.ajouterNouvelleVoitureFlotte()" style="background-color: #22C55E; color: #000; font-weight: bold; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px;">➕ AJOUTER UNE VOITURE</button>
+                        <button type="button" onclick="window.supprimerDerniereVoitureFlotte()" style="background-color: #EF4444; color: #fff; font-weight: bold; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-size: 12px;">❌ RETIRER LA DERNIÈRE VOITURE</button>
                     </div>
                 </div>
-                <div style="background:#000; padding:12px; border-radius:6px; border:1px solid #222;">
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--4race-coral);" class="lbl-v2">#183</div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 1</label><input type="text" id="s_v2_1" value="Thomas" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 2</label><input type="text" id="s_v2_2" value="Loïc" onchange="dbPushFullRaceState()"></div>
-                    </div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 3</label><input type="text" id="s_v2_3" value="Antoine" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 4</label><input type="text" id="s_v2_4" value="Séb" onchange="dbPushFullRaceState()"></div>
-                    </div>
-                </div>
-                <div style="background:#000; padding:12px; border-radius:6px; border:1px solid #222;">
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--4race-coral);" class="lbl-v3">#156</div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 1</label><input type="text" id="s_v3_1" value="Julien" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 2</label><input type="text" id="s_v3_2" value="Romain" onchange="dbPushFullRaceState()"></div>
-                    </div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 3</label><input type="text" id="s_v3_3" value="Nico" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 4</label><input type="text" id="s_v3_4" value="Mathieu" onchange="dbPushFullRaceState()"></div>
-                    </div>
-                </div>
-                <div style="background:#000; padding:12px; border-radius:6px; border:1px solid #222;">
-                    <div style="font-weight:bold; margin-bottom:10px; color:var(--4race-coral);" class="lbl-v4">#40</div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 1</label><input type="text" id="s_v4_1" value="Arthur" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 2</label><input type="text" id="s_v4_2" value="Pierre" onchange="dbPushFullRaceState()"></div>
-                    </div>
-                    <div class="config-row">
-                        <div class="config-group"><label>Pilote 3</label><input type="text" id="s_v4_3" value="Dylan" onchange="dbPushFullRaceState()"></div>
-                        <div class="config-group"><label>Pilote 4</label><input type="text" id="s_v4_4" value="Franck" onchange="dbPushFullRaceState()"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        
+        <div id="dynamic-setup-inputs" class="col-12" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; margin-top: 5px; margin-bottom: 5px;"></div>
+           
         <div class="card col-12">
             <div class="card-title">⚙️ Paramètres Communs, Seuils & Attribution Numéros</div>
             <div class="config-row">
@@ -479,225 +439,9 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> 
 
-    <div id="car-pages-container">
-        <div id="page-v1" class="page-content grid">
-            <div class="card col-4" style="border: 1px solid #4f5d6c;">
-                <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v1">#531</span></div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p1_v1">Pilote 1</label><input type="number" id="c_v1_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                    <div class="config-group"><label class="p2_v1">Pilote 2</label><input type="number" id="c_v1_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p3_v1">Pilote 3</label><input type="number" id="c_v1_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                    <div class="config-group"><label class="p4_v1">Pilote 4</label><input type="number" id="c_v1_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v1')"></div>
-                </div>
-            </div>
-
-            <div class="card col-4" style="background-color: #141416; border: 1px solid #34495e; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="color: #00bc8c; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 12px; font-style: italic;">
-                        <span>🧮 DEBRIEF FLASH CONSO</span>
-                        <span id="flash-result-v1" style="color: #f39c12; font-family: monospace; font-style: normal; font-size: 13px; font-weight: bold;">--.- L/tr</span>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 8px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Pilote concerné</label>
-                        <select id="select-flash-pilote-v1" class="form-select form-select-sm" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px;"></select>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 12px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Essence brûlée (L)</label>
-                        <input type="number" id="input-flash-litres-v1" class="form-control form-control-sm" step="0.01" placeholder="ex: 34.50" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px; font-weight: bold; font-family: monospace;">
-                    </div>
-                    <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 3px 0;">
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #00bc8c; text-align: center; font-weight: bold; margin-bottom: 2px;">SEC</label><input type="number" id="input-flash-sec-v1" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #3498db; text-align: center; font-weight: bold; margin-bottom: 2px;">PLUIE</label><input type="number" id="input-flash-pluie-v1" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #9b59b6; text-align: center; font-weight: bold; margin-bottom: 2px;">DÉLUGE</label><input type="number" id="input-flash-deluge-v1" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #f1c40f; text-align: center; font-weight: bold; margin-bottom: 2px;">FCY</label><input type="number" id="input-flash-fcy-v1" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; display: flex; gap: 6px;">
-                    <button type="button" onclick="executerCalculFlashVoiture('v1')" style="flex: 1; font-weight: bold; font-size: 11px; background-color: #e67e22; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">🧮 CALCULER</button>
-                    <button type="button" id="btn-apply-flash-v1" onclick="injecterFlashDansVoiture('v1')" disabled style="flex: 1; font-weight: bold; font-size: 11px; background-color: #7f8c8d; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">📥 INJECTER</button>
-                </div>
-            </div>
-            
-            <div class="card col-4">
-                <div class="card-title">📋 Rotation des Prochains Relais</div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais Actuel</label><select id="r_v1_1" onchange="saveCarConfig('v1')"></select></div>
-                    <div class="config-group"><label>Relais N+1</label><select id="r_v1_2" onchange="saveCarConfig('v1')"></select></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais N+2</label><select id="r_v1_3" onchange="saveCarConfig('v1')"></select></div>
-                    <div class="config-group"><label>Relais N+3</label><select id="r_v1_4" onchange="saveCarConfig('v1')"></select></div>
-                </div>
-            </div>
-            <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v1"></tbody></table></div>
-        </div>
-
-        <div id="page-v2" class="page-content grid">
-            <div class="card col-4" style="border: 1px solid #4f5d6c;">
-                <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v2">#183</span></div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p1_v2">Pilote 1</label><input type="number" id="c_v2_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                    <div class="config-group"><label class="p2_v2">Pilote 2</label><input type="number" id="c_v2_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p3_v2">Pilote 3</label><input type="number" id="c_v2_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                    <div class="config-group"><label class="p4_v2">Pilote 4</label><input type="number" id="c_v2_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v2')"></div>
-                </div>
-            </div>
-
-            <div class="card col-4" style="background-color: #141416; border: 1px solid #34495e; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="color: #00bc8c; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 12px; font-style: italic;">
-                        <span>🧮 DEBRIEF FLASH CONSO</span>
-                        <span id="flash-result-v2" style="color: #f39c12; font-family: monospace; font-style: normal; font-size: 13px; font-weight: bold;">--.- L/tr</span>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 8px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Pilote concerné</label>
-                        <select id="select-flash-pilote-v2" class="form-select form-select-sm" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px;"></select>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 12px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Essence brûlée (L)</label>
-                        <input type="number" id="input-flash-litres-v2" class="form-control form-control-sm" step="0.01" placeholder="ex: 34.50" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px; font-weight: bold; font-family: monospace;">
-                    </div>
-                    <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 3px 0;">
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #00bc8c; text-align: center; font-weight: bold; margin-bottom: 2px;">SEC</label><input type="number" id="input-flash-sec-v2" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #3498db; text-align: center; font-weight: bold; margin-bottom: 2px;">PLUIE</label><input type="number" id="input-flash-pluie-v2" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #9b59b6; text-align: center; font-weight: bold; margin-bottom: 2px;">DÉLUGE</label><input type="number" id="input-flash-deluge-v2" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #f1c40f; text-align: center; font-weight: bold; margin-bottom: 2px;">FCY</label><input type="number" id="input-flash-fcy-v2" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; display: flex; gap: 6px;">
-                    <button type="button" onclick="executerCalculFlashVoiture('v2')" style="flex: 1; font-weight: bold; font-size: 11px; background-color: #e67e22; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">🧮 CALCULER</button>
-                    <button type="button" id="btn-apply-flash-v2" onclick="injecterFlashDansVoiture('v2')" disabled style="flex: 1; font-weight: bold; font-size: 11px; background-color: #7f8c8d; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">📥 INJECTER</button>
-                </div>
-            </div>
-            
-            <div class="card col-4">
-                <div class="card-title">📋 Rotation des Prochains Relais</div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais Actuel</label><select id="r_v2_1" onchange="saveCarConfig('v2')"></select></div>
-                    <div class="config-group"><label>Relais N+1</label><select id="r_v2_2" onchange="saveCarConfig('v2')"></select></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais N+2</label><select id="r_v2_3" onchange="saveCarConfig('v2')"></select></div>
-                    <div class="config-group"><label>Relais N+3</label><select id="r_v2_4" onchange="saveCarConfig('v2')"></select></div>
-                </div>
-            </div>
-            <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v2"></tbody></table></div>
-        </div>
-
-        <div id="page-v3" class="page-content grid">
-            <div class="card col-4" style="border: 1px solid #4f5d6c;">
-                <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v3">#156</span></div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p1_v3">Pilote 1</label><input type="number" id="c_v3_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                    <div class="config-group"><label class="p2_v3">Pilote 2</label><input type="number" id="c_v3_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p3_v3">Pilote 3</label><input type="number" id="c_v3_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                    <div class="config-group"><label class="p4_v3">Pilote 4</label><input type="number" id="c_v3_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v3')"></div>
-                </div>
-            </div>
-
-            <div class="card col-4" style="background-color: #141416; border: 1px solid #34495e; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="color: #00bc8c; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 12px; font-style: italic;">
-                        <span>🧮 DEBRIEF FLASH CONSO</span>
-                        <span id="flash-result-v3" style="color: #f39c12; font-family: monospace; font-style: normal; font-size: 13px; font-weight: bold;">--.- L/tr</span>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 8px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Pilote concerné</label>
-                        <select id="select-flash-pilote-v3" class="form-select form-select-sm" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px;"></select>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 12px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Essence brûlée (L)</label>
-                        <input type="number" id="input-flash-litres-v3" class="form-control form-control-sm" step="0.01" placeholder="ex: 34.50" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px; font-weight: bold; font-family: monospace;">
-                    </div>
-                    <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 3px 0;">
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #00bc8c; text-align: center; font-weight: bold; margin-bottom: 2px;">SEC</label><input type="number" id="input-flash-sec-v3" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #3498db; text-align: center; font-weight: bold; margin-bottom: 2px;">PLUIE</label><input type="number" id="input-flash-pluie-v3" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #9b59b6; text-align: center; font-weight: bold; margin-bottom: 2px;">DÉLUGE</label><input type="number" id="input-flash-deluge-v3" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #f1c40f; text-align: center; font-weight: bold; margin-bottom: 2px;">FCY</label><input type="number" id="input-flash-fcy-v3" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; display: flex; gap: 6px;">
-                    <button type="button" onclick="executerCalculFlashVoiture('v3')" style="flex: 1; font-weight: bold; font-size: 11px; background-color: #e67e22; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">🧮 CALCULER</button>
-                    <button type="button" id="btn-apply-flash-v3" onclick="injecterFlashDansVoiture('v3')" disabled style="flex: 1; font-weight: bold; font-size: 11px; background-color: #7f8c8d; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">📥 INJECTER</button>
-                </div>
-            </div>
-            
-            <div class="card col-4">
-                <div class="card-title">📋 Rotation des Prochains Relais</div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais Actuel</label><select id="r_v3_1" onchange="saveCarConfig('v3')"></select></div>
-                    <div class="config-group"><label>Relais N+1</label><select id="r_v3_2" onchange="saveCarConfig('v3')"></select></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais N+2</label><select id="r_v3_3" onchange="saveCarConfig('v3')"></select></div>
-                    <div class="config-group"><label>Relais N+3</label><select id="r_v3_4" onchange="saveCarConfig('v3')"></select></div>
-                </div>
-            </div>
-            <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v3"></tbody></table></div>
-        </div>
-
-        <div id="page-v4" class="page-content grid">
-            <div class="card col-4" style="border: 1px solid #4f5d6c;">
-                <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-v4">#40</span></div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p1_v4">Pilote 1</label><input type="number" id="c_v4_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                    <div class="config-group"><label class="p2_v4">Pilote 2</label><input type="number" id="c_v4_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label class="p3_v4">Pilote 3</label><input type="number" id="c_v4_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                    <div class="config-group"><label class="p4_v4">Pilote 4</label><input type="number" id="c_v4_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('v4')"></div>
-                </div>
-            </div>
-
-            <div class="card col-4" style="background-color: #141416; border: 1px solid #34495e; display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
-                    <div style="color: #00bc8c; font-weight: bold; font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 12px; font-style: italic;">
-                        <span>🧮 DEBRIEF FLASH CONSO</span>
-                        <span id="flash-result-v4" style="color: #f39c12; font-family: monospace; font-style: normal; font-size: 13px; font-weight: bold;">--.- L/tr</span>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 8px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Pilote concerné</label>
-                        <select id="select-flash-pilote-v4" class="form-select form-select-sm" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px;"></select>
-                    </div>
-                    <div class="mb-2" style="margin-bottom: 12px;">
-                        <label style="font-size: 11px; color: #888; text-transform: uppercase; display: block; margin-bottom: 4px; font-weight: 600;">Essence brûlée (L)</label>
-                        <input type="number" id="input-flash-litres-v4" class="form-control form-control-sm" step="0.01" placeholder="ex: 34.50" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; font-size: 13px; width: 100%; padding: 8px; border-radius: 4px; font-weight: bold; font-family: monospace;">
-                    </div>
-                    <div style="display: table; width: 100%; border-collapse: separate; border-spacing: 3px 0;">
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #00bc8c; text-align: center; font-weight: bold; margin-bottom: 2px;">SEC</label><input type="number" id="input-flash-sec-v4" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #3498db; text-align: center; font-weight: bold; margin-bottom: 2px;">PLUIE</label><input type="number" id="input-flash-pluie-v4" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #9b59b6; text-align: center; font-weight: bold; margin-bottom: 2px;">DÉLUGE</label><input type="number" id="input-flash-deluge-v4" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                        <div style="display: table-cell; width: 25%;"><label style="font-size: 9px; display: block; color: #f1c40f; text-align: center; font-weight: bold; margin-bottom: 2px;">FCY</label><input type="number" id="input-flash-fcy-v4" value="0" min="0" style="background-color: #0A0A0C; color: #fff; border: 1px solid #333; text-align: center; width: 100%; padding: 6px; font-size: 12px; border-radius: 4px;"></div>
-                    </div>
-                </div>
-                <div style="margin-top: 15px; display: flex; gap: 6px;">
-                    <button type="button" onclick="executerCalculFlashVoiture('v4')" style="flex: 1; font-weight: bold; font-size: 11px; background-color: #e67e22; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">🧮 CALCULER</button>
-                    <button type="button" id="btn-apply-flash-v4" onclick="injecterFlashDansVoiture('v4')" disabled style="flex: 1; font-weight: bold; font-size: 11px; background-color: #7f8c8d; border: none; color: #fff; padding: 10px 0; border-radius: 4px; cursor: pointer; text-transform: uppercase;">📥 INJECTER</button>
-                </div>
-            </div>
-            
-            <div class="card col-4">
-                <div class="card-title">📋 Rotation des Prochains Relais</div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais Actuel</label><select id="r_v4_1" onchange="saveCarConfig('v4')"></select></div>
-                    <div class="config-group"><label>Relais N+1</label><select id="r_v4_2" onchange="saveCarConfig('v4')"></select></div>
-                </div>
-                <div class="config-row">
-                    <div class="config-group"><label>Relais N+2</label><select id="r_v4_3" onchange="saveCarConfig('v4')"><option value="1">Pilote 1</option><option value="2">Pilote 2</option><option value="3">Pilote 3</option><option value="4">Pilote 4</option></select></div>
-                    <div class="config-group"><label>Relais N+3</label><select id="r_v4_4" onchange="saveCarConfig('v4')"><option value="1">Pilote 1</option><option value="2">Pilote 2</option><option value="3">Pilote 3</option><option value="4">Pilote 4</option></select></div>
-                </div>
-            </div>
-            <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-v4"></tbody></table></div>
-        </div>
-    </div>
+    <div id="car-pages-container"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -1182,76 +926,198 @@
         window.enemyDatabase = []; window.isFCY = false; window.weatherMode = "sec";
 
 // =======================================================================
-        // 👤 GESTION SÉCURISÉE ET PROPAGATION AUTOMATIQUE DES ÉQUIPAGES
+        // 🔄 GENERATEUR INTERFACE ET RECONNEXION ULTRA-DYNAMIQUE (FINALE CORRIGÉE)
         // =======================================================================
         window.applyGlobalCustomizationLocal = function() {
-            // 🛡️ ÉTAPE 1 : Sauvegarde des prénoms UNIQUEMENT si les cases existent à l'écran
+            const containerPages = document.getElementById("car-pages-container");
+            const containerTabs = document.getElementById("dynamic-car-tabs");
+            const containerSetup = document.getElementById("dynamic-setup-inputs");
+            
+            // Ciblage robuste de l'ancienne carte de gestion des équipages en dur pour la désactiver
+            const oldSetupInputs = document.querySelector("#page-setup > .card[style*='border: 1px solid #222']");
+
+            if (!containerPages || !containerTabs) return;
+
+            // Masquage automatique et sécurisé de la vieille liste figée de l'équipage
+            if (oldSetupInputs) oldSetupInputs.style.display = "none";
+
+            // Sauvegarde des sélections utilisateur en cours pour éviter les sauts d'affichage au rafraîchissement
+            let choixFlashMenti = {};
+            let choixRotationsMenti = {};
+            for (let id in window.fleetState) {
+                const sF = document.getElementById(`select-flash-pilote-${id}`);
+                choixFlashMenti[id] = sF ? sF.value : "1";
+                choixRotationsMenti[id] = [];
+                for(let r=1; r<=4; r++) {
+                    const sR = document.getElementById(`r_${id}_${r}`);
+                    choixRotationsMenti[id].push(sR ? sR.value : String(r));
+                }
+            }
+
+            // --- 1. RECONSTRUCTION ET INSERTION DU SETUP ÉQUIPE ---
+            if (containerSetup) {
+                let setupHtml = "";
+                for (let id in window.fleetState) {
+                    const numAssigne = window.carIdMapping[id] || id.replace("v", "90");
+                    const pDb = window.pilotsDatabase[id] || { "1": "Pilote 1", "2": "Pilote 2", "3": "Pilote 3", "4": "Pilote 4" };
+                    
+                    setupHtml += `
+                        <div style="background:#000; padding:15px; border-radius:6px; border:1px solid #222;">
+                            <div style="font-weight:bold; margin-bottom:10px; color:var(--4race-coral); display:flex; justify-content:space-between;">
+                                <span class="lbl-${id}">#${numAssigne}</span>
+                                <span style="font-size:10px; color:#555;">ID INTERNE: ${id.toUpperCase()}</span>
+                            </div>
+                            <div class="config-row" style="margin-bottom:8px;">
+                                <div class="config-group"><label>N° Châssis</label><input type="number" id="setup-${id}" value="${numAssigne}" onchange="window.dbPushFullRaceState()"></div>
+                                <div class="config-group"><label>Pilote 1</label><input type="text" id="s_${id}_1" value="${pDb["1"]}" onchange="window.dbPushFullRaceState()"></div>
+                            </div>
+                            <div class="config-row" style="margin-bottom:8px;">
+                                <div class="config-group"><label>Pilote 2</label><input type="text" id="s_${id}_2" value="${pDb["2"]}" onchange="window.dbPushFullRaceState()"></div>
+                                <div class="config-group"><label>Pilote 3</label><input type="text" id="s_${id}_3" value="${pDb["3"]}" onchange="window.dbPushFullRaceState()"></div>
+                            </div>
+                            <div class="config-row">
+                                <div class="config-group"><label>Pilote 4</label><input type="text" id="s_${id}_4" value="${pDb["4"]}" onchange="window.dbPushFullRaceState()"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+                containerSetup.innerHTML = setupHtml;
+            }
+
+            // Lecture et synchronisation des inputs vers les objets de données
             for (let id in window.fleetState) {
                 const el1 = document.getElementById(`s_${id}_1`);
                 const el2 = document.getElementById(`s_${id}_2`);
                 const el3 = document.getElementById(`s_${id}_3`);
                 const el4 = document.getElementById(`s_${id}_4`);
+                const elSetupNum = document.getElementById(`setup-${id}`);
 
                 if (el1 && el1.value) window.pilotsDatabase[id]["1"] = el1.value;
                 if (el2 && el2.value) window.pilotsDatabase[id]["2"] = el2.value;
                 if (el3 && el3.value) window.pilotsDatabase[id]["3"] = el3.value;
                 if (el4 && el4.value) window.pilotsDatabase[id]["4"] = el4.value;
+                if (elSetupNum && elSetupNum.value) window.carIdMapping[id] = elSetupNum.value;
             }
 
-            // 🏎️ ÉTAPE 2 : Mise à jour des numéros de Châssis (#531, #183...)
-            if (document.getElementById("setup-v1")) window.carIdMapping.v1 = document.getElementById("setup-v1").value;
-            if (document.getElementById("setup-v2")) window.carIdMapping.v2 = document.getElementById("setup-v2").value;
-            if (document.getElementById("setup-v3")) window.carIdMapping.v3 = document.getElementById("setup-v3").value;
-            if (document.getElementById("setup-v4")) window.carIdMapping.v4 = document.getElementById("setup-v4").value;
+            // --- 2. RECONSTRUCTION DES ONGLETS DE NAV ET DES FICHES DE DEBRIEFING HORIZONTALES ---
+            let tabsHtml = "";
+            let pagesHtml = "";
+            
+            for (let id in window.fleetState) {
+                const numCar = window.carIdMapping[id] || "??";
+                const db = window.pilotsDatabase[id];
 
-            document.querySelectorAll(".lbl-v1").forEach(el => el.innerText = "#" + window.carIdMapping.v1);
-            document.querySelectorAll(".lbl-v2").forEach(el => el.innerText = "#" + window.carIdMapping.v2);
-            document.querySelectorAll(".lbl-v3").forEach(el => el.innerText = "#" + window.carIdMapping.v3);
-            document.querySelectorAll(".lbl-v4").forEach(el => el.innerText = "#" + window.carIdMapping.v4);
+                // Génération automatique du bouton d'onglet
+                tabsHtml += `<button id="nav-${id}" class="tab-btn" onclick="navigateToPage('page-${id}', 'nav-${id}')">🏎️ <span class="lbl-${id}">#${numCar}</span></button>`;
 
-            // 🔄 ÉTAPE 3 : Propagation de force dans ABSOLUMENT TOUS les menus déroulants
+                // Génération automatique de la page pleine largeur correspondante
+                if (!document.getElementById(`page-${id}`)) {
+                    pagesHtml += `
+                        <div id="page-${id}" class="page-content grid">
+                            <div class="card col-4" style="border: 1px solid #4f5d6c;">
+                                <div class="card-title">📊 Fiche Consos Étalon - Châssis <span class="lbl-${id}">#${numCar}</span></div>
+                                <div class="config-row">
+                                    <div class="config-group"><label class="p1_${id}">${db["1"]}</label><input type="number" id="c_${id}_1_sec" value="1.77" step="0.01" onchange="saveCarConfig('${id}')"></div>
+                                    <div class="config-group"><label class="p2_${id}">${db["2"]}</label><input type="number" id="c_${id}_2_sec" value="1.77" step="0.01" onchange="saveCarConfig('${id}')"></div>
+                                </div>
+                                <div class="config-row">
+                                    <div class="config-group"><label class="p3_${id}">${db["3"]}</label><input type="number" id="c_${id}_3_sec" value="1.77" step="0.01" onchange="saveCarConfig('${id}')"></div>
+                                    <div class="config-group"><label class="p4_${id}">${db["4"]}</label><input type="number" id="c_${id}_4_sec" value="1.77" step="0.01" onchange="saveCarConfig('${id}')"></div>
+                                </div>
+                            </div>
+                            <div class="card col-4" style="background-color:#141416; border:1px solid #34495e; display:flex; flex-direction:column; justify-content:space-between;">
+                                <div>
+                                    <div style="color:#00bc8c; font-weight:bold; font-size:12px; display:flex; justify-content:space-between; margin-bottom:12px; font-style:italic;">
+                                        <span>🧮 DEBRIEF FLASH CONSO</span>
+                                        <span id="flash-result-${id}" style="color:#f39c12; font-family:monospace; font-size:13px; font-weight:bold;">--.- L/tr</span>
+                                    </div>
+                                    <div class="mb-2" style="margin-bottom:8px;">
+                                        <label style="font-size:11px; color:#888; text-transform:uppercase; display:block; margin-bottom:4px; font-weight:600;">Pilote concerné</label>
+                                        <select id="select-flash-pilote-${id}" class="form-select form-select-sm" style="background-color:#0A0A0C; color:#fff; border:1px solid #333; font-size:13px; width:100%; padding:8px; border-radius:4px;"></select>
+                                    </div>
+                                    <div class="mb-2" style="margin-bottom:12px;">
+                                        <label style="font-size:11px; color:#888; text-transform:uppercase; display:block; margin-bottom:4px; font-weight:600;">Essence brûlée (L)</label>
+                                        <input type="number" id="input-flash-litres-${id}" class="form-control form-control-sm" step="0.01" placeholder="ex: 34.50" style="background-color:#0A0A0C; color:#fff; border:1px solid #333; text-align:center; font-size:13px; width:100%; padding:8px; border-radius:4px; font-weight:bold; font-family:monospace;">
+                                    </div>
+                                    <div style="display:table; width:100%; border-collapse:separate; border-spacing:3px 0;">
+                                        <div style="display:table-cell; width:25%;"><label style="font-size:9px; display:block; color:#00bc8c; text-align:center; font-weight:bold; margin-bottom: 2px;">SEC</label><input type="number" id="input-flash-sec-${id}" value="0" min="0" style="background-color:#0A0A0C; color:#fff; border:1px solid #333; text-align:center; width:100%; padding:6px; font-size:12px; border-radius:4px;"></div>
+                                        <div style="display:table-cell; width:25%;"><label style="font-size:9px; display:block; color:#3498db; text-align:center; font-weight:bold; margin-bottom: 2px;">PLUIE</label><input type="number" id="input-flash-pluie-${id}" value="0" min="0" style="background-color:#0A0A0C; color:#fff; border:1px solid #333; text-align:center; width:100%; padding:6px; font-size:12px; border-radius:4px;"></div>
+                                        <div style="display:table-cell; width:25%;"><label style="font-size:9px; display:block; color:#9b59b6; text-align:center; font-weight:bold; margin-bottom: 2px;">DÉLUGE</label><input type="number" id="input-flash-deluge-${id}" value="0" min="0" style="background-color:#0A0A0C; color:#fff; border:1px solid #333; text-align:center; width:100%; padding:6px; font-size:12px; border-radius:4px;"></div>
+                                        <div style="display:table-cell; width:25%;"><label style="font-size:9px; display:block; color:#f1c40f; text-align:center; font-weight:bold; margin-bottom: 2px;">FCY</label><input type="number" id="input-flash-fcy-${id}" value="0" min="0" style="background-color:#0A0A0C; color:#fff; border:1px solid #333; text-align:center; width:100%; padding:6px; font-size:12px; border-radius:4px;"></div>
+                                    </div>
+                                </div>
+                                <div style="margin-top:15px; display:flex; gap:6px;">
+                                    <button type="button" onclick="executerCalculFlashVoiture('${id}')" style="flex:1; font-weight:bold; font-size:11px; background-color:#e67e22; border:none; color:#fff; padding:10px 0; border-radius:4px; cursor:pointer;">🧮 CALCULER</button>
+                                    <button type="button" id="btn-apply-flash-${id}" onclick="injecterFlashDansVoiture('${id}')" disabled style="flex:1; font-weight:bold; font-size:11px; background-color:#7f8c8d; border:none; color:#fff; padding:10px 0; border-radius:4px; cursor:pointer;">📥 INJECTER</button>
+                                </div>
+                            </div>
+                            <div class="card col-4">
+                                <div class="card-title">📋 Rotation des Prochains Relais</div>
+                                <div class="config-row">
+                                    <div class="config-group"><label>Relais Actuel</label><select id="r_${id}_1" onchange="saveCarConfig('${id}')"></select></div>
+                                    <div class="config-group"><label>Relais N+1</label><select id="r_${id}_2" onchange="saveCarConfig('${id}')"></select></div>
+                                </div>
+                                <div class="config-row">
+                                    <div class="config-group"><label>Relais N+2</label><select id="r_${id}_3" onchange="saveCarConfig('${id}')"></select></div>
+                                    <div class="config-group"><label>Relais N+3</label><select id="r_${id}_4" onchange="saveCarConfig('${id}')"></select></div>
+                                </div>
+                            </div>
+                            <div class="card col-12"><div class="card-title">🔮 Planificateur Prédictif à la Goutte d'Essence</div><table><thead><tr><th>Relais</th><th>Pilote Assigné</th><th>Autonomie Estimée</th><th>Carburant Attendu</th></tr></thead><tbody id="plan-body-${id}"></tbody></table></div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Injection dynamique sécurisée
+            containerTabs.innerHTML = tabsHtml;
+            if (pagesHtml !== "") containerPages.innerHTML += pagesHtml;
+
+            // Retrait des fiches obsolètes si suppression d'une voiture
+            Array.from(containerPages.children).forEach(pageNode => {
+                const checkId = pageNode.id.replace("page-", "");
+                if (checkId !== "fleet" && checkId !== "intel" && checkId !== "setup" && !window.fleetState[checkId]) {
+                    pageNode.remove();
+                }
+            });
+
+            // Propagation finale des prénoms dans les menus déroulants
             for(let id in window.fleetState) {
                 const db = window.pilotsDatabase[id];
+                const numCar = window.carIdMapping[id] || "??";
                 
-                // Mise à jour des textes d'affichage simples
+                document.querySelectorAll(`.lbl-${id}`).forEach(el => el.innerText = "#" + numCar);
                 document.querySelectorAll(`.p1_${id}`).forEach(el => el.innerText = db["1"]);
                 document.querySelectorAll(`.p2_${id}`).forEach(el => el.innerText = db["2"]);
                 document.querySelectorAll(`.p3_${id}`).forEach(el => el.innerText = db["3"]);
                 document.querySelectorAll(`.p4_${id}`).forEach(el => el.innerText = db["4"]);
 
-                // 🎯 RECONNEXION FORCEE DU CALCULATEUR FLASH (BOÎTE BLEUE)
                 const sCalcFlash = document.getElementById(`select-flash-pilote-${id}`);
                 if(sCalcFlash) {
-                    const valeurSauvegardee = sCalcFlash.value || "1";
-                    sCalcFlash.innerHTML = `
-                        <option value="1" ${valeurSauvegardee === '1' ? 'selected' : ''}>${db["1"]}</option>
-                        <option value="2" ${valeurSauvegardee === '2' ? 'selected' : ''}>${db["2"]}</option>
-                        <option value="3" ${valeurSauvegardee === '3' ? 'selected' : ''}>${db["3"]}</option>
-                        <option value="4" ${valeurSauvegardee === '4' ? 'selected' : ''}>${db["4"]}</option>
-                    `;
+                    const vSaved = choixFlashMenti[id] || "1";
+                    sCalcFlash.innerHTML = `<option value="1" ${vSaved=='1'?'selected':''}>${db["1"]}</option><option value="2" ${vSaved=='2'?'selected':''}>${db["2"]}</option><option value="3" ${vSaved=='3'?'selected':''}>${db["3"]}</option><option value="4" ${vSaved=='4'?'selected':''}>${db["4"]}</option>`;
                 }
                 
-                // 🎯 RECONNEXION FORCEE DE LA ROTATION DES RELAIS (BOÎTE DE DROITE)
                 for(let r=1; r<=4; r++) {
                     const sRot = document.getElementById(`r_${id}_${r}`);
                     if(sRot) {
-                        const selectedVal = window.fleetState[id].rotation[r-1] || String(r);
-                        sRot.innerHTML = `
-                            <option value="1" ${selectedVal == '1' ? 'selected' : ''}>${db["1"]}</option>
-                            <option value="2" ${selectedVal == '2' ? 'selected' : ''}>${db["2"]}</option>
-                            <option value="3" ${selectedVal == '3' ? 'selected' : ''}>${db["3"]}</option>
-                            <option value="4" ${selectedVal == '4' ? 'selected' : ''}>${db["4"]}</option>
-                        `;
+                        const vSaved = (choixRotationsMenti[id] && choixRotationsMenti[id][r-1]) ? choixRotationsMenti[id][r-1] : (window.fleetState[id].rotation[r-1] || String(r));
+                        sRot.innerHTML = `<option value="1" ${vSaved=='1'?'selected':''}>${db["1"]}</option><option value="2" ${vSaved=='2'?'selected':''}>${db["2"]}</option><option value="3" ${vSaved=='3'?'selected':''}>${db["3"]}</option><option value="4" ${vSaved=='4'?'selected':''}>${db["4"]}</option>`;
                     }
                 }
             }
-            
-            // Relance de la mise à jour des calculs de stratégie
+
+            const fleetGrid = document.querySelector(".fleet-grid");
+            if (fleetGrid) {
+                const nbVoitures = Object.keys(window.fleetState).length;
+                fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(4, nbVoitures)}, 1fr)`;
+            }
+
             for (let id in window.fleetState) { updateCarStrategyLocal(id); }
             if (typeof rebuildIntelTableLocal === "function") rebuildIntelTableLocal();
         };
+
         // =======================================================================
-        // 🧮 MODULE DE DEBRIEFING FLASH CONSO INDÉPENDANT ET EXPORTÉ AU NAVIGATEUR
+        // 🧮 MODULE DE DEBRIEFING FLASH CONSO (ATTACHE GLOBAL NAVIGATEUR)
         // =======================================================================
         window.dernierCalculParVoiture = window.dernierCalculParVoiture || {};
 
@@ -1263,33 +1129,25 @@
             const tFcy = parseInt(document.getElementById(`input-flash-fcy-${id}`).value) || 0;
 
             const totalTours = tSec + tPluie + tDeluge + tFcy;
-
             if (essenceBrulee <= 0 || totalTours === 0) {
                 alert("⚠️ Renseigne l'essence brûlée et les tours de ce châssis pour lancer le calcul !");
                 return;
             }
 
-            // Calcul des tours équivalents SEC (Application de tes facteurs de réduction exacts)
             const toursEquivalentsSec = (tSec * 1.0) + (tPluie * 0.80) + (tDeluge * 0.40) + (tFcy * 0.50);
-
-            // Détermination de la conso de référence sur le Sec
             const consoEtalonSec = essenceBrulee / toursEquivalentsSec;
-
-            // Sauvegarde globale pour cette voiture précise
             window.dernierCalculParVoiture[id] = consoEtalonSec;
 
-            // Mise à jour de l'affichage dans l'en-tête de la carte de CETTE voiture
             const resultSpan = document.getElementById(`flash-result-${id}`);
             if (resultSpan) {
                 resultSpan.innerText = `${consoEtalonSec.toFixed(3)} L/tr`;
                 resultSpan.style.color = "#00bc8c";
             }
 
-            // Activation du bouton d'injection pour cette voiture
             const btnInjecter = document.getElementById(`btn-apply-flash-${id}`);
             if (btnInjecter) {
                 btnInjecter.disabled = false;
-                btnInjecter.style.backgroundColor = "#2ecc71"; // Vert actif
+                btnInjecter.style.backgroundColor = "#2ecc71";
                 btnInjecter.style.color = "#ffffff";
             }
         };
@@ -1298,21 +1156,15 @@
             const consoAInjecter = window.dernierCalculParVoiture[id];
             if (!consoAInjecter) return;
 
-            // Récupération du numéro de pilote sélectionné dans le menu Flash de cette voiture
             const piloteIdx = document.getElementById(`select-flash-pilote-${id}`).value;
-
-            // Ciblage de l'input de consommation "Sec" de ce pilote sur CETTE voiture précise
             const inputConsoSec = document.getElementById(`c_${id}_${piloteIdx}_sec`);
 
             if (inputConsoSec) {
                 inputConsoSec.value = consoAInjecter.toFixed(2);
-                
-                // Déclenchement de l'événement de mise à jour automatique vers Firebase
                 inputConsoSec.dispatchEvent(new Event('change'));
                 
                 alert(`🎯 Calculateur Voiture ${id.toUpperCase()} :\nLa consommation étalon SEC (${consoAInjecter.toFixed(2)} L/tr) a été injectée pour le Pilote ${piloteIdx}.`);
                 
-                // Nettoyage et reset du petit module de la voiture
                 document.getElementById(`input-flash-litres-${id}`).value = "";
                 document.getElementById(`input-flash-sec-${id}`).value = "0";
                 document.getElementById(`input-flash-pluie-${id}`).value = "0";
@@ -1331,6 +1183,57 @@
                 alert(`❌ Erreur d'injection : Impossible de trouver la case d'ID "c_${id}_${piloteIdx}_sec".`);
             }
         };
+
+        // =======================================================================
+        // ➕ LOGIQUE D'AJOUT / RETRAIT DE CHÂSSIS PAR LE FLUX FIREBASE CLOUD
+        // =======================================================================
+        window.ajouterNouvelleVoitureFlotte = function() {
+            const indexSuivant = Object.keys(window.fleetState).length + 1;
+            const nouvelId = `v${indexSuivant}`;
+            const nouveauChassisDefaut = String(500 + indexSuivant);
+
+            if (indexSuivant > 8) {
+                alert("⚠️ Capacité maximale du muret atteinte (8 châssis simultanés max).");
+                return;
+            }
+
+            window.carIdMapping[nouvelId] = nouveauChassisDefaut;
+            window.pilotsDatabase[nouvelId] = { "1": "Pilote A", "2": "Pilote B", "3": "Pilote C", "4": "Pilote D" };
+            window.fleetState[nouvelId] = { 
+                fuel: parseFloat(document.getElementById("setup-maxFuel").value) || 42.0, 
+                currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, 
+                rotation: ["1", "2", "3", "4"], 
+                conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, 
+                hasAlerted: false 
+            };
+
+            window.applyGlobalCustomizationLocal();
+            window.dbPushFullRaceState();
+            alert(`✅ Voiture ajoutée ! Nouveau bouton disponible dans la barre : Châssis #${nouveauChassisDefaut}.`);
+        };
+
+        window.supprimerDerniereVoitureFlotte = function() {
+            const listeIds = Object.keys(window.fleetState);
+            const nbVoitures = listeIds.length;
+
+            if (nbVoitures <= 1) {
+                alert("❌ Impossible de supprimer : Il doit rester au moins 1 voiture active en piste !");
+                return;
+            }
+
+            const dernierId = listeIds[nbVoitures - 1];
+            if (confirm(`⚠️ Souhaitez-vous vraiment retirer la voiture #${window.carIdMapping[dernierId] || dernierId} du muret des stands ?`)) {
+                clearInterval(window.fleetState[dernierId].interval);
+                delete window.fleetState[dernierId];
+                delete window.carIdMapping[dernierId];
+                delete window.pilotsDatabase[dernierId];
+
+                window.applyGlobalCustomizationLocal();
+                window.dbPushFullRaceState();
+                setTimeout(() => { navigateToPage('page-fleet', 'nav-fleet'); }, 100);
+            }
+        };
+        
         function updateCarStrategyLocal(id) {
             const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
             const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
