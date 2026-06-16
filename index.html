@@ -1557,15 +1557,28 @@
             window.dbPushFullRaceState();
         }
 
-        function navigateToPage(targetPageId, activeNavId) {
-            document.getElementById('page-fleet').style.display = 'none';
-            document.getElementById('page-intel').style.display = 'none';
-            document.getElementById('page-setup').style.display = 'none';
-            for (let id in window.fleetState) { document.getElementById(`page-${id}`).style.display = 'none'; }
-            document.getElementById(targetPageId).style.display = 'grid';
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(activeNavId).classList.add('active');
-        }
+  function navigateToPage(targetPageId, activeNavId) {
+    // 1. On cache TOUTES les pages de contenu
+    document.getElementById('page-fleet').style.display = 'none';
+    document.getElementById('page-intel').style.display = 'none';
+    document.getElementById('page-setup').style.display = 'none';
+    
+    // On cache aussi les pages des voitures (v1 à v6)
+    for (let i = 1; i <= 6; i++) {
+        const pageCar = document.getElementById(`page-v${i}`);
+        if(pageCar) pageCar.style.display = 'none';
+    }
+
+    // 2. On affiche SEULEMENT la page demandée
+    const target = document.getElementById(targetPageId);
+    if(target) target.style.display = 'grid';
+
+    // 3. On gère l'état actif des boutons
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const activeBtn = document.getElementById(activeNavId);
+    if(activeBtn) activeBtn.classList.add('active');
+}
+        
         function triggerRacePopup(type, title, text) {
             const popup = document.getElementById("raceAlertPopup");
             const content = document.getElementById("raceAlertContent");
@@ -1766,38 +1779,29 @@
         };
         
         // =======================================================================
-        // 🔒 LOGIQUE DE MASQUAGE CHIRURGICAL (POUR 6 VOITURES MAX)
+        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ
         // =======================================================================
+        window.carsVisiblesCompteur = 4;
+
         window.modifierFlotteVisuelle = function(actionAjouter) {
-            // Nombre de voitures que tu veux gérer (ici 6)
-            const MAX_VOITURES = 6;
-            
-            // On compte combien sont actuellement visibles (en regardant le style des cartes)
-            let visibles = 0;
-            for(let i = 1; i <= MAX_VOITURES; i++) {
-                const card = document.getElementById(`card-v${i}`);
-                if(card && card.style.display !== 'none') visibles++;
-            }
+            if (actionAjouter && window.carsVisiblesCompteur < 6) {
+                window.carsVisiblesCompteur++;
+            } else if (!actionAjouter && window.carsVisiblesCompteur > 1) {
+                window.navigateToPage('page-fleet', 'nav-fleet');
+                window.carsVisiblesCompteur--;
+            } else return;
 
-            // Calcul du nouveau nombre
-            let nouveauNombre = actionAjouter ? (visibles + 1) : (visibles - 1);
-            if (nouveauNombre < 1) nouveauNombre = 1;
-            if (nouveauNombre > MAX_VOITURES) nouveauNombre = MAX_VOITURES;
-
-            // Application du masquage
-            for (let i = 1; i <= MAX_VOITURES; i++) {
-                const displayState = (i <= nouveauNombre) ? '' : 'none';
-                
+            for (let i = 1; i <= 6; i++) {
+                const displayState = (i <= window.carsVisiblesCompteur) ? '' : 'none';
                 if(document.getElementById(`card-v${i}`)) document.getElementById(`card-v${i}`).style.display = displayState;
                 if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
                 if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
-                if(document.getElementById(`page-v${i}`)) document.getElementById(`page-v${i}`).style.display = (i <= nouveauNombre) ? 'grid' : 'none';
+                if(document.getElementById(`page-v${i}`)) document.getElementById(`page-v${i}`).style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
             }
             
-            // Ajustement de la grille d'accueil
             const fleetGrid = document.querySelector(".fleet-grid");
             if (fleetGrid) {
-                fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(nouveauNombre, 4)}, 1fr)`;
+                fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 4)}, 1fr)`;
             }
         };
     </script>
