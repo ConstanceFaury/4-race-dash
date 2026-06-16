@@ -925,23 +925,17 @@
         };
         window.enemyDatabase = []; window.isFCY = false; window.weatherMode = "sec";
 
-// =======================================================================
-        // 🔄 GENERATEUR INTERFACE ET RECONNEXION ULTRA-DYNAMIQUE (FINALE CORRIGÉE)
+         // =======================================================================
+        // 🔄 GENERATEUR INTERFACE ET RECONNEXION ULTRA-DYNAMIQUE (CORRIGÉE & ANTI-CRASH)
         // =======================================================================
         window.applyGlobalCustomizationLocal = function() {
             const containerPages = document.getElementById("car-pages-container");
             const containerTabs = document.getElementById("dynamic-car-tabs");
             const containerSetup = document.getElementById("dynamic-setup-inputs");
-            
-            // Ciblage robuste de l'ancienne carte de gestion des équipages en dur pour la désactiver
-            const oldSetupInputs = document.querySelector("#page-setup > .card[style*='border: 1px solid #222']");
 
             if (!containerPages || !containerTabs) return;
 
-            // Masquage automatique et sécurisé de la vieille liste figée de l'équipage
-            if (oldSetupInputs) oldSetupInputs.style.display = "none";
-
-            // Sauvegarde des sélections utilisateur en cours pour éviter les sauts d'affichage au rafraîchissement
+            // Sauvegarde sécurisée des sélections utilisateur avant reconstruction (évite les sauts visuels)
             let choixFlashMenti = {};
             let choixRotationsMenti = {};
             for (let id in window.fleetState) {
@@ -1007,7 +1001,7 @@
                 const numCar = window.carIdMapping[id] || "??";
                 const db = window.pilotsDatabase[id];
 
-                // Génération automatique du bouton d'onglet
+                // Génération automatique du bouton d'onglet dans la barre supérieure
                 tabsHtml += `<button id="nav-${id}" class="tab-btn" onclick="navigateToPage('page-${id}', 'nav-${id}')">🏎️ <span class="lbl-${id}">#${numCar}</span></button>`;
 
                 // Génération automatique de la page pleine largeur correspondante
@@ -1068,11 +1062,10 @@
                 }
             }
 
-            // Injection dynamique sécurisée
             containerTabs.innerHTML = tabsHtml;
-            if (pagesHtml !== "") containerPages.innerHTML += pagesHtml;
+            containerPages.innerHTML = pagesHtml;
 
-            // Retrait des fiches obsolètes si suppression d'une voiture
+            // Retrait des fiches de voitures obsolètes
             Array.from(containerPages.children).forEach(pageNode => {
                 const checkId = pageNode.id.replace("page-", "");
                 if (checkId !== "fleet" && checkId !== "intel" && checkId !== "setup" && !window.fleetState[checkId]) {
@@ -1119,7 +1112,7 @@
         // =======================================================================
         // 🧮 MODULE DE DEBRIEFING FLASH CONSO (ATTACHE GLOBAL NAVIGATEUR)
         // =======================================================================
-        window.dernierCalculParVoiture = window.dernierCalculParVoiture || {};
+        window.dernierCalculParVoiture = {};
 
         window.executerCalculFlashVoiture = function(id) {
             const essenceBrulee = parseFloat(document.getElementById(`input-flash-litres-${id}`).value) || 0;
@@ -1233,6 +1226,19 @@
                 setTimeout(() => { navigateToPage('page-fleet', 'nav-fleet'); }, 100);
             }
         };
+
+        function updateCarStrategyLocal(id) {
+            const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
+            const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
+            const fcyCoeff = parseFloat(document.getElementById("setup-fcyCoeff").value);
+            const alertLimit = parseInt(document.getElementById("setup-alertLimit").value);
+
+            // Sécurisation anti-crash si l'index météo n'existe pas encore au démarrage ou après une remise à zéro
+            let currentConso = 1.77;
+            if (car && car.conso && car.conso[pilotIdx]) {
+                currentConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"] || 1.77;
+            }
+            if (window.isFCY && !car.isInsidePit) currentConso *= fcyCoeff;
         
         function updateCarStrategyLocal(id) {
             const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
