@@ -175,9 +175,7 @@
         <button id="nav-v2" class="tab-btn" onclick="navigateToPage('page-v2', 'nav-v2')">🏎️ <span class="lbl-v2">#183</span></button>
         <button id="nav-v3" class="tab-btn" onclick="navigateToPage('page-v3', 'nav-v3')">🏎️ <span class="lbl-v3">#156</span></button>
         <button id="nav-v4" class="tab-btn" onclick="navigateToPage('page-v4', 'nav-v4')">🏎️ <span class="lbl-v4">#40</span></button>
-        <button id="nav-v5" class="tab-btn" onclick="navigateToPage('page-v5', 'nav-v5')" style="display: none;">🏎️ <span class="lbl-v5">#05</span></button>
-        <button id="nav-v6" class="tab-btn" onclick="navigateToPage('page-v6', 'nav-v6')" style="display: none;">🏎️ <span class="lbl-v6">#06</span></button>
-     
+        
         <button id="btn-paddock-mode" class="tab-btn" onclick="window.togglePaddockMode()" style="margin-left: auto; border: 1px solid #333; color: #fff; background-color: #1a1a1a;">🔓 Mode Administrateur</button>
     </nav>
 
@@ -358,90 +356,6 @@
                     <button id="btn-exit-v4" class="btn-quick btn-quick-exit" onclick="window.exitCarPit('v4')">🏎️ Repartie !</button>
                 </div>
             </div>
-            
-            <div id="card-v5" class="car-card">
-                <div class="car-header">
-                    <button class="car-number-link lbl-v5" onclick="navigateToPage('page-v5', 'nav-v5')">#531</button>
-                    <span id="badge-v5" class="car-status-badge badge-piste">En Piste</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
-                    <div>
-                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span>
-                        <strong id="fleet-pos-v5" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong>
-                    </div>
-                    
-                    <div style="text-align: right;">
-                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span>
-                        <strong id="fleet-best-v5" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong>
-                        <div style="font-size: 11px; color: #aaa; margin-top: 2px;">
-                            Δ : <span id="fleet-delta-v5" style="font-weight: bold; color: #ef4444;">--</span>
-                        </div>
-                    </div>
-                </div>
-                <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v5" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
-                <div class="fuel-display-box">
-                    <div id="fuel-val-v5" class="fuel-main-value">42.0L</div>
-                    <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v5" style="color:#fff;">-</strong></div>
-                    <div id="target-time-v5" style="font-size:11px; color:#FF4719; font-weight:600; margin-top:2px;">🚨 STOP ESTIMÉ : --:--:--</div> <div id="predict-box-v5" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
-                    <div class="fuel-bar-container"><div id="bar-v5" class="fuel-bar"></div></div>
-                </div>
-                <div id="opt-box-v5" class="pit-options-box">
-                    <label><input type="radio" name="fuel-mode-v5" id="rad-full-v5" checked onclick="document.getElementById('input-litres-v5').disabled = true;"> ⛽ Plein Complet</label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="radio" name="fuel-mode-v5" id="rad-partial-v5" onclick="document.getElementById('input-litres-v5').disabled = false;"> 📥 Ajouter (L) :
-                        <input type="number" id="input-litres-v5" value="15" step="0.5" disabled style="width: 60px; padding: 2px; background: #222; border: 1px solid #444; color: #fff; text-align: center; border-radius: 3px;">
-                    </label>
-                    <label><input type="checkbox" id="chk-pilot-v5" checked> 👤 Chgt Pilote</label>
-                </div>
-                <div id="pit-timer-v5" class="pit-mini-timer">00:00.0</div>
-                <div class="car-actions">
-                    <button id="btn-lap-v5" class="btn-quick btn-quick-lap" onclick="triggerCarLap('v5')">Passage Ligne</button>
-                    <button id="btn-pit-v5" class="btn-quick btn-quick-pit" onclick="enterCarPit('v5')">📥 Entrée Stand</button>
-                    <button id="btn-exit-v5" class="btn-quick btn-quick-exit" onclick="window.exitCarPit('v5')">🏎️ Repartie !</button>
-                </div>
-            </div>
-            
-            <div id="card-v6" class="car-card">
-                <div class="car-header">
-                    <button class="car-number-link lbl-v6" onclick="navigateToPage('page-v6', 'nav-v6')">#531</button>
-                    <span id="badge-v6" class="car-status-badge badge-piste">En Piste</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; background: #000; padding: 6px; border-radius: 4px; border: 1px solid #1c1c1f; margin-top: -4px;">
-                    <div>
-                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Pos</span>
-                        <strong id="fleet-pos-v6" style="color: #EAB308; font-size:15px; font-family:monospace;">-</strong>
-                    </div>
-                    
-                    <div style="text-align: right;">
-                        <span style="font-size:10px; color:#555; text-transform:uppercase; display:block;">Best</span>
-                        <strong id="fleet-best-v6" style="color: #a855f7; font-size:13px; font-family:monospace;">--:--.---</strong>
-                        <div style="font-size: 11px; color: #aaa; margin-top: 2px;">
-                            Δ : <span id="fleet-delta-v6" style="font-weight: bold; color: #ef4444;">--</span>
-                        </div>
-                    </div>
-                </div>
-                <div><span style="font-size:11px; color:#555; text-transform:uppercase;">Pilote</span><div id="fleet-pilot-v6" style="font-weight:bold; font-size:14px; color:#ffffff;">-</div></div>
-                <div class="fuel-display-box">
-                    <div id="fuel-val-v6" class="fuel-main-value">42.0L</div>
-                    <div style="font-size:11px; color:#aaa; margin-top:2px;">Tours restants: <strong id="laps-v6" style="color:#fff;">-</strong></div>
-                    <div id="target-time-v6" style="font-size:11px; color:#FF4719; font-weight:600; margin-top:2px;">🚨 STOP ESTIMÉ : --:--:--</div> <div id="predict-box-v6" class="target-lap-badge">🎯 Arrêt idéal : Tour -</div>
-                    <div class="fuel-bar-container"><div id="bar-v6" class="fuel-bar"></div></div>
-                </div>
-                <div id="opt-box-v6" class="pit-options-box">
-                    <label><input type="radio" name="fuel-mode-v6" id="rad-full-v6" checked onclick="document.getElementById('input-litres-v6').disabled = true;"> ⛽ Plein Complet</label>
-                    <label style="display: flex; align-items: center; gap: 5px;">
-                        <input type="radio" name="fuel-mode-v6" id="rad-partial-v6" onclick="document.getElementById('input-litres-v6').disabled = false;"> 📥 Ajouter (L) :
-                        <input type="number" id="input-litres-v6" value="15" step="0.5" disabled style="width: 60px; padding: 2px; background: #222; border: 1px solid #444; color: #fff; text-align: center; border-radius: 3px;">
-                    </label>
-                    <label><input type="checkbox" id="chk-pilot-v6" checked> 👤 Chgt Pilote</label>
-                </div>
-                <div id="pit-timer-v6" class="pit-mini-timer">00:00.0</div>
-                <div class="car-actions">
-                    <button id="btn-lap-v6" class="btn-quick btn-quick-lap" onclick="triggerCarLap('v6')">Passage Ligne</button>
-                    <button id="btn-pit-v6" class="btn-quick btn-quick-pit" onclick="enterCarPit('v6')">📥 Entrée Stand</button>
-                    <button id="btn-exit-v6" class="btn-quick btn-quick-exit" onclick="window.exitCarPit('v6')">🏎️ Repartie !</button>
-                </div>
-            </div>
         </div>
         <div id="rc-message-paddock" class="col-12" style="background-color: #EAB308; color: #000000; padding: 10px 15px; font-weight: bold; font-size: 13px; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.5); display: flex; justify-content: space-between; align-items: center; margin-bottom: -5px;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -488,11 +402,6 @@
                     <option value="Portimao">Portimao (8h)</option>
                 </select>
             </div>
-        </div>
-
-        <div class="card col-12" style="padding: 15px; text-align: center;">
-            <button type="button" onclick="window.modifierFlotteVisuelle(true)" style="background-color: #22C55E; color: #000; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">➕ AFFICHER</button>
-            <button type="button" onclick="window.modifierFlotteVisuelle(false)" style="background-color: #EF4444; color: #fff; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">❌ MASQUER</button>
         </div>
 
         <div class="card col-12" style="border: 1px solid #222;">
@@ -849,7 +758,7 @@
 
                 remove(ref(db, 'logs'));
                 remove(ref(db, 'race_state')).then(() => {
-                    for(let id in ) {
+                    for(let id in window.fleetState) {
                         window.fleetState[id].fuel = fuelMaxSetting;
                         window.fleetState[id].currentLap = 0;
                         window.fleetState[id].isInsidePit = false;
@@ -1180,25 +1089,21 @@
     </script>
 
     <script>
-        window.carIdMapping = { "v1": "531", "v2": "183", "v3": "156", "v4": "40", "v5": "05", "v6": "06" };
+        window.carIdMapping = { "v1": "531", "v2": "183", "v3": "156", "v4": "40" };
         window.pilotsDatabase = {
             "v1": { "1": "Alex", "2": "Hugo", "3": "Max", "4": "Yanis" },
             "v2": { "1": "Thomas", "2": "Loïc", "3": "Antoine", "4": "Séb" },
             "v3": { "1": "Julien", "2": "Romain", "3": "Nico", "4": "Mathieu" },
-            "v4": { "1": "Arthur", "2": "Pierre", "3": "Dylan", "4": "Franck" },
-            "v5": { "1": "Pilote", "2": "Pilote", "3": "Pilote", "4": "Pilote" },
-            "v6": { "1": "Pilote", "2": "Pilote", "3": "Pilote", "4": "Pilote" }
+            "v4": { "1": "Arthur", "2": "Pierre", "3": "Dylan", "4": "Franck" }
         };
 
-      window.fleetState = {
+        window.fleetState = {
             "v1": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.10, forte_pluie:1.10}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
             "v2": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "2": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "3": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20}, "4": {sec:1.77, pluie_moderee:1.20, forte_pluie:1.20} }, hasAlerted: false },
             "v3": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
-            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
-            "v5": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false },
-            "v6": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false }
+            "v4": { fuel: 42.0, currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, rotation: ["1", "2", "3", "4"], conso: { "1": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "2": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "3": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15}, "4": {sec:1.77, pluie_moderee:1.15, forte_pluie:1.15} }, hasAlerted: false }
         };
-     
+        
         // =======================================================================
         // 1. BASE DE DONNÉES COMPLÈTE : SEC / PLUIE MODÉRÉE / FORTE PLUIE
         // =======================================================================
@@ -1286,15 +1191,11 @@
                 const el2 = document.getElementById(`s_${id}_2`);
                 const el3 = document.getElementById(`s_${id}_3`);
                 const el4 = document.getElementById(`s_${id}_4`);
-                const el5 = document.getElementById(`s_${id}_5`);
-                const el6 = document.getElementById(`s_${id}_6`);
 
                 if (el1 && el1.value) window.pilotsDatabase[id]["1"] = el1.value;
                 if (el2 && el2.value) window.pilotsDatabase[id]["2"] = el2.value;
                 if (el3 && el3.value) window.pilotsDatabase[id]["3"] = el3.value;
                 if (el4 && el4.value) window.pilotsDatabase[id]["4"] = el4.value;
-                if (el5 && el5.value) window.pilotsDatabase[id]["5"] = el5.value;
-                if (el6 && el6.value) window.pilotsDatabase[id]["6"] = el6.value;
             }
 
             // 🏎️ ÉTAPE 2 : Mise à jour des numéros de Châssis (#531, #183...)
@@ -1302,15 +1203,11 @@
             if (document.getElementById("setup-v2")) window.carIdMapping.v2 = document.getElementById("setup-v2").value;
             if (document.getElementById("setup-v3")) window.carIdMapping.v3 = document.getElementById("setup-v3").value;
             if (document.getElementById("setup-v4")) window.carIdMapping.v4 = document.getElementById("setup-v4").value;
-            if (document.getElementById("setup-v5")) window.carIdMapping.v5 = document.getElementById("setup-v5").value;
-            if (document.getElementById("setup-v6")) window.carIdMapping.v6 = document.getElementById("setup-v6").value;
 
             document.querySelectorAll(".lbl-v1").forEach(el => el.innerText = "#" + window.carIdMapping.v1);
             document.querySelectorAll(".lbl-v2").forEach(el => el.innerText = "#" + window.carIdMapping.v2);
             document.querySelectorAll(".lbl-v3").forEach(el => el.innerText = "#" + window.carIdMapping.v3);
             document.querySelectorAll(".lbl-v4").forEach(el => el.innerText = "#" + window.carIdMapping.v4);
-            document.querySelectorAll(".lbl-v5").forEach(el => el.innerText = "#" + window.carIdMapping.v5);
-            document.querySelectorAll(".lbl-v6").forEach(el => el.innerText = "#" + window.carIdMapping.v6);
 
             // 🔄 ÉTAPE 3 : Propagation de force dans ABSOLUMENT TOUS les menus déroulants
             for(let id in window.fleetState) {
@@ -1321,9 +1218,6 @@
                 document.querySelectorAll(`.p2_${id}`).forEach(el => el.innerText = db["2"]);
                 document.querySelectorAll(`.p3_${id}`).forEach(el => el.innerText = db["3"]);
                 document.querySelectorAll(`.p4_${id}`).forEach(el => el.innerText = db["4"]);
-                document.querySelectorAll(`.p5_${id}`).forEach(el => el.innerText = db["5"]);
-                document.querySelectorAll(`.p6_${id}`).forEach(el => el.innerText = db["6"]);
-
 
                 // 🎯 RECONNEXION FORCEE DU CALCULATEUR FLASH (BOÎTE BLEUE)
                 const sCalcFlash = document.getElementById(`select-flash-pilote-${id}`);
@@ -1334,8 +1228,6 @@
                         <option value="2" ${valeurSauvegardee === '2' ? 'selected' : ''}>${db["2"]}</option>
                         <option value="3" ${valeurSauvegardee === '3' ? 'selected' : ''}>${db["3"]}</option>
                         <option value="4" ${valeurSauvegardee === '4' ? 'selected' : ''}>${db["4"]}</option>
-                        <option value="5" ${valeurSauvegardee === '5' ? 'selected' : ''}>${db["5"]}</option>
-                        <option value="6" ${valeurSauvegardee === '6' ? 'selected' : ''}>${db["6"]}</option>
                     `;
                 }
                 
@@ -1349,8 +1241,6 @@
                             <option value="2" ${selectedVal == '2' ? 'selected' : ''}>${db["2"]}</option>
                             <option value="3" ${selectedVal == '3' ? 'selected' : ''}>${db["3"]}</option>
                             <option value="4" ${selectedVal == '4' ? 'selected' : ''}>${db["4"]}</option>
-                            <option value="5" ${selectedVal == '5' ? 'selected' : ''}>${db["5"]}</option>
-                            <option value="6" ${selectedVal == '6' ? 'selected' : ''}>${db["6"]}</option>
                         `;
                     }
                 }
@@ -1597,8 +1487,6 @@
                 if(document.getElementById(`r_${id}_2`)) document.getElementById(`r_${id}_2`).value = car.rotation[1];
                 if(document.getElementById(`r_${id}_3`)) document.getElementById(`r_${id}_3`).value = car.rotation[2];
                 if(document.getElementById(`r_${id}_4`)) document.getElementById(`r_${id}_4`).value = car.rotation[3];
-                if(document.getElementById(`r_${id}_5`)) document.getElementById(`r_${id}_5`).value = car.rotation[4];
-                if(document.getElementById(`r_${id}_6`)) document.getElementById(`r_${id}_6`).value = car.rotation[5];
             }
             
             car.hasAlerted = false; 
@@ -1641,49 +1529,34 @@
             alert(`Ajustement validé : ${resultConso.toFixed(2)} L/tr.`);
         }
 
-       window.saveCarConfig = function(id) {
-    const car = window.fleetState[id];
-    if (!car) return;
+        function saveCarConfig(id) {
+            const car = window.fleetState[id];
+            car.conso["1"].sec = parseFloat(document.getElementById(`c_${id}_1_sec`).value);
+            car.conso["1"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_1_pluie`).value);
+            car.conso["2"].sec = parseFloat(document.getElementById(`c_${id}_2_sec`).value);
+            car.conso["2"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_2_pluie`).value);
+            car.conso["3"].sec = parseFloat(document.getElementById(`c_${id}_3_sec`).value);
+            car.conso["3"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_3_pluie`).value);
+            car.conso["4"].sec = parseFloat(document.getElementById(`c_${id}_4_sec`).value);
+            car.conso["4"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_4_pluie`).value);
+            
+            car.rotation[0] = document.getElementById(`r_${id}_1`).value;
+            car.rotation[1] = document.getElementById(`r_${id}_2`).value;
+            car.rotation[2] = document.getElementById(`r_${id}_3`).value;
+            car.rotation[3] = document.getElementById(`r_${id}_4`).value;
+            
+            window.dbPushFullRaceState();
+        }
 
-    // Sauvegarde des consos pour les 4 pilotes de la voiture
-    for (let p = 1; p <= 4; p++) {
-        const inputSec = document.getElementById(`c_${id}_${p}_sec`);
-        const inputPluie = document.getElementById(`c_${id}_${p}_pluie`);
-        if (inputSec) car.conso[String(p)].sec = parseFloat(inputSec.value);
-        if (inputPluie) car.conso[String(p)][window.weatherMode] = parseFloat(inputPluie.value);
-    }
-    
-    // Sauvegarde de la rotation des relais
-    for (let r = 1; r <= 4; r++) {
-        const sRot = document.getElementById(`r_${id}_${r}`);
-        if (sRot) car.rotation[r-1] = sRot.value;
-    }
-    
-    window.dbPushFullRaceState();
-};
-
-  function navigateToPage(targetPageId, activeNavId) {
-    // 1. On cache TOUTES les pages de contenu
-    document.getElementById('page-fleet').style.display = 'none';
-    document.getElementById('page-intel').style.display = 'none';
-    document.getElementById('page-setup').style.display = 'none';
-    
-    // On cache aussi les pages des voitures (v1 à v6)
-    for (let i = 1; i <= 6; i++) {
-        const pageCar = document.getElementById(`page-v${i}`);
-        if(pageCar) pageCar.style.display = 'none';
-    }
-
-    // 2. On affiche SEULEMENT la page demandée
-    const target = document.getElementById(targetPageId);
-    if(target) target.style.display = 'grid';
-
-    // 3. On gère l'état actif des boutons
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    const activeBtn = document.getElementById(activeNavId);
-    if(activeBtn) activeBtn.classList.add('active');
-}
-        
+        function navigateToPage(targetPageId, activeNavId) {
+            document.getElementById('page-fleet').style.display = 'none';
+            document.getElementById('page-intel').style.display = 'none';
+            document.getElementById('page-setup').style.display = 'none';
+            for (let id in window.fleetState) { document.getElementById(`page-${id}`).style.display = 'none'; }
+            document.getElementById(targetPageId).style.display = 'grid';
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(activeNavId).classList.add('active');
+        }
         function triggerRacePopup(type, title, text) {
             const popup = document.getElementById("raceAlertPopup");
             const content = document.getElementById("raceAlertContent");
@@ -1860,74 +1733,6 @@
                console.log("🔓 Mode Administrator activé : Toutes les commandes muret sont disponibles.");
             }
         };
-
-        window.carsVisiblesCompteur = 4; // Nombre par défaut au démarrage
-
-        window.modifierFlotteVisuelle = function(actionAjouter) {
-            if (actionAjouter && window.carsVisiblesCompteur < 6) {
-                window.carsVisiblesCompteur++;
-            } else if (!actionAjouter && window.carsVisiblesCompteur > 1) {
-                window.navigateToPage('page-fleet', 'nav-fleet');
-                window.carsVisiblesCompteur--;
-            } else return;
-
-            for (let i = 1; i <= 6; i++) {
-                const displayState = (i <= window.carsVisiblesCompteur) ? '' : 'none';
-                if(document.getElementById(`card-v${i}`)) document.getElementById(`card-v${i}`).style.display = displayState;
-                if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
-                if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
-                if(document.getElementById(`page-v${i}`)) document.getElementById(`page-v${i}`).style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
-            }
-            
-            const fleetGrid = document.querySelector(".fleet-grid");
-            if (fleetGrid) fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 3)}, 1fr)`;
-        };
-        
-    // =======================================================================
-        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ - VERSION UNIQUE ET DÉFINITIVE
-        // =======================================================================
-        window.carsVisiblesCompteur = 4; // Nombre de voitures visibles par défaut
-
-        // Fonction principale appelée par tes boutons ➕ et ❌
-        window.modifierFlotteVisuelle = function(actionAjouter) {
-            if (actionAjouter && window.carsVisiblesCompteur < 6) {
-                window.carsVisiblesCompteur++;
-            } else if (!actionAjouter && window.carsVisiblesCompteur > 1) {
-                // Sécurité : si on masque la voiture active, retour à l'accueil
-                window.navigateToPage('page-fleet', 'nav-fleet');
-                window.carsVisiblesCompteur--;
-            } else return;
-
-            window.appliquerMasquageVisuel();
-        };
-
-        // Fonction d'application visuelle (celle-ci fait tout le travail)
-        window.appliquerMasquageVisuel = function() {
-            for (let i = 1; i <= 6; i++) {
-                const displayState = (i <= window.carsVisiblesCompteur) ? '' : 'none';
-                
-                // Masquage/Affichage des éléments (Cartes, boutons nav, setup, pages calcul)
-                if(document.getElementById(`card-v${i}`)) document.getElementById(`card-v${i}`).style.display = displayState;
-                if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
-                if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
-                
-                const page = document.getElementById(`page-v${i}`);
-                if(page) page.style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
-            }
-            
-            // Ajustement dynamique de la grille (max 3 colonnes pour que ce soit lisible)
-            const fleetGrid = document.querySelector(".fleet-grid");
-            if (fleetGrid) {
-                const colonnes = window.carsVisiblesCompteur > 3 ? 3 : window.carsVisiblesCompteur;
-                fleetGrid.style.gridTemplateColumns = `repeat(${colonnes}, 1fr)`;
-            }
-        };
-
-        // Initialisation propre au chargement de la page
-        window.addEventListener('load', () => {
-            window.appliquerMasquageVisuel();
-        });
-        
     </script>
 </body>
 </html>
