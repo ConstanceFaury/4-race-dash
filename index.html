@@ -145,18 +145,29 @@
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         @keyframes scaleUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes flash-card { 0%, 100% { box-shadow: 0 0 4px rgba(239,68,68,0); } 50% { box-shadow: 0 0 20px rgba(239,68,68,0.5); background-color: #1c0a0a; } }
-        /* Animation de clignotement pour le Drapeau Rouge */
-        @keyframes clignotementRouge {
-            0% { border-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
-            50% { border-color: #1a1a1a; box-shadow: none; }
-            100% { border-color: #ef4444; box-shadow: 0 0 5px #ef4444; }
+       
+        /* Animation de clignotement agressive pour le Drapeau Rouge */
+        @keyframes clignotementRougeIntense {
+            0% { 
+                border-color: #ef4444 !important; 
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.8) !important; 
+            }
+            50% { 
+                border-color: #1a1a1a !important; 
+                box-shadow: inset 0 0 0px transparent !important; 
+            }
+            100% { 
+                border-color: #ef4444 !important; 
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.8) !important; 
+            }
         }
-        
-        /* Classe dynamique appliquée aux cartes */
-        .car-card.state-red-flag {
-            border: 2px solid #ef4444 !important;
-            animation: clignotementRouge 1s infinite ease-in-out;
-        }
+
+/* On force l'état sur la carte de la voiture */
+div.car-card.state-red-flag, 
+.car-card.state-red-flag {
+    border: 2px solid #ef4444 !important;
+    animation: clignotementRougeIntense 1s infinite ease-in-out !important;
+}
     </style>
 </head>
 <body>
