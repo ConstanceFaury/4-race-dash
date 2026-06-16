@@ -699,6 +699,17 @@
         </div>
     </div>
 
+    <div id="page-intel" class="page-content grid">
+        </div>
+
+    <div id="login-popup" class="race-alert-popup" style="display: flex; z-index: 9999;">
+        <div class="race-alert-content" style="border: 3px solid var(--4race-coral);">
+            <div class="race-alert-title" style="color: var(--4race-coral);">🔒 ACCÈS SÉCURISÉ</div>
+            <input type="password" id="access-code" placeholder="Entrez le code d'accès" style="width: 100%; padding: 12px; margin: 20px 0; border-radius: 4px; border: 1px solid #333; background: #000; color: #fff; text-align: center; font-size: 16px;">
+            <button class="race-alert-btn" onclick="window.checkAccess()">VALIDER L'ACCÈS</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -1733,6 +1744,21 @@
                console.log("🔓 Mode Administrator activé : Toutes les commandes muret sont disponibles.");
             }
         };
+         window.checkAccess = function() {
+                const code = document.getElementById('access-code').value;
+                const popup = document.getElementById('login-popup');
+                if (code === "ADMIN123") {
+                    popup.style.display = "none";
+                    window.isReadOnlyMode = true;
+                    window.togglePaddockMode();
+                } else if (code === "BOX456") {
+                    popup.style.display = "none";
+                    window.isReadOnlyMode = false;
+                    window.togglePaddockMode();
+                } else {
+                    alert("❌ Code invalide !");
+                }
+            };
     </script>
 </body>
 </html>
