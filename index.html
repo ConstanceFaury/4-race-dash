@@ -1649,7 +1649,7 @@ window.executerCalculFlashVoiture = function(id) {
         // =======================================================================
         window.isReadOnlyMode = false;
         
-        window.togglePaddockMode = function() {
+       window.togglePaddockMode = function() {
             window.isReadOnlyMode = !window.isReadOnlyMode;
             
             const btnMode = document.getElementById("btn-paddock-mode");
@@ -1663,14 +1663,14 @@ window.executerCalculFlashVoiture = function(id) {
             const headerFCY = document.getElementById("trackState");
             const headerReset = document.querySelector(".reset-status");
             const headerMeteo = document.getElementById("weatherStateSelect");
-            const headerRedFlag = document.getElementById("redFlagState"); // 🔴 AJOUT : Ciblage du bouton Drapeau Rouge
+            const headerRedFlag = document.getElementById("redFlagState");
             
             if (window.isReadOnlyMode) {
                 // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
+                
+                // 🔒 SÉCURITÉ ABSOLUE : On fait complètement disparaître le bouton Admin !
                 if (btnMode) {
-                    btnMode.innerText = "🔒 Mode Lecture (Box)";
-                    btnMode.style.backgroundColor = "#EF4444"; // Rouge alerte
-                    btnMode.style.color = "#ffffff";
+                    btnMode.style.display = "none";
                 }
                 
                 // Verrouillage des inputs, sélecteurs et masquage des boutons de passage de ligne
@@ -1686,26 +1686,28 @@ window.executerCalculFlashVoiture = function(id) {
                 
                 // Verrouillage sécurité du header (FCY, Reset, Météo, Drapeau Rouge)
                 if (headerFCY) {
-                    headerFCY.style.pointerEvents = "none"; // Rend le bouton incliquable
-                    headerFCY.style.opacity = "0.6";        // Effet visuel désactivé
+                    headerFCY.style.pointerEvents = "none";
+                    headerFCY.style.opacity = "0.6";
                 }
                 if (headerReset) {
                     headerReset.style.pointerEvents = "none";
                     headerReset.style.opacity = "0.3";
                 }
                 if (headerMeteo) {
-                    headerMeteo.disabled = true; // Bloque le menu déroulant météo à 3 états
+                    headerMeteo.disabled = true;
                 }
                 if (headerRedFlag) {
-                    // 🔴 SÉCURITÉ : Bloque le bouton Drapeau Rouge en mode lecture
                     headerRedFlag.style.pointerEvents = "none";
                     headerRedFlag.style.opacity = "0.4";
                 }
                 
-               console.log("🔒 Paddock Mode activé : FCY, Météo, Reset, Drapeau Rouge et commandes verrouillés.");
+               console.log("🔒 Paddock Mode actif : Commandes verrouillées et bouton de switch masqué.");
             } else {
                 // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
+                
+                // 🔓 On réaffiche le bouton normalement sur le muret
                 if (btnMode) {
+                    btnMode.style.display = "block"; 
                     btnMode.innerText = "🔓 Mode Administrateur";
                     btnMode.style.backgroundColor = "#1a1a1a";
                     btnMode.style.color = "#ffffff";
@@ -1733,29 +1735,13 @@ window.executerCalculFlashVoiture = function(id) {
                     headerMeteo.disabled = false;
                 }
                 if (headerRedFlag) {
-                    // 🔓 Réactivation du bouton Drapeau Rouge pour le muret
                     headerRedFlag.style.pointerEvents = "auto";
                     headerRedFlag.style.opacity = "1";
                 }
                 
-               console.log("🔓 Mode Administrator activé : Toutes les commandes muret sont disponibles.");
+               console.log("🔓 Mode Administrator actif : Toutes les commandes muret sont disponibles.");
             }
         };
-         window.checkAccess = function() {
-                const code = document.getElementById('access-code').value;
-                const popup = document.getElementById('login-popup');
-                if (code === "ADMIN123") {
-                    popup.style.display = "none";
-                    window.isReadOnlyMode = true;
-                    window.togglePaddockMode();
-                } else if (code === "BOX456") {
-                    popup.style.display = "none";
-                    window.isReadOnlyMode = false;
-                    window.togglePaddockMode();
-                } else {
-                    alert("❌ Code invalide !");
-                }
-            };
     </script>
 </body>
 </html>
