@@ -1678,8 +1678,8 @@ window.executerCalculFlashVoiture = function(id) {
                         btnMode.style.display = "block";
                         btnMode.style.setProperty("display", "block", "important");
                         btnMode.innerHTML = `
-                            <div style="display: flex; gap: 5px; align-items: center; background: #1a1a1a; padding: 5px; border-radius: 6px; border: 1px solid #EF4444;">
-                                <input type="password" id="unlock-admin-code" placeholder="Code Admin" style="width: 100px; padding: 4px; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; font-size: 11px; text-align: center;">
+                            <div onclick="event.stopPropagation();" style="display: flex; gap: 5px; align-items: center; background: #1a1a1a; padding: 5px; border-radius: 6px; border: 1px solid #EF4444; cursor: default;">
+                                <input type="password" id="unlock-admin-code" placeholder="Code Admin" style="width: 100px; padding: 4px; background: #000; border: 1px solid #333; color: #fff; border-radius: 4px; font-size: 11px; text-align: center; cursor: text;">
                                 <button onclick="window.reUnlockAdmin(event)" style="padding: 4px 8px; background: #EF4444; color: #fff; border: none; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer;">OK</button>
                             </div>
                         `;
