@@ -1286,11 +1286,15 @@
                 const el2 = document.getElementById(`s_${id}_2`);
                 const el3 = document.getElementById(`s_${id}_3`);
                 const el4 = document.getElementById(`s_${id}_4`);
+                const el5 = document.getElementById(`s_${id}_5`);
+                const el6 = document.getElementById(`s_${id}_6`);
 
                 if (el1 && el1.value) window.pilotsDatabase[id]["1"] = el1.value;
                 if (el2 && el2.value) window.pilotsDatabase[id]["2"] = el2.value;
                 if (el3 && el3.value) window.pilotsDatabase[id]["3"] = el3.value;
                 if (el4 && el4.value) window.pilotsDatabase[id]["4"] = el4.value;
+                if (el5 && el5.value) window.pilotsDatabase[id]["5"] = el5.value;
+                if (el6 && el6.value) window.pilotsDatabase[id]["6"] = el6.value;
             }
 
             // 🏎️ ÉTAPE 2 : Mise à jour des numéros de Châssis (#531, #183...)
@@ -1298,11 +1302,15 @@
             if (document.getElementById("setup-v2")) window.carIdMapping.v2 = document.getElementById("setup-v2").value;
             if (document.getElementById("setup-v3")) window.carIdMapping.v3 = document.getElementById("setup-v3").value;
             if (document.getElementById("setup-v4")) window.carIdMapping.v4 = document.getElementById("setup-v4").value;
+            if (document.getElementById("setup-v5")) window.carIdMapping.v5 = document.getElementById("setup-v5").value;
+            if (document.getElementById("setup-v6")) window.carIdMapping.v6 = document.getElementById("setup-v6").value;
 
             document.querySelectorAll(".lbl-v1").forEach(el => el.innerText = "#" + window.carIdMapping.v1);
             document.querySelectorAll(".lbl-v2").forEach(el => el.innerText = "#" + window.carIdMapping.v2);
             document.querySelectorAll(".lbl-v3").forEach(el => el.innerText = "#" + window.carIdMapping.v3);
             document.querySelectorAll(".lbl-v4").forEach(el => el.innerText = "#" + window.carIdMapping.v4);
+            document.querySelectorAll(".lbl-v5").forEach(el => el.innerText = "#" + window.carIdMapping.v5);
+            document.querySelectorAll(".lbl-v6").forEach(el => el.innerText = "#" + window.carIdMapping.v6);
 
             // 🔄 ÉTAPE 3 : Propagation de force dans ABSOLUMENT TOUS les menus déroulants
             for(let id in window.fleetState) {
@@ -1313,6 +1321,9 @@
                 document.querySelectorAll(`.p2_${id}`).forEach(el => el.innerText = db["2"]);
                 document.querySelectorAll(`.p3_${id}`).forEach(el => el.innerText = db["3"]);
                 document.querySelectorAll(`.p4_${id}`).forEach(el => el.innerText = db["4"]);
+                document.querySelectorAll(`.p5_${id}`).forEach(el => el.innerText = db["5"]);
+                document.querySelectorAll(`.p6_${id}`).forEach(el => el.innerText = db["6"]);
+
 
                 // 🎯 RECONNEXION FORCEE DU CALCULATEUR FLASH (BOÎTE BLEUE)
                 const sCalcFlash = document.getElementById(`select-flash-pilote-${id}`);
@@ -1323,6 +1334,8 @@
                         <option value="2" ${valeurSauvegardee === '2' ? 'selected' : ''}>${db["2"]}</option>
                         <option value="3" ${valeurSauvegardee === '3' ? 'selected' : ''}>${db["3"]}</option>
                         <option value="4" ${valeurSauvegardee === '4' ? 'selected' : ''}>${db["4"]}</option>
+                        <option value="5" ${valeurSauvegardee === '5' ? 'selected' : ''}>${db["5"]}</option>
+                        <option value="6" ${valeurSauvegardee === '6' ? 'selected' : ''}>${db["6"]}</option>
                     `;
                 }
                 
@@ -1336,6 +1349,8 @@
                             <option value="2" ${selectedVal == '2' ? 'selected' : ''}>${db["2"]}</option>
                             <option value="3" ${selectedVal == '3' ? 'selected' : ''}>${db["3"]}</option>
                             <option value="4" ${selectedVal == '4' ? 'selected' : ''}>${db["4"]}</option>
+                            <option value="5" ${selectedVal == '5' ? 'selected' : ''}>${db["5"]}</option>
+                            <option value="6" ${selectedVal == '6' ? 'selected' : ''}>${db["6"]}</option>
                         `;
                     }
                 }
@@ -1582,6 +1597,8 @@
                 if(document.getElementById(`r_${id}_2`)) document.getElementById(`r_${id}_2`).value = car.rotation[1];
                 if(document.getElementById(`r_${id}_3`)) document.getElementById(`r_${id}_3`).value = car.rotation[2];
                 if(document.getElementById(`r_${id}_4`)) document.getElementById(`r_${id}_4`).value = car.rotation[3];
+                if(document.getElementById(`r_${id}_5`)) document.getElementById(`r_${id}_5`).value = car.rotation[4];
+                if(document.getElementById(`r_${id}_6`)) document.getElementById(`r_${id}_6`).value = car.rotation[5];
             }
             
             car.hasAlerted = false; 
@@ -1634,11 +1651,17 @@
             car.conso["3"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_3_pluie`).value);
             car.conso["4"].sec = parseFloat(document.getElementById(`c_${id}_4_sec`).value);
             car.conso["4"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_4_pluie`).value);
+            car.conso["5"].sec = parseFloat(document.getElementById(`c_${id}_5_sec`).value);
+            car.conso["5"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_5_pluie`).value);
+            car.conso["6"].sec = parseFloat(document.getElementById(`c_${id}_6_sec`).value);
+            car.conso["6"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_6_pluie`).value);
             
             car.rotation[0] = document.getElementById(`r_${id}_1`).value;
             car.rotation[1] = document.getElementById(`r_${id}_2`).value;
             car.rotation[2] = document.getElementById(`r_${id}_3`).value;
             car.rotation[3] = document.getElementById(`r_${id}_4`).value;
+            car.rotation[4] = document.getElementById(`r_${id}_5`).value;
+            car.rotation[5] = document.getElementById(`r_${id}_6`).value;
             
             window.dbPushFullRaceState();
         }
@@ -1864,26 +1887,25 @@
             if (fleetGrid) fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 3)}, 1fr)`;
         };
         
-      // =======================================================================
-        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ (VERSION AUTO-APPLIQUÉE)
+     // =======================================================================
+        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ (VERSION DÉFINITIVE)
         // =======================================================================
         window.carsVisiblesCompteur = 4; // Définit le nombre de voitures au démarrage
 
-        // Cette fonction gère le compteur ET applique le style immédiatement
+        // Fonction principale appelée par les boutons ➕ et ❌
         window.modifierFlotteVisuelle = function(actionAjouter) {
             if (actionAjouter && window.carsVisiblesCompteur < 6) {
                 window.carsVisiblesCompteur++;
             } else if (!actionAjouter && window.carsVisiblesCompteur > 1) {
-                // Si on masque la page actuelle, on revient à la page flotte
+                // Si on masque la voiture active, on revient à l'accueil
                 window.navigateToPage('page-fleet', 'nav-fleet');
                 window.carsVisiblesCompteur--;
             } else return;
 
-            // Application immédiate du masquage
-            appliquerMasquageVisuel();
+            window.appliquerMasquageVisuel();
         };
 
-        // Fonction séparée pour appliquer le style (appelée par modifierFlotteVisuelle)
+        // Fonction d'application visuelle
         window.appliquerMasquageVisuel = function() {
             for (let i = 1; i <= 6; i++) {
                 const displayState = (i <= window.carsVisiblesCompteur) ? '' : 'none';
@@ -1893,23 +1915,24 @@
                 if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
                 if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
                 
-                // Masquage/Affichage de la page correspondante
+                // Masquage/Affichage de la page de calcul
                 const page = document.getElementById(`page-v${i}`);
                 if(page) page.style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
             }
             
-            // Ajustement dynamique de la grille d'accueil
+            // Ajustement de la grille d'accueil
             const fleetGrid = document.querySelector(".fleet-grid");
             if (fleetGrid) {
                 fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 4)}, 1fr)`;
             }
         };
 
-        // Initialisation : Applique le masquage au chargement de la page pour ne montrer que 4 voitures
+        // Initialisation au chargement
         window.addEventListener('load', () => {
             window.carsVisiblesCompteur = 4;
             window.appliquerMasquageVisuel();
         });
+
     </script>
 </body>
 </html>
