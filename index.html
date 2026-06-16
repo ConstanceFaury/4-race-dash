@@ -1887,17 +1887,17 @@
             if (fleetGrid) fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 3)}, 1fr)`;
         };
         
-     // =======================================================================
-        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ (VERSION DÉFINITIVE)
+    // =======================================================================
+        // 🔒 LOGIQUE DE MASQUAGE SÉCURISÉ - VERSION UNIQUE ET DÉFINITIVE
         // =======================================================================
-        window.carsVisiblesCompteur = 4; // Définit le nombre de voitures au démarrage
+        window.carsVisiblesCompteur = 4; // Nombre de voitures visibles par défaut
 
-        // Fonction principale appelée par les boutons ➕ et ❌
+        // Fonction principale appelée par tes boutons ➕ et ❌
         window.modifierFlotteVisuelle = function(actionAjouter) {
             if (actionAjouter && window.carsVisiblesCompteur < 6) {
                 window.carsVisiblesCompteur++;
             } else if (!actionAjouter && window.carsVisiblesCompteur > 1) {
-                // Si on masque la voiture active, on revient à l'accueil
+                // Sécurité : si on masque la voiture active, retour à l'accueil
                 window.navigateToPage('page-fleet', 'nav-fleet');
                 window.carsVisiblesCompteur--;
             } else return;
@@ -1905,34 +1905,33 @@
             window.appliquerMasquageVisuel();
         };
 
-        // Fonction d'application visuelle
+        // Fonction d'application visuelle (celle-ci fait tout le travail)
         window.appliquerMasquageVisuel = function() {
             for (let i = 1; i <= 6; i++) {
                 const displayState = (i <= window.carsVisiblesCompteur) ? '' : 'none';
                 
-                // Masquage/Affichage des éléments HTML
+                // Masquage/Affichage des éléments (Cartes, boutons nav, setup, pages calcul)
                 if(document.getElementById(`card-v${i}`)) document.getElementById(`card-v${i}`).style.display = displayState;
                 if(document.getElementById(`nav-v${i}`)) document.getElementById(`nav-v${i}`).style.display = displayState;
                 if(document.getElementById(`box-setup-v${i}`)) document.getElementById(`box-setup-v${i}`).style.display = displayState;
                 
-                // Masquage/Affichage de la page de calcul
                 const page = document.getElementById(`page-v${i}`);
                 if(page) page.style.display = (i <= window.carsVisiblesCompteur) ? 'grid' : 'none';
             }
             
-            // Ajustement de la grille d'accueil
+            // Ajustement dynamique de la grille (max 3 colonnes pour que ce soit lisible)
             const fleetGrid = document.querySelector(".fleet-grid");
             if (fleetGrid) {
-                fleetGrid.style.gridTemplateColumns = `repeat(${Math.min(window.carsVisiblesCompteur, 4)}, 1fr)`;
+                const colonnes = window.carsVisiblesCompteur > 3 ? 3 : window.carsVisiblesCompteur;
+                fleetGrid.style.gridTemplateColumns = `repeat(${colonnes}, 1fr)`;
             }
         };
 
-        // Initialisation au chargement
+        // Initialisation propre au chargement de la page
         window.addEventListener('load', () => {
-            window.carsVisiblesCompteur = 4;
             window.appliquerMasquageVisuel();
         });
-
+        
     </script>
 </body>
 </html>
