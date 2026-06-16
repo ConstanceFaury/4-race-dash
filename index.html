@@ -168,6 +168,20 @@ div.car-card.state-red-flag,
     border: 2px solid #ef4444 !important;
     animation: clignotementRougeIntense 1s infinite ease-in-out !important;
 }
+        /* Animation de clignotement pour le grand cadre extérieur */
+        @keyframes clignotementGrandCadre {
+            0% { border-color: #ef4444 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.7) !important; }
+            50% { border-color: #1a1a1a !important; box-shadow: none !important; }
+            100% { border-color: #ef4444 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.7) !important; }
+        }
+        
+        /* Quand le drapeau rouge est actif, le grand conteneur clignote en rouge */
+        .page-content.state-red-flag,
+        #page-fleet.state-red-flag,
+        .grid.state-red-flag {
+            border: 2px solid #ef4444 !important;
+            animation: clignotementGrandCadre 1.2s infinite ease-in-out !important;
+        }
     </style>
 </head>
 <body>
@@ -919,6 +933,15 @@ div.car-card.state-red-flag,
                 } else {
                     card.classList.remove('state-red-flag');
                 }
+                const fleetContainer = document.getElementById('page-fleet') || document.querySelector('.page-content');
+            
+            if (fleetContainer) {
+                if (window.isRedFlag) {
+                    fleetContainer.classList.add('state-red-flag');
+                } else {
+                    fleetContainer.classList.remove('state-red-flag');
+                }
+            }
             });
             // ----------------------------------------------------------------
 
