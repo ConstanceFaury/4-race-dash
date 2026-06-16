@@ -744,24 +744,18 @@
                 window.updateRaceControlBanner(msg, tStr);
             }
         };
-     window.dbToggleRedFlag = function() {
+   window.dbToggleRedFlag = function() {
+            // 1. Inversion de l'état global
             window.isRedFlag = !window.isRedFlag;
-            const msg = window.isRedFlag ? "🔴 DRAPEAU ROUGE / INTERRUPTION DE COURSE - INTERDICTION DE SORTIR DES STANDS !" : "🟢 FIN DU DRAPEAU ROUGE - PRÉPARATION À LA RELANCE";
             
-            // 📲 1. Envoi de l'état au Cloud Firebase
+            const msg = window.isRedFlag 
+                ? "🔴 DRAPEAU ROUGE / INTERRUPTION DE COURSE - INTERDICTION DE SORTIR DES STANDS !" 
+                : "🟢 FIN DU DRAPEAU ROUGE - PRÉPARATION À LA RELANCE";
+            
+            // 2. Envoi strict au Cloud Firebase
             update(ref(db, 'race_state'), { isRedFlag: window.isRedFlag });
             
-            // 🚨 2. AJOUT VISUEL : Clignotement des contours des tableaux de voitures
-            const carCards = document.querySelectorAll('.car-card');
-            carCards.forEach(card => {
-                if (window.isRedFlag) {
-                    card.classList.add('state-red-flag');
-                } else {
-                    card.classList.remove('state-red-flag');
-                }
-            });
-
-            // 📢 3. Mise à jour de la bannière Direction de Course
+            // 3. Envoi de la bannière Direction de Course
             const tStr = new Date().toLocaleTimeString('fr-FR');
             if (typeof window.updateRaceControlBanner === "function") {
                 window.updateRaceControlBanner(msg, tStr);
@@ -885,13 +879,25 @@
             window.isFCY = data.isFCY || false;
             window.isRedFlag = data.isRedFlag || false;
 
-            // --- SYNCHRONISATION DU BOUTON ET DES CARTES DE DRAPEAU ROUGE ---
+        // --- SYNCHRONISATION DU BOUTON ET DES CARTES DE DRAPEAU ROUGE ---
             const btnRed = document.getElementById('redFlagState');
             if (btnRed) {
                 btnRed.innerText = window.isRedFlag ? "🚨 DRAPEAU ROUGE ACTIF" : "🔴 DRAPEAU ROUGE";
-                btnRed.style.backgroundColor = window.isRedFlag ? "#ef4444" : "#222";
-                btnRed.style.color = window.isRedFlag ? "#000000" : "#ef4444";
-                btnRed.style.animation = window.isRedFlag ? "blink 0.8s infinite" : "none";
+                
+                // On force un nettoyage des styles pour enlever la drôle de tête du bouton
+                btnRed.style.setProperty("border", window.isRedFlag ? "2px solid #ef4444" : "1px solid #333", "important");
+                btnRed.style.setProperty("box-shadow", window.isRedFlag ? "0 0 10px #ef4444" : "none", "important");
+                btnRed.style.setProperty("background-color", window.isRedFlag ? "#ef4444" : "#222", "important");
+                btnRed.style.setProperty("color", window.isRedFlag ? "#ffffff" : "#ef4444", "important");
+                
+                // Style de texte et alignement pour que ce soit droit et propre
+                btnRed.style.fontWeight = "bold";
+                btnRed.style.padding = "10px 15px";
+                btnRed.style.borderRadius = "6px";
+                btnRed.style.cursor = "pointer";
+                
+                // On utilise l'animation clignotante CSS existante uniquement si actif
+                btnRed.style.animation = window.isRedFlag ? "blink 1s infinite ease-in-out" : "none";
             }
 
             // Application immédiate du clignotement rouge sur toutes les cartes en direct du Cloud
