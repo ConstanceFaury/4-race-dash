@@ -925,8 +925,8 @@
         };
         window.enemyDatabase = []; window.isFCY = false; window.weatherMode = "sec";
 
-         // =======================================================================
-        // 🔄 GENERATEUR INTERFACE ET RECONNEXION ULTRA-DYNAMIQUE (CORRIGÉE & ANTI-CRASH)
+// =======================================================================
+        // 🔄 GENERATEUR INTERFACE ET RECONNEXION ULTRA-DYNAMIQUE (ANTI-CRASH)
         // =======================================================================
         window.applyGlobalCustomizationLocal = function() {
             const containerPages = document.getElementById("car-pages-container");
@@ -1196,7 +1196,7 @@
                 fuel: parseFloat(document.getElementById("setup-maxFuel").value) || 42.0, 
                 currentLap: 0, isInsidePit: false, pitSeconds: 0, interval: null, 
                 rotation: ["1", "2", "3", "4"], 
-                conso: { "1": {sec:1.77}, "2": {sec:1.77}, "3": {sec:1.77}, "4": {sec:1.77} }, 
+                conso: { "1": {sec:1.77, pluie_moderee:1.42, forte_pluie:0.71}, "2": {sec:1.77, pluie_moderee:1.42, forte_pluie:0.71}, "3": {sec:1.77, pluie_moderee:1.42, forte_pluie:0.71}, "4": {sec:1.77, pluie_moderee:1.42, forte_pluie:0.71} }, 
                 hasAlerted: false 
             };
 
@@ -1239,19 +1239,6 @@
                 currentConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"] || 1.77;
             }
             if (window.isFCY && !car.isInsidePit) currentConso *= fcyCoeff;
-        
-        function updateCarStrategyLocal(id) {
-            const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
-            const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
-            const fcyCoeff = parseFloat(document.getElementById("setup-fcyCoeff").value);
-            const alertLimit = parseInt(document.getElementById("setup-alertLimit").value);
-
-            // Sélection dynamique de l'indice de consommation météo
-            let currentConso = 1.77;
-            if (car.conso[pilotIdx]) {
-                currentConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"];
-            }
-            if (window.isFCY && !car.isInsidePit) currentConso *= fcyCoeff;
 
             let lapsLeft = Math.floor(car.fuel / currentConso); if (lapsLeft < 0) lapsLeft = 0;
             let targetStopLap = car.currentLap + lapsLeft;
@@ -1290,20 +1277,18 @@
                 tbody.innerHTML = ""; let trackerLap = car.currentLap;
                 for(let i=0; i<4; i++) {
                     let pIdx = car.rotation[i]; 
-                    let c = car.conso[pIdx][window.weatherMode] || car.conso[pIdx]["sec"]; 
+                    let c = car.conso[pIdx][window.weatherMode] || car.conso[pIdx]["sec"] || 1.77; 
                     if(i===0 && window.isFCY) c *= fcyCoeff;
                     let l = (i===0) ? Math.floor(car.fuel / c) : Math.floor(fuelMaxSetting / c); trackerLap += l;
                     tbody.innerHTML += `<tr><td><strong>Relais ${i+1}</strong></td><td>${window.pilotsDatabase[id][pIdx]}</td><td>~ ${l} tours (Fin au Tour ${trackerLap})</td><td>${i===0?car.fuel.toFixed(1)+' L restants':'Plein ('+fuelMaxSetting+' L)'}</td></tr>`;
                 }
             }
+            
             // 🚨 AJOUT OPTIMISATION DANS LA STRATÉGIE LOCAL INTERFACE
             const elTargetLocal = document.getElementById(`target-time-${id}`);
             if (lapsLeft > 0 && elTargetLocal) {
-                // Secours Spa si les variables Cloud ne sont pas encore instanciées en local
                 const refSec = 185.0; 
-                const tempsReferenceTour = refSec; 
-
-                const tempsTotalRestantMS = lapsLeft * tempsReferenceTour * 1000;
+                const tempsTotalRestantMS = lapsLeft * refSec * 1000;
                 const heureCible = new Date(Date.now() + tempsTotalRestantMS);
                 
                 const hh = String(heureCible.getHours()).padStart(2, '0');
@@ -1314,146 +1299,19 @@
             } else if (elTargetLocal) {
                 elTargetLocal.innerText = "🚨 PANNE IMMINENTE";
             }
-        } // Fin de la fonction updateCarStrategyLocal
-
-        function rebuildIntelTableLocal() {
-            const tbody = document.getElementById("intelTableBody"); tbody.innerHTML = "";
-            let totalConsoSum = 0; let totalVehiclesCount = 0;
-
-            window.enemyDatabase.forEach(enemy => {
-                totalConsoSum += enemy.conso; totalVehiclesCount++;
-                tbody.innerHTML += `<tr style="background-color: rgba(255, 71, 25, 0.03); border-left: 4px solid var(--4race-coral);"><td><strong>#${enemy.num}</strong></td><td><span style="color:var(--4race-coral); font-weight:600;">Adversaire</span></td><td>${enemy.laps} tours</td><td><strong>${enemy.conso.toFixed(2)} L/tr</strong></td><td><span class="badge-intel ${enemy.danger?'badge-intel-danger':'badge-intel-safe'}">${enemy.status}</span></td></tr>`;
-            });
-
-            for(let id in window.fleetState) {
-                const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
-                const baseConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"];
-                totalConsoSum += baseConso; totalVehiclesCount++;
-                tbody.innerHTML += `<tr style="border-left: 4px solid var(--state-green);"><td><strong>#${window.carIdMapping[id]}</strong></td><td><span style="color:var(--state-green); font-weight:600;">Notre Team</span></td><td>~ ${Math.floor(parseFloat(document.getElementById("setup-maxFuel").value) / baseConso)} tours</td><td><strong style="color:var(--state-green);">${baseConso.toFixed(2)} L/tr</strong></td><td><span>${window.pilotsDatabase[id][pilotIdx]}</span></td></tr>`;
-            }
-            if (totalVehiclesCount > 0) document.getElementById("globalMeanValue").innerText = (totalConsoSum / totalVehiclesCount).toFixed(2) + " L";
-            else document.getElementById("globalMeanValue").innerText = "0.00 L";
-        }
-
-        function triggerCarLap(id) {
-            const car = window.fleetState[id]; if (car.isInsidePit) return;
-            car.currentLap++; const pilotIdx = car.rotation[0];
-            let conso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"]; 
-            if(window.isFCY) conso *= parseFloat(document.getElementById("setup-fcyCoeff").value);
-            car.fuel = Math.max(0, car.fuel - conso);
-            
-            let labelLogMeteo = "VERT";
-            if(window.isFCY) labelLogMeteo = "🟨 FCY";
-            else if(window.weatherMode === "pluie_moderee") labelLogMeteo = "🌧️ PLUIE";
-            else if(window.weatherMode === "forte_pluie") labelLogMeteo = "⛈️ ORAGE";
-
-            window.dbLogLiveEventCloud(window.carIdMapping[id], `Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, labelLogMeteo);
-            window.dbPushFullRaceState();
-        }
-
-        function enterCarPit(id) {
-            const car = window.fleetState[id]; 
-            car.isInsidePit = true; 
-            car.pitSeconds = 0;
-            
-            if (window.applyPitVisualsOn) window.applyPitVisualsOn(id);
-            if (window.startLocalPitTimer) window.startLocalPitTimer(id);
-
-            window.dbLogLiveEventCloud(window.carIdMapping[id], "📥 ENTRÉE BOX STAND", `${car.fuel.toFixed(1)} L`, "STAND");
-            window.dbPushFullRaceState();
-        }
-
-        window.exitCarPit = function(id) {
-            const car = window.fleetState[id];
-            clearInterval(car.interval);
-            car.isInsidePit = false; // 🟢 La voiture sort officiellement des stands en local
-            
-            const fuelMaxSetting = parseFloat(document.getElementById("setup-maxFuel").value);
-            
-            // Détection du mode de ravitaillement choisi au muret
-            const isFullFuel = document.getElementById(`rad-full-${id}`).checked;
-            const doPilotChange = document.getElementById(`chk-pilot-${id}`).checked;
-        
-            let logDetails = "Arrêt";
-            
-            if (isFullFuel) {
-                car.fuel = fuelMaxSetting; 
-                logDetails += " + Plein Carburant Complet"; 
-            } else {
-                const litresAAjouter = parseFloat(document.getElementById(`input-litres-${id}`).value) || 0.0;
-                // On ajoute les litres au reste actuel sans dépasser la capacité maximale du réservoir
-                car.fuel = Math.min(fuelMaxSetting, car.fuel + litresAAjouter);
-                logDetails += ` + Ravitaillement Partiel (+${litresAAjouter.toFixed(1)}L)`;
-            }
-            
-            if (doPilotChange) {
-                let oldPilot = car.rotation.shift(); 
-                car.rotation.push(oldPilot);
-                logDetails += ` + Relais ${window.pilotsDatabase[id][car.rotation[0]]}`;
-                
-                // Mise à jour des menus déroulants de rotation
-                if(document.getElementById(`r_${id}_1`)) document.getElementById(`r_${id}_1`).value = car.rotation[0];
-                if(document.getElementById(`r_${id}_2`)) document.getElementById(`r_${id}_2`).value = car.rotation[1];
-                if(document.getElementById(`r_${id}_3`)) document.getElementById(`r_${id}_3`).value = car.rotation[2];
-                if(document.getElementById(`r_${id}_4`)) document.getElementById(`r_${id}_4`).value = car.rotation[3];
-            }
-            
-            car.hasAlerted = false; 
-            closeRacePopup();
-            
-            // Désactivation des visuels des stands immédiatement
-            if (window.applyPitVisualsOff) window.applyPitVisualsOff(id);
-        
-            // 📡 ENVOI SYNCHRONISÉ AU CLOUD FIREBASE
-            if (typeof window.dbLogLiveEventCloud === "function") {
-                window.dbLogLiveEventCloud(window.carIdMapping[id], `🏎️ REPARTIE (${logDetails})`, `${car.fuel.toFixed(1)} L`, "PISTE");
-            }
-
-            // Synchro propre de l'état sans écraser ou faire planter le circuit
-            if (typeof window.dbPushFullRaceState === "function") { 
-                window.dbPushFullRaceState(); 
-            }
-        };
-
-        function calculateEnemyIntel() {
-            const num = document.getElementById("intelCarNum").value; const laps = parseInt(document.getElementById("intelCarLaps").value);
-            if(!num || laps <= 0) return;
-            const calculatedConso = parseFloat(document.getElementById("setup-maxFuel").value) / laps; let dangerState = (calculatedConso < 1.76);
-            window.enemyDatabase.push({ num: num, laps: laps, conso: calculatedConso, status: dangerState?"🚨 Pousse son réservoir !":"S'arrête avant nous", danger: dangerState });
-            window.dbPushFullRaceState();
-        }
-
-        function runLiveInjection(id) {
-            const pIdx = document.getElementById(`calc_p_${id}`).value;
-            const weather = document.getElementById(`calc_w_${id}`).value;
-            const laps = parseInt(document.getElementById(`calc_laps_${id}`).value);
-            const fuelRemis = parseFloat(document.getElementById(`calc_fuel_${id}`).value);
-            if(laps <= 0 || fuelRemis <= 0) return;
-            const resultConso = fuelRemis / laps;
-            
-            if (!window.fleetState[id].conso[pIdx]) window.fleetState[id].conso[pIdx] = {};
-            window.fleetState[id].conso[pIdx][weather] = resultConso;
-            
-            window.dbPushFullRaceState();
-            alert(`Ajustement validé : ${resultConso.toFixed(2)} L/tr.`);
         }
 
         function saveCarConfig(id) {
             const car = window.fleetState[id];
             car.conso["1"].sec = parseFloat(document.getElementById(`c_${id}_1_sec`).value);
-            car.conso["1"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_1_pluie`).value);
             car.conso["2"].sec = parseFloat(document.getElementById(`c_${id}_2_sec`).value);
-            car.conso["2"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_2_pluie`).value);
             car.conso["3"].sec = parseFloat(document.getElementById(`c_${id}_3_sec`).value);
-            car.conso["3"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_3_pluie`).value);
             car.conso["4"].sec = parseFloat(document.getElementById(`c_${id}_4_sec`).value);
-            car.conso["4"][window.weatherMode] = parseFloat(document.getElementById(`c_${id}_4_pluie`).value);
             
             car.rotation[0] = document.getElementById(`r_${id}_1`).value;
             car.rotation[1] = document.getElementById(`r_${id}_2`).value;
             car.rotation[2] = document.getElementById(`r_${id}_3`).value;
             car.rotation[3] = document.getElementById(`r_${id}_4`).value;
-            
             window.dbPushFullRaceState();
         }
 
@@ -1461,19 +1319,17 @@
             document.getElementById('page-fleet').style.display = 'none';
             document.getElementById('page-intel').style.display = 'none';
             document.getElementById('page-setup').style.display = 'none';
-            for (let id in window.fleetState) { document.getElementById(`page-${id}`).style.display = 'none'; }
+            for (let id in window.fleetState) { if(document.getElementById(`page-${id}`)) document.getElementById(`page-${id}`).style.display = 'none'; }
             document.getElementById(targetPageId).style.display = 'grid';
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(activeNavId).classList.add('active');
         }
+
         function triggerRacePopup(type, title, text) {
-            const popup = document.getElementById("raceAlertPopup");
-            const content = document.getElementById("raceAlertContent");
-            content.className = "race-alert-content type-" + type;
-            document.getElementById("racePopupTitle").innerText = title;
-            document.getElementById("racePopupText").innerText = text;
-            popup.style.display = "flex";
+            const popup = document.getElementById("raceAlertPopup"); const content = document.getElementById("raceAlertContent");
+            content.className = "race-alert-content type-" + type; document.getElementById("racePopupTitle").innerText = title; document.getElementById("racePopupText").innerText = text; popup.style.display = "flex";
         }
+
         function closeRacePopup() { document.getElementById("raceAlertPopup").style.display = "none"; }
         function formatPitTime(s) { return `${Math.floor(s/60).toString().padStart(2,'0')}:${Math.floor(s%60).toString().padStart(2,'0')}.${Math.floor((s%1)*10)}`; }
 
@@ -1487,32 +1343,22 @@
             const maxFuelInput = document.getElementById("setup-maxFuel");
             if (maxFuelInput) { maxFuelInput.value = circuit.maxFuel; }
 
-            ["v1", "v2", "v3", "v4"].forEach(id => {
-                if (!window.fleetState || !window.fleetState[id]) return;
+            for (let id in window.fleetState) {
                 const car = window.fleetState[id];
-
                 for (let p = 1; p <= 4; p++) {
                     const consoTheorique = circuit.conso[p - 1];
-                    
                     if (!car.conso[p]) car.conso[p] = {};
                     
                     car.conso[p].sec = consoTheorique.sec;
                     car.conso[p].pluie_moderee = consoTheorique.pluie_moderee;
                     car.conso[p].forte_pluie = consoTheorique.forte_pluie;
 
-                    // On rafraîchit visuellement les boîtes du muret des stands
                     const inputSec = document.getElementById(`c_${id}_${p}_sec`);
-                    const inputPluie = document.getElementById(`c_${id}_${p}_pluie`);
-                    
                     if (inputSec) inputSec.value = consoTheorique.sec;
-                    if (inputPluie) {
-                        inputPluie.value = consoTheorique[window.weatherMode === "forte_pluie" ? "forte_pluie" : "pluie_moderee"];
-                    }
                 }
                 car.fuel = circuit.maxFuel;
-            });
+            }
 
-            // 📢 C'EST ICI QUE L'ON TRANSMET LES VALEURS DE RÉFÉRENCE DE MANIÈRE SÉCURISÉE AU CLOUD
             if (typeof window.dbPushFullRaceState === "function") { 
                 update(ref(db, 'race_state'), {
                     track_ref_sec: circuit.refSecSec,
@@ -1538,7 +1384,6 @@
             if (bannerText) bannerText.innerText = "RC_MESSAGE: " + texte;
             if (bannerTime) bannerTime.innerText = heureStr || new Date().toLocaleTimeString('fr-FR');
             
-            // Petite animation de flash pour attirer l'œil du stratège au muret des stands
             if (bannerDiv) {
                 bannerDiv.style.opacity = "0.3";
                 setTimeout(() => { bannerDiv.style.opacity = "1"; }, 150);
@@ -1552,94 +1397,43 @@
         
         window.togglePaddockMode = function() {
             window.isReadOnlyMode = !window.isReadOnlyMode;
-            
             const btnMode = document.getElementById("btn-paddock-mode");
-            
-            // 1. On cible tous les boutons d'action et éléments de saisie des pages
-            const elementsAction = document.querySelectorAll(
-                '.btn-quick, .btn-action, .btn-calculator, input, select'
-            );
-            
-            // 2. On cible spécifiquement les commandes stratégiques du Header (FCY, Météo, Reset, Drapeau Rouge)
+            const elementsAction = document.querySelectorAll('.btn-quick, .btn-action, .btn-calculator, input, select');
             const headerFCY = document.getElementById("trackState");
             const headerReset = document.querySelector(".reset-status");
             const headerMeteo = document.getElementById("weatherStateSelect");
-            const headerRedFlag = document.getElementById("redFlagState"); // 🔴 AJOUT : Ciblage du bouton Drapeau Rouge
+            const headerRedFlag = document.getElementById("redFlagState"); 
             
             if (window.isReadOnlyMode) {
-                // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
                 if (btnMode) {
                     btnMode.innerText = "🔒 Mode Lecture (Box)";
-                    btnMode.style.backgroundColor = "#EF4444"; // Rouge alerte
+                    btnMode.style.backgroundColor = "#EF4444"; 
                     btnMode.style.color = "#ffffff";
                 }
-                
-                // Verrouillage des inputs, sélecteurs et masquage des boutons de passage de ligne
                 elementsAction.forEach(el => {
                     if (el.id !== "btn-paddock-mode") {
-                        if (el.tagName === "INPUT" || el.tagName === "SELECT") {
-                            el.disabled = true;
-                        } else {
-                            el.style.visibility = "hidden";
-                        }
+                        if (el.tagName === "INPUT" || el.tagName === "SELECT") el.disabled = true;
+                        else el.style.visibility = "hidden";
                     }
                 });
-                
-                // Verrouillage sécurité du header (FCY, Reset, Météo, Drapeau Rouge)
-                if (headerFCY) {
-                    headerFCY.style.pointerEvents = "none"; // Rend le bouton incliquable
-                    headerFCY.style.opacity = "0.6";        // Effet visuel désactivé
-                }
-                if (headerReset) {
-                    headerReset.style.pointerEvents = "none";
-                    headerReset.style.opacity = "0.3";
-                }
-                if (headerMeteo) {
-                    headerMeteo.disabled = true; // Bloque le menu déroulant météo à 3 états
-                }
-                if (headerRedFlag) {
-                    // 🔴 SÉCURITÉ : Bloque le bouton Drapeau Rouge en mode lecture
-                    headerRedFlag.style.pointerEvents = "none";
-                    headerRedFlag.style.opacity = "0.4";
-                }
-                
-               console.log("🔒 Paddock Mode activé : FCY, Météo, Reset, Drapeau Rouge et commandes verrouillés.");
+                if (headerFCY) { headerFCY.style.pointerEvents = "none"; headerFCY.style.opacity = "0.6"; }
+                if (headerReset) { headerReset.style.pointerEvents = "none"; headerReset.style.opacity = "0.3"; }
+                if (headerMeteo) headerMeteo.disabled = true;
+                if (headerRedFlag) { headerRedFlag.style.pointerEvents = "none"; headerRedFlag.style.opacity = "0.4"; }
             } else {
-                // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
                 if (btnMode) {
                     btnMode.innerText = "🔓 Mode Administrateur";
                     btnMode.style.backgroundColor = "#1a1a1a";
                     btnMode.style.color = "#ffffff";
                 }
-                
-                // On réactive et réaffiche tout
                 elementsAction.forEach(el => {
-                    if (el.tagName === "INPUT" || el.tagName === "SELECT") {
-                        el.disabled = false;
-                    } else {
-                        el.style.visibility = "visible";
-                    }
+                    if (el.tagName === "INPUT" || el.tagName === "SELECT") el.disabled = false;
+                    else el.style.visibility = "visible";
                 });
-                
-                // Réactivation des commandes du header
-                if (headerFCY) {
-                    headerFCY.style.pointerEvents = "auto";
-                    headerFCY.style.opacity = "1";
-                }
-                if (headerReset) {
-                    headerReset.style.pointerEvents = "auto";
-                    headerReset.style.opacity = "1";
-                }
-                if (headerMeteo) {
-                    headerMeteo.disabled = false;
-                }
-                if (headerRedFlag) {
-                    // 🔓 Réactivation du bouton Drapeau Rouge pour le muret
-                    headerRedFlag.style.pointerEvents = "auto";
-                    headerRedFlag.style.opacity = "1";
-                }
-                
-               console.log("🔓 Mode Administrator activé : Toutes les commandes muret sont disponibles.");
+                if (headerFCY) { headerFCY.style.pointerEvents = "auto"; headerFCY.style.opacity = "1"; }
+                if (headerReset) { headerReset.style.pointerEvents = "auto"; headerReset.style.opacity = "1"; }
+                if (headerMeteo) headerMeteo.disabled = false;
+                if (headerRedFlag) { headerRedFlag.style.pointerEvents = "auto"; headerRedFlag.style.opacity = "1"; }
             }
         };
     </script>
