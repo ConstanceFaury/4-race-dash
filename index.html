@@ -1644,13 +1644,18 @@ window.executerCalculFlashVoiture = function(id) {
             }
         };
 
-        // =======================================================================
+// =======================================================================
         // 4. LOGIQUE DU PADDOCK MODE (VERROUILLAGE ABSOLU ÉCRAN BOX / MURET)
         // =======================================================================
         window.isReadOnlyMode = false;
         
-       window.togglePaddockMode = function() {
-            window.isReadOnlyMode = !window.isReadOnlyMode;
+        window.togglePaddockMode = function(forceState) {
+            // Si forceState est fourni (true ou false), on l'impose. Sinon, on inverse.
+            if (typeof forceState !== "undefined") {
+                window.isReadOnlyMode = forceState;
+            } else {
+                window.isReadOnlyMode = !window.isReadOnlyMode;
+            }
             
             const btnMode = document.getElementById("btn-paddock-mode");
             
@@ -1668,14 +1673,14 @@ window.executerCalculFlashVoiture = function(id) {
             if (window.isReadOnlyMode) {
                 // --- PASSAGE EN MODE LECTURE SEULE (ÉCRAN BOX / STAND) ---
                 
-                // 🔒 SÉCURITÉ ABSOLUE : On fait complètement disparaître le bouton Admin !
+                // 🔒 SÉCURITÉ ABSOLUE : On cache le bouton Admin pour le Box !
                 if (btnMode) {
                     btnMode.style.display = "none";
                 }
                 
                 // Verrouillage des inputs, sélecteurs et masquage des boutons de passage de ligne
                 elementsAction.forEach(el => {
-                    if (el.id !== "btn-paddock-mode") {
+                    if (el.id !== "btn-paddock-mode" && el.id !== "access-code") {
                         if (el.tagName === "INPUT" || el.tagName === "SELECT") {
                             el.disabled = true;
                         } else {
@@ -1684,24 +1689,12 @@ window.executerCalculFlashVoiture = function(id) {
                     }
                 });
                 
-                // Verrouillage sécurité du header (FCY, Reset, Météo, Drapeau Rouge)
-                if (headerFCY) {
-                    headerFCY.style.pointerEvents = "none";
-                    headerFCY.style.opacity = "0.6";
-                }
-                if (headerReset) {
-                    headerReset.style.pointerEvents = "none";
-                    headerReset.style.opacity = "0.3";
-                }
-                if (headerMeteo) {
-                    headerMeteo.disabled = true;
-                }
-                if (headerRedFlag) {
-                    headerRedFlag.style.pointerEvents = "none";
-                    headerRedFlag.style.opacity = "0.4";
-                }
+                if (headerFCY) { headerFCY.style.pointerEvents = "none"; headerFCY.style.opacity = "0.6"; }
+                if (headerReset) { headerReset.style.pointerEvents = "none"; headerReset.style.opacity = "0.3"; }
+                if (headerMeteo) headerMeteo.disabled = true;
+                if (headerRedFlag) { headerRedFlag.style.pointerEvents = "none"; headerRedFlag.style.opacity = "0.4"; }
                 
-               console.log("🔒 Paddock Mode actif : Commandes verrouillées et bouton de switch masqué.");
+                console.log("🔒 Paddock Mode actif : Commandes verrouillées et bouton masqué.");
             } else {
                 // --- RETOUR EN MODE ADMINISTRATEUR (MURET DES STANDS) ---
                 
@@ -1723,23 +1716,33 @@ window.executerCalculFlashVoiture = function(id) {
                 });
                 
                 // Réactivation des commandes du header
-                if (headerFCY) {
-                    headerFCY.style.pointerEvents = "auto";
-                    headerFCY.style.opacity = "1";
-                }
-                if (headerReset) {
-                    headerReset.style.pointerEvents = "auto";
-                    headerReset.style.opacity = "1";
-                }
-                if (headerMeteo) {
-                    headerMeteo.disabled = false;
-                }
-                if (headerRedFlag) {
-                    headerRedFlag.style.pointerEvents = "auto";
-                    headerRedFlag.style.opacity = "1";
-                }
+                if (headerFCY) { headerFCY.style.pointerEvents = "auto"; headerFCY.style.opacity = "1"; }
+                if (headerReset) { headerReset.style.pointerEvents = "auto"; headerReset.style.opacity = "1"; }
+                if (headerMeteo) headerMeteo.disabled = false;
+                if (headerRedFlag) { headerRedFlag.style.pointerEvents = "auto"; headerRedFlag.style.opacity = "1"; }
                 
-               console.log("🔓 Mode Administrator actif : Toutes les commandes muret sont disponibles.");
+                console.log("🔓 Mode Administrateur actif : Commandes muret disponibles.");
+            }
+        };
+
+        // LA LOGIQUE DE VÉRIFICATION AVEC LES CODES INTERNES
+        window.checkAccess = function() {
+            const codeInput = document.getElementById('access-code');
+            if (!codeInput) return;
+            
+            const code = codeInput.value.trim();
+            const popup = document.getElementById('login-popup');
+            
+            if (code === "ADMIN123") {
+                if (popup) popup.style.display = "none";
+                window.togglePaddockMode(false); // Force le mode ADMIN (déverrouillé + bouton visible)
+            } 
+            else if (code === "BOX456") {
+                if (popup) popup.style.display = "none";
+                window.togglePaddockMode(true);  // Force le mode BOX (verrouillé + bouton masqué)
+            } 
+            else {
+                alert("❌ Code d'accès invalide !");
             }
         };
     </script>
