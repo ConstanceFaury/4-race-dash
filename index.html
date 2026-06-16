@@ -1610,17 +1610,25 @@ window.executerCalculFlashVoiture = function(id) {
             alert(`Ajustement validé : ${resultConso.toFixed(2)} L/tr.`);
         }
 
-        function saveCarConfig(id) {
+function saveCarConfig(id) {
     const car = window.fleetState[id];
     
-    // On sauvegarde uniquement le SEC pour les 4 pilotes
+    // On boucle sur les 4 pilotes pour sauvegarder la valeur SEC entrante
     for (let p = 1; p <= 4; p++) {
         const inputSec = document.getElementById(`c_${id}_${p}_sec`);
         if (inputSec) {
-            car.conso[String(p)].sec = parseFloat(inputSec.value) || 1.77;
+            const valSec = parseFloat(inputSec.value) || 1.77;
+            
+            if (!car.conso[p]) car.conso[p] = {};
+            
+            // On applique ta logique 100% linéaire ici aussi !
+            car.conso[p].sec = valSec;
+            car.conso[p].pluie_moderee = valSec * 0.75;
+            car.conso[p].forte_pluie = valSec * 0.40;
         }
     }
     
+    // Sauvegarde des sélections des menus déroulants de rechange
     car.rotation[0] = document.getElementById(`r_${id}_1`).value;
     car.rotation[1] = document.getElementById(`r_${id}_2`).value;
     car.rotation[2] = document.getElementById(`r_${id}_3`).value;
