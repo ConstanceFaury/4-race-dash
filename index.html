@@ -1013,9 +1013,10 @@ div.car-card.state-red-flag,
                 const targetTimeEl = document.getElementById(`target-time-${id}`);
                 let stopEstime = targetTimeEl ? targetTimeEl.innerText : "🚨 STOP ESTIMÉ : --:--:--";
 
-                const currentLap = cloudCar.currentLap || 0;
-                const tourArretIdeal = currentLap ? (parseInt(currentLap) + parseInt(toursRestants)) : "--";
-
+                // On force les valeurs en nombres entiers pour éviter le bug du "Tour 0"
+                const currentLap = parseInt(cloudCar.currentLap) || 0;
+                const toursRestantsVal = parseInt(toursRestants) || 0;
+                const tourArretIdeal = currentLap + toursRestantsVal;
                 // --- HISTORIQUE DES 5 DERNIERS TOURS ---
                 let lapsRows = "";
                 const history = cloudCar.history || []; 
@@ -1871,24 +1872,34 @@ function saveCarConfig(id) {
     window.dbPushFullRaceState();
 }
 
-   function navigateToPage(targetPageId, activeNavId) {
+  function navigateToPage(targetPageId, activeNavId) {
+            // 🔍 On cible tout l'en-tête de ton site (le bandeau météo/bouton rouge)
+            const topHeader = document.querySelector('header') || document.querySelector('.controls-top');
+
             // 1. On cache TOUTES les pages principales
             if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.display = 'none';
             if (document.getElementById('page-intel')) document.getElementById('page-intel').style.display = 'none';
             if (document.getElementById('page-setup')) document.getElementById('page-setup').style.display = 'none';
             if (document.getElementById('page-box-monitor')) document.getElementById('page-box-monitor').style.display = 'none';
             
-            // 2. On cache les pages individuelles des voitures
+            // 2. On cache les pages individuelles
             for (let id in window.fleetState) { 
                 const carPage = document.getElementById(`page-${id}`);
                 if (carPage) carPage.style.display = 'none'; 
             }
             
-            // 3. On affiche la page demandée
+            // 🚀 3. MASQUAGE DU BANDEAU SPÉCIFIQUE AU BOX
+            if (targetPageId === 'page-box-monitor') {
+                if (topHeader) topHeader.style.setProperty("display", "none", "important");
+            } else {
+                if (topHeader) topHeader.style.setProperty("display", "flex", "important");
+            }
+
+            // 4. On affiche la page demandée
             const targetPage = document.getElementById(targetPageId);
             if (targetPage) targetPage.style.display = 'grid';
             
-            // 4. On gère le style actif sur l'onglet
+            // 5. On gère le style actif de l'onglet
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             const activeNav = document.getElementById(activeNavId);
             if (activeNav) activeNav.classList.add('active');
