@@ -309,40 +309,6 @@ div.car-card.state-red-flag,
     50% { border-color: #500; }
     100% { border-color: #ef4444; }
 }
-/* --- Styles spécifiques au Volet Stands --- */
-.stand-mini-block {
-    background: #101012;
-    border: 1px solid #1a1a1e;
-    padding: 10px;
-    border-radius: 6px;
-    text-align: center;
-}
-.stand-mini-block label {
-    display: block;
-    font-size: 0.75rem;
-    color: #71717a;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-}
-.stand-mini-block .value {
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-.stand-chrono-list {
-    background: #09090b;
-    border-radius: 6px;
-    padding: 8px;
-    margin-top: 10px;
-    font-family: monospace;
-    font-size: 0.95rem;
-}
-.stand-chrono-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 3px 6px;
-    border-bottom: 1px solid #141416;
-}
-.stand-chrono-row:last-child { border-bottom: none; }
         
     </style>
 </head>
@@ -374,10 +340,8 @@ div.car-card.state-red-flag,
         <button id="nav-v2" class="tab-btn" onclick="navigateToPage('page-v2', 'nav-v2')">🏎️ <span class="lbl-v2">#183</span></button>
         <button id="nav-v3" class="tab-btn" onclick="navigateToPage('page-v3', 'nav-v3')">🏎️ <span class="lbl-v3">#156</span></button>
         <button id="nav-v4" class="tab-btn" onclick="navigateToPage('page-v4', 'nav-v4')">🏎️ <span class="lbl-v4">#40</span></button>
-        <button class="nav-btn" onclick="navigateToPage('page-stands')">📺 Vue Stands (Box)</button>
         
       <button id="btn-paddock-mode" class="tab-btn" onclick="window.togglePaddockMode()" style="margin-left: auto; border: 1px solid #333; color: #fff; background-color: #1a1a1a; padding: 10px 18px; border-radius: 6px; font-weight: bold; cursor: pointer;"></button>
-      <button class="nav-btn" onclick="navigateToPage('page-stands')">📺 Mode Stands (Box)</button>
     </nav>
 
     <div id="raceAlertPopup" class="race-alert-popup">
@@ -389,15 +353,14 @@ div.car-card.state-red-flag,
     </div>
     
 <div id="page-stands" class="page-content page-hidden">
-    <div class="card" style="grid-column: span 12; margin-bottom: 15px;">
-        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
-            <span class="card-title">📊 SUPERVISION FLOTTE — MONITEUR STANDS</span>
-            <span id="stands-global-status" style="padding: 4px 15px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; color: #000; background: var(--state-green);">PISTE VERTE</span>
-        </div>
+    <div class="stands-header">
+        <h2>📊 SUPERVISION FLOTTE — MODE STANDS</h2>
+        <div id="stands-global-status" class="status-banner-stands">PISTE CLAIR</div>
     </div>
     
-    <div id="stands-cars-container" style="grid-column: span 12; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 15px;">
-        </div>
+    <div class="stands-grid">
+        <div id="stands-cars-container" class="stands-container"></div>
+    </div>
 </div>
     
   <div id="page-fleet" class="page-content active grid">
@@ -1079,94 +1042,115 @@ window.renderStandsScreen = function() {
     const container = document.getElementById("stands-cars-container");
     if (!container) return;
     
-    // 1. Synchronisation de la bannière de sécurité du volet
+    // 1. Mise à jour de la bannière d'état globale de la course
     const globalStatus = document.getElementById("stands-global-status");
     if (globalStatus) {
-        if (window.isRedFlag) { globalStatus.innerText = "🛑 DRAPEAU ROUGE"; globalStatus.style.background = "var(--state-alert)"; }
-        else if (window.isFCY) { globalStatus.innerText = "🟨 FCY ACTIF"; globalStatus.style.background = "var(--state-fcy)"; }
-        else if (window.weatherMode === "forte_pluie") { globalStatus.innerText = "⛈️ FORTE PLUIE"; globalStatus.style.background = "#2563eb"; }
-        else if (window.weatherMode === "pluie_moderee") { globalStatus.innerText = "🌧️ PLUIE MODÉRÉE"; globalStatus.style.background = "#3b82f6"; }
-        else { globalStatus.innerText = "🟢 PISTE CLAIRE"; globalStatus.style.background = "var(--state-green)"; }
+        if (window.isRedFlag) {
+            globalStatus.innerText = "🛑 DRAPEAU ROUGE";
+            globalStatus.style.background = "var(--state-alert)";
+        } else if (window.isFCY) {
+            globalStatus.innerText = "🟨 FULL COURSE YELLOW";
+            globalStatus.style.background = "var(--state-fcy)";
+        } else if (window.weatherMode === "forte_pluie" || window.weatherMode === "pluie_moderee") {
+            globalStatus.innerText = "🌧️ PISTE HUMIDE / PLUIE";
+            globalStatus.style.background = "#3b82f6";
+        } else {
+            globalStatus.innerText = "🟢 PISTE CLEAR (VERT)";
+            globalStatus.style.background = "var(--state-green)";
+        }
     }
 
     let htmlContent = "";
 
-    // 2. Génération des volets par voiture
+    // 2. Boucle sur les voitures de ton équipe
     ["v1", "v2", "v3", "v4"].forEach(id => {
         if (!window.fleetState || !window.fleetState[id]) return;
         const car = window.fleetState[id];
         
+        // Récupération du numéro de voiture configuré dans le setup
         const inputNum = document.getElementById(`setup-${id}`);
         const carNum = inputNum ? inputNum.value : car.carNumInput || id.toUpperCase();
         
         const pilotIdx = car.rotation ? car.rotation[0] : "1";
         const pilotName = window.pilotsDatabase && window.pilotsDatabase[id] ? window.pilotsDatabase[id][pilotIdx] : `Pilote ${pilotIdx}`;
         
+        // Gestion de l'état de la voiture
+        let statusText = car.isInsidePit ? "🔧 AU STAND" : "🏎️ EN PISTE";
+        let statusClass = car.isInsidePit ? "background: var(--state-alert); color:white;" : "background: var(--state-green); color:black;";
+        
+        // Logique de calcul du stop estimé et du tour d'arrêt idéal
+        // Disons que la capacité max dépend du circuit (ex: maxFuel) et de la conso
         const currentFuel = parseFloat(car.fuel) || 0;
         const currentLap = parseInt(car.currentLap) || 0;
         
-        // Calculs stratégiques linéaires basés sur le SEC
+        // On estime combien de tours il reste avec l'essence actuelle
         let facteurMeteo = 1.0;
         if (window.weatherMode === "pluie_moderee") facteurMeteo = 0.75;
         if (window.weatherMode === "forte_pluie") facteurMeteo = 0.40;
-        
         let consoEstimee = ((car.conso && car.conso[pilotIdx] ? car.conso[pilotIdx].sec : 1.77) || 1.77) * facteurMeteo;
-        if (window.isFCY) consoEstimee *= 0.50; // Alignement sur la conso FCY à 50%
+        if (window.isFCY) consoEstimee *= 0.50;
         
         const toursRestants = consoEstimee > 0 ? Math.floor(currentFuel / consoEstimee) : 0;
         const tourArretIdeal = currentLap + toursRestants;
         
-        // Estimation horaire (Basé sur 3min05 par tour au drapeau vert, 4min sous FCY à Spa)
-        const tempsMoyenTour = window.isFCY ? 240 : 185; 
-        const heureStop = new Date(Date.now() + (toursRestants * tempsMoyenTour * 1000)).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
+        // Heure de stop estimée (en se basant sur un chrono moyen de 3 min (180s) par tour à Spa en Fun Cup)
+        const tempsMoyenTourSecondes = window.isFCY ? 240 : 185; 
+        const secondesRestantes = toursRestants * tempsMoyenTourSecondes;
+        const heureStop = new Date(Date.now() + secondesRestantes * 1000).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
 
-        const borderStyle = car.isInsidePit ? "border: 2px solid var(--state-alert);" : "border: 1px solid #222;";
-        const statusLabel = car.isInsidePit ? "<span style='color:var(--state-alert)'>🔧 STAND</span>" : "<span style='color:var(--state-green)'>🏎️ PISTE</span>";
-
+        // Simulation ou récupération de l'historique (ici on extrait les données reçues)
+        // Note : Idéalement, ton script Python alimentera un tableau de derniers chronos. 
+        // En attendant, on affiche le Best Lap et le dernier encodé de manière dynamique.
+        const bestLapStr = car.bestLap || "--:--.--";
+        const lastLapStr = car.lastLap || "--:--.--"; 
+        
+        // Génération du bloc HTML pour la voiture
         htmlContent += `
-            <div class="card" style="${borderStyle} padding: 15px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #222; padding-bottom: 6px;">
-                    <span style="font-size: 1.6rem; font-weight: 800; color: var(--4race-coral); font-style: italic;">N° ${carNum}</span>
-                    <span style="font-weight: bold; font-size: 0.95rem;">${statusLabel}</span>
+            <div class="stand-car-card ${car.isInsidePit ? 'pit-active' : ''}">
+                <div class="stand-car-top">
+                    <span class="stand-car-num">N° ${carNum}</span>
+                    <span class="stand-car-state" style="${statusClass}">${statusText}</span>
                 </div>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div class="stand-mini-block" style="grid-column: span 2;">
+                <div class="stand-main-info">
+                    <div class="stand-info-block">
                         <label>Pilote en Piste</label>
-                        <div class="value" style="color: var(--4race-white); font-size: 1.15rem;">${pilotName}</div>
+                        <div class="value" style="color:var(--4race-coral); font-size:1.4rem;">${pilotName}</div>
                     </div>
-                    <div class="stand-mini-block">
+                    <div class="stand-info-block">
                         <label>Tour Actuel</label>
                         <div class="value">#${currentLap}</div>
                     </div>
-                    <div class="stand-mini-block">
-                        <label>Carburant</label>
-                        <div class="value" style="color: ${currentFuel < 8 ? 'var(--state-alert)' : 'var(--4race-white)'}">${currentFuel.toFixed(1)} L</div>
+                    <div class="stand-info-block">
+                        <label>Tour Arrêt Idéal</label>
+                        <div class="value highlight">#${tourArretIdeal}</div>
                     </div>
-                    <div class="stand-mini-block">
-                        <label>Box Stop Idéal</label>
-                        <div class="value" style="color: #00ffcc;">#${tourArretIdeal}</div>
-                    </div>
-                    <div class="stand-mini-block">
-                        <label>Heure du Stop</label>
-                        <div class="value" style="color: var(--state-fcy);">~ ${heureStop}</div>
+                    <div class="stand-info-block">
+                        <label>Heure du Pitchief Stop</label>
+                        <div class="value" style="color:#eab308;">~ ${heureStop}</div>
                     </div>
                 </div>
                 
-                <div class="stand-chrono-list">
-                    <div class="stand-chrono-row">
-                        <span style="color: #71717a;">Dernier Tour :</span>
-                        <span style="color: #fff; font-weight: bold;">${car.lastLap || "--:--.--"}</span>
+                <div class="stand-chrono-section">
+                    <div class="stand-chrono-title">
+                        <span>⏱️ CHRONOMÉTRAGE LIVE</span>
+                        <span style="color:#f0f;">Meilleur : ${bestLapStr}</span>
                     </div>
-                    <div class="stand-chrono-row">
-                        <span style="color: #71717a;">Meilleur Tour :</span>
-                        <span style="color: #f0f; font-weight: bold;">${car.bestLap || "--:--.--"}</span>
+                    <div class="stand-laps-list">
+                        <div class="stand-lap-row">
+                            <span>Dernier tour :</span>
+                            <span style="font-weight:bold; color:white;">${lastLapStr}</span>
+                        </div>
+                        <div class="stand-lap-row">
+                            <span>Carburant Restant :</span>
+                            <span style="color:${currentFuel < 8 ? 'var(--state-alert)' : '#22c55e'}">${currentFuel.toFixed(1)} L</span>
+                        </div>
                     </div>
                 </div>
             </div>
         `;
     });
-
+    
     container.innerHTML = htmlContent;
 };
         
