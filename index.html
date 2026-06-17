@@ -246,7 +246,7 @@ div.car-card.state-red-flag,
 
  <nav id="main-nav-bar">
         <button id="nav-fleet" class="tab-btn active" onclick="navigateToPage('page-fleet', 'nav-fleet')">📋 Supervision Flotte</button>
-        <button class="tab-btn" id="tab-box-monitor" onclick="window.switchTab('box-monitor')">⏱️ Moniteur Box Pilotes</button>
+        <button class="tab-btn" id="tab-box-monitor" onclick="navigateToPage('page-box-monitor', 'tab-box-monitor')">⏱️ Moniteur Box Pilotes</button>
         <button id="nav-intel" class="tab-btn" onclick="navigateToPage('page-intel', 'nav-intel')">🕵️ Intel Adversaires</button>
         <button id="nav-setup" class="tab-btn" onclick="navigateToPage('page-setup', 'nav-setup')">⚙️ Setup Équipe</button>
         <button id="nav-v1" class="tab-btn" onclick="navigateToPage('page-v1', 'nav-v1')">🏎️ <span class="lbl-v1">#531</span></button>
@@ -1818,13 +1818,26 @@ function saveCarConfig(id) {
 }
 
         function navigateToPage(targetPageId, activeNavId) {
-            document.getElementById('page-fleet').style.display = 'none';
-            document.getElementById('page-intel').style.display = 'none';
-            document.getElementById('page-setup').style.display = 'none';
-            for (let id in window.fleetState) { document.getElementById(`page-${id}`).style.display = 'none'; }
-            document.getElementById(targetPageId).style.display = 'grid';
+            // 1. On cache TOUTES les pages principales (on a ajouté la nouvelle ici)
+            if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.style.display = 'none';
+            if (document.getElementById('page-intel')) document.getElementById('page-intel').style.display = 'none';
+            if (document.getElementById('page-setup')) document.getElementById('page-setup').style.display = 'none';
+            if (document.getElementById('page-box-monitor')) document.getElementById('page-box-monitor').style.display = 'none'; // <-- LA LIGNE AJOUTÉE !
+            
+            // 2. On cache les pages individuelles des voitures (#531, #183, etc.)
+            for (let id in window.fleetState) { 
+                const carPage = document.getElementById(`page-${id}`);
+                if (carPage) carPage.style.display = 'none'; 
+            }
+            
+            // 3. On affiche la page demandée
+            const targetPage = document.getElementById(targetPageId);
+            if (targetPage) targetPage.style.display = 'grid';
+            
+            // 4. On gère le style actif sur les boutons du menu
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(activeNavId).classList.add('active');
+            const activeNav = document.getElementById(activeNavId);
+            if (activeNav) activeNav.classList.add('active');
         }
         function triggerRacePopup(type, title, text) {
             const popup = document.getElementById("raceAlertPopup");
