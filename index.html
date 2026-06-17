@@ -777,14 +777,14 @@ div.car-card.state-red-flag,
         </div>
     </div>
 
-    <div id="page-intel" class="page-content grid">
-        </div>
-
-<div id="page-box-monitor" class="page-content active-grid" style="display: none; width: 100vw; max-width: 100%; padding: 20px; box-sizing: border-box; background: #0a0a0a;">
-    <div id="box-monitor-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
-        
+<div id="page-intel" class="page-content grid">
     </div>
-</div>
+
+    <div id="page-box-monitor" class="page-content active-grid" style="display: none; width: 100vw; max-width: 100%; padding: 20px; box-sizing: border-box; background: #0a0a0a;">
+        <div id="box-monitor-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
+            </div>
+    </div>
+    
     <div id="login-popup" class="race-alert-popup" style="display: flex; z-index: 9999;">
         <div class="race-alert-content" style="border: 3px solid var(--4race-coral);">
             <div class="race-alert-title" style="color: var(--4race-coral);">🔒 ACCÈS SÉCURISÉ</div>
@@ -949,7 +949,7 @@ div.car-card.state-red-flag,
         // =======================================================================
         // GENERATION DYNAMIQUE DE L'ÉCRAN BOX PILOTES
         // =======================================================================
-     window.updateBoxMonitorPage = function(data) {
+    window.updateBoxMonitorPage = function(data) {
             const gridContainer = document.getElementById("box-monitor-grid");
             if (!gridContainer) return;
 
@@ -960,97 +960,136 @@ div.car-card.state-red-flag,
                 
                 const cloudCar = data.cars[id];
                 const localCar = window.fleetState[id];
+
+                // 🛑 CORRECTION DU NUMÉRO DE VOITURE (Récupère #531 au lieu de v1)
+                let realCarNum = id; 
+                const lblSpan = document.querySelector(`.lbl-${id}`);
+                if (lblSpan) {
+                    realCarNum = lblSpan.innerText; // Va chercher le vrai texte "#531" dans ton menu HTML
+                } else {
+                    realCarNum = id.toUpperCase();
+                }
+
                 const activePilot = localCar.rotation ? localCar.rotation[0] : "1";
                 const pilotName = cloudCar.pilotsInputs ? (cloudCar.pilotsInputs[activePilot] || `Pilote ${activePilot}`) : `Pilote ${activePilot}`;
 
-                // --- 1. ÉTAT DE LA VOITURE EN DIRECT ---
+                // --- ÉTAT DE LA VOITURE ---
                 let statusText = "EN PISTE";
-                let statusBg = "#10b981";
-                let statusColor = "#fff";
+                let statusBg = "rgba(16, 185, 129, 0.15)";
+                let statusColor = "#10b981";
+                let statusBorder = "1px solid #10b981";
+
                 if (window.isRedFlag) {
                     statusText = "DRAPEAU ROUGE";
-                    statusBg = "#ef4444";
+                    statusBg = "rgba(239, 68, 68, 0.15)";
+                    statusColor = "#ef4444";
+                    statusBorder = "1px solid #ef4444";
                 } else if (window.isFCY) {
-                    statusText = "FCY SLOW";
-                    statusBg = "#f59e0b";
-                    statusColor = "#000";
+                    statusText = "FCY EN COURS";
+                    statusBg = "rgba(245, 158, 11, 0.15)";
+                    statusColor = "#f59e0b";
+                    statusBorder = "1px solid #f59e0b";
                 } else if (cloudCar.isInsidePit) {
                     statusText = "AU STAND";
-                    statusBg = "#3b82f6";
+                    statusBg = "rgba(59, 130, 246, 0.15)";
+                    statusColor = "#3b82f6";
+                    statusBorder = "1px solid #3b82f6";
                 }
 
-                // --- 2. RECUPERATION DES ESSAIS / CHRONOS DEPUIS TON CODE CLOUD ---
+                // --- RÉCUPÉRATION IDENTIQUE A LA SUPERVISION FLOTTE ---
+                // On va chercher les vrais textes de la page supervision pour être sûr que c'est 100% identique
+                const posEl = document.getElementById(`fleet-pos-${id}`);
+                let pos = posEl ? posEl.innerText : "-";
+
+                const bestEl = document.getElementById(`fleet-best-${id}`);
+                let best = bestEl ? bestEl.innerText : "--:--.---";
+
+                const deltaEl = document.getElementById(`fleet-delta-${id}`);
+                let delta = deltaEl ? deltaEl.innerText : "--";
+
+                const lapsEl = document.getElementById(`laps-${id}`);
+                let toursRestants = lapsEl ? lapsEl.innerText : "0";
+
+                const targetTimeEl = document.getElementById(`target-time-${id}`);
+                let stopEstime = targetTimeEl ? targetTimeEl.innerText : "🚨 STOP ESTIMÉ : --:--:--";
+
+                const currentLap = cloudCar.currentLap || 0;
+                const tourArretIdeal = currentLap ? (parseInt(currentLap) + parseInt(toursRestants)) : "--";
+
+                // --- HISTORIQUE DES 5 DERNIERS TOURS ---
                 let lapsRows = "";
                 const history = cloudCar.history || []; 
                 const last5Laps = history.slice(-5).reverse(); 
                 
                 if (last5Laps.length === 0) {
-                    lapsRows = `<tr><td colspan="3" style="color:#444; text-align:center; padding:15px; font-size:11px;">Aucun tour enregistré</td></tr>`;
+                    lapsRows = `<tr><td colspan="3" style="color:#555; text-align:center; padding:15px; font-style:italic;">Aucun chrono enregistré</td></tr>`;
                 } else {
                     last5Laps.forEach(l => {
                         const isBest = l.time === cloudCar.bestLap;
-                        const timeClass = isBest ? "lap-purple" : "";
-                        const deltaClass = l.delta.startsWith("-") || l.delta === "0.000" ? "delta-green" : "delta-red";
+                        const timeColor = isBest ? "color: #a855f7; font-weight: bold;" : "color: #ddd;";
+                        const deltaColor = l.delta.startsWith("-") || l.delta === "0.000" ? "color: #10b981;" : (l.delta === "--" ? "color: #555;" : "color: #ef4444;");
                         
                         lapsRows += `
-                            <tr>
-                                <td>Tour ${l.lap}</td>
-                                <td class="${timeClass}">${l.time}</td>
-                                <td class="${deltaClass}">${l.delta}</td>
+                            <tr style="border-bottom: 1px solid #222;">
+                                <td style="padding: 6px 5px; color: #aaa;">Tour ${l.lap}</td>
+                                <td style="padding: 6px 5px; ${timeColor}">${l.time}</td>
+                                <td style="padding: 6px 5px; ${deltaColor}">${l.delta}</td>
                             </tr>
                         `;
                     });
                 }
 
-                // --- 3. COPIE CONFORME DES INFOS CALCULÉES PAR TA PAGE SUPERVISION ---
-                // On va chercher directement le texte généré par ton gros bloc Firebase
-                const txtLapsEl = document.getElementById(`laps-${id}`);
-                const toursRestants = txtLapsEl ? parseInt(txtLapsEl.innerText) || 0 : 0;
-                
-                const txtTimeEl = document.getElementById(`target-time-${id}`);
-                let stopEstime = txtTimeEl ? txtTimeEl.innerText.replace("🚨 STOP ESTIMÉ : ", "") : "--:--:--";
-                if (window.isRedFlag) stopEstime = "PAUSE";
-
-                const currentLap = cloudCar.currentLap || 0;
-                const tourArretIdeal = currentLap ? (parseInt(currentLap) + toursRestants) : "--";
-
-                // --- 4. AFFICHAGE ÉPURÉ SPÉCIAL PILOTE ---
+                // --- CONSTRUCTION DE LA CARTE (Clone Visuel avec le bloc info pilote à la place de l'essence) ---
                 htmlContent += `
-                    <div class="box-monitor-card">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span style="font-size: 32px; font-weight: 900; color: #fff;">#${id}</span>
-                            <span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 1px;">${statusText}</span>
+                    <div style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 18px; color: #fff; display: flex; flex-direction: column; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+                        
+                        <!-- Ligne 1 : Numéro et Statut -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h2 style="font-size: 32px; font-weight: 900; margin: 0; font-family: monospace;">${realCarNum}</h2>
+                            <span style="background: ${statusBg}; color: ${statusColor}; border: ${statusBorder}; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 1px;">${statusText}</span>
                         </div>
 
-                        <div style="background: #000; padding: 10px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; color: #aaa; font-family: monospace;">
-                            <div>POS <br><span style="font-size:18px; color:#f59e0b; font-weight:bold;">${cloudCar.position || "-"}</span></div>
-                            <div style="text-align: right;">MEILLEUR TOUR <br><span style="color:#a855f7; font-size:16px; font-weight:bold;">${cloudCar.bestLap || "--:--.---"}</span></div>
-                        </div>
-
-                        <div style="font-size: 12px; color: #666; text-transform: uppercase;">Pilote en piste <br><span style="font-size: 18px; font-weight: bold; color: #fff;">${pilotName}</span></div>
-
-                        <div style="background: #000; padding: 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px; border: 1px dashed #222;">
-                            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #aaa;">
-                                <span>TOUR EN COURS :</span>
-                                <strong style="color: #fff; font-size: 16px;">${currentLap}</strong>
+                        <!-- Ligne 2 : Position et Meilleur Tour -->
+                        <div style="background: #000; padding: 10px 15px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <div style="color: #666; font-size: 11px; text-transform: uppercase;">POS</div>
+                                <div style="color: #f59e0b; font-size: 18px; font-weight: bold;">${pos}</div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #aaa; border-top: 1px solid #111; padding-top: 6px;">
-                                <span>ARRÊT IDÉAL :</span>
-                                <strong style="color: #3b82f6; font-size: 16px;">Tour ${tourArretIdeal}</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #aaa; border-top: 1px solid #111; padding-top: 6px;">
-                                <span>STOP ESTIMÉ :</span>
-                                <strong style="color: #ef4444; font-size: 16px;">${stopEstime}</strong>
+                            <div style="text-align: right;">
+                                <div style="color: #666; font-size: 11px; text-transform: uppercase;">BEST</div>
+                                <div style="color: #a855f7; font-size: 16px; font-weight: bold; font-family: monospace;">${best}</div>
+                                <div style="font-size: 12px; color: ${delta.includes('-') || delta === '0.000' ? '#10b981' : (delta === '--' ? '#555' : '#ef4444')};">Δ: ${delta}</div>
                             </div>
                         </div>
 
+                        <!-- Ligne 3 : Pilote -->
+                        <div style="margin-bottom: 15px;">
+                            <div style="color: #666; font-size: 11px; text-transform: uppercase;">Pilote</div>
+                            <div style="font-size: 18px; font-weight: bold;">${pilotName}</div>
+                        </div>
+
+                        <!-- Ligne 4 : BLOC STRATÉGIE (Remplace le Réservoir de 42.0L) -->
+                        <div style="background: #000; border: 1px solid #1a1a1a; border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 15px;">
+                            <div style="font-size: 14px; margin-bottom: 6px; color: #ccc;">Tour en cours : <strong style="color: #fff; font-size: 16px;">${currentLap}</strong></div>
+                            <div style="font-size: 12px; margin-bottom: 12px; color: #888;">Tours restants : <strong style="color: #fff;">${toursRestants}</strong></div>
+                            
+                            <div style="font-size: 14px; font-weight: bold; color: #ef4444; margin-bottom: 12px;">
+                                ${stopEstime}
+                            </div>
+                            
+                            <div style="display: inline-block; border: 1px dashed #3b82f6; color: #3b82f6; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold;">
+                                🎯 Arrêt idéal : Tour ${tourArretIdeal}
+                            </div>
+                        </div>
+
+                        <!-- Ligne 5 : Les 5 Derniers Tours -->
                         <div style="flex-grow: 1;">
-                            <table class="box-laps-table">
+                            <table style="width: 100%; border-collapse: collapse; font-family: monospace; font-size: 14px;">
                                 <thead>
-                                    <tr>
-                                        <th>Tour</th>
-                                        <th>Chrono</th>
-                                        <th>Delta / Best</th>
+                                    <tr style="color: #666; text-transform: uppercase; font-size: 10px; border-bottom: 1px solid #333;">
+                                        <th style="text-align: left; padding-bottom: 5px;">Tour</th>
+                                        <th style="text-align: left; padding-bottom: 5px;">Chrono</th>
+                                        <th style="text-align: left; padding-bottom: 5px;">Delta</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1058,6 +1097,7 @@ div.car-card.state-red-flag,
                                 </tbody>
                             </table>
                         </div>
+
                     </div>
                 `;
             }
@@ -1831,37 +1871,24 @@ function saveCarConfig(id) {
     window.dbPushFullRaceState();
 }
 
-    function navigateToPage(targetPageId, activeNavId) {
-            // 🔍 Recherche du header météo + bouton rouge par toutes les classes possibles de ton projet
-            const topHeader = document.querySelector('.controls-top') || 
-                              document.querySelector('.top-bar') || 
-                              document.getElementById('header-status') ||
-                              document.querySelector('header');
-
+   function navigateToPage(targetPageId, activeNavId) {
             // 1. On cache TOUTES les pages principales
             if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.display = 'none';
             if (document.getElementById('page-intel')) document.getElementById('page-intel').style.display = 'none';
             if (document.getElementById('page-setup')) document.getElementById('page-setup').style.display = 'none';
             if (document.getElementById('page-box-monitor')) document.getElementById('page-box-monitor').style.display = 'none';
             
-            // 2. On cache les pages individuelles des voitures (#531, #183, etc.)
+            // 2. On cache les pages individuelles des voitures
             for (let id in window.fleetState) { 
                 const carPage = document.getElementById(`page-${id}`);
                 if (carPage) carPage.style.display = 'none'; 
             }
             
-            // 3. AFFICHAGE/MASQUAGE DE L'EN-TÊTE MÉTÉO/BOUTON ROUGE
-            if (targetPageId === 'page-box-monitor') {
-                if (topHeader) topHeader.style.setProperty("display", "none", "important"); // Masque complètement au Box
-            } else {
-                if (topHeader) topHeader.style.setProperty("display", "flex", "important"); // Réaffiche ailleurs
-            }
-
-            // 4. On affiche la page demandée
+            // 3. On affiche la page demandée
             const targetPage = document.getElementById(targetPageId);
             if (targetPage) targetPage.style.display = 'grid';
             
-            // 5. On gère le style actif sur les boutons du menu
+            // 4. On gère le style actif sur l'onglet
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             const activeNav = document.getElementById(activeNavId);
             if (activeNav) activeNav.classList.add('active');
