@@ -949,7 +949,7 @@ div.car-card.state-red-flag,
         // =======================================================================
         // GENERATION DYNAMIQUE DE L'ÉCRAN BOX PILOTES
         // =======================================================================
-      window.updateBoxMonitorPage = function(data) {
+     window.updateBoxMonitorPage = function(data) {
             const gridContainer = document.getElementById("box-monitor-grid");
             if (!gridContainer) return;
 
@@ -963,7 +963,7 @@ div.car-card.state-red-flag,
                 const activePilot = localCar.rotation ? localCar.rotation[0] : "1";
                 const pilotName = cloudCar.pilotsInputs ? (cloudCar.pilotsInputs[activePilot] || `Pilote ${activePilot}`) : `Pilote ${activePilot}`;
 
-                // 1. Détermination de l'état de la voiture
+                // --- 1. ÉTAT DE LA VOITURE EN DIRECT ---
                 let statusText = "EN PISTE";
                 let statusBg = "#10b981";
                 let statusColor = "#fff";
@@ -979,7 +979,7 @@ div.car-card.state-red-flag,
                     statusBg = "#3b82f6";
                 }
 
-                // 2. Génération de l'historique des 5 derniers tours
+                // --- 2. RECUPERATION DES ESSAIS / CHRONOS DEPUIS TON CODE CLOUD ---
                 let lapsRows = "";
                 const history = cloudCar.history || []; 
                 const last5Laps = history.slice(-5).reverse(); 
@@ -1002,44 +1002,19 @@ div.car-card.state-red-flag,
                     });
                 }
 
-                // 3. CALCULS EN LIGNE DIRECTS INDÉPENDANTS DES BADGES HTML
-                let consoBase = 1.77;
-                if (cloudCar.conso && cloudCar.conso[activePilot] && cloudCar.conso[activePilot]["sec"]) {
-                    consoBase = parseFloat(cloudCar.conso[activePilot]["sec"]);
-                }
+                // --- 3. COPIE CONFORME DES INFOS CALCULÉES PAR TA PAGE SUPERVISION ---
+                // On va chercher directement le texte généré par ton gros bloc Firebase
+                const txtLapsEl = document.getElementById(`laps-${id}`);
+                const toursRestants = txtLapsEl ? parseInt(txtLapsEl.innerText) || 0 : 0;
+                
+                const txtTimeEl = document.getElementById(`target-time-${id}`);
+                let stopEstime = txtTimeEl ? txtTimeEl.innerText.replace("🚨 STOP ESTIMÉ : ", "") : "--:--:--";
+                if (window.isRedFlag) stopEstime = "PAUSE";
 
-                let facteurMeteo = 1.0;
-                if (window.weatherMode === "pluie_moderee") facteurMeteo = 0.75;
-                else if (window.weatherMode === "forte_pluie") facteurMeteo = 0.40;
+                const currentLap = cloudCar.currentLap || 0;
+                const tourArretIdeal = currentLap ? (parseInt(currentLap) + toursRestants) : "--";
 
-                const consoStandardAjustee = consoBase * facteurMeteo;
-                const consoFCY = consoBase * 0.50;
-                let consoAppliquee = window.isFCY ? consoFCY : consoStandardAjustee;
-                if (window.isRedFlag) consoAppliquee = 0;
-
-                // Calcul mathématique des tours restants
-                const toursRestants = consoAppliquee > 0 ? Math.floor((parseFloat(cloudCar.fuel) || 42.0) / consoAppliquee) : 0;
-                const tourArretIdeal = cloudCar.currentLap ? (parseInt(cloudCar.currentLap) + toursRestants) : "--";
-
-                // Calcul mathématique du STOP ESTIMÉ
-                let stopEstime = "--:--:--";
-                if (toursRestants > 0) {
-                    const refSec = parseFloat(data.track_ref_sec) || 185.0;
-                    const refPluie = parseFloat(data.track_ref_pluie) || 205.0;
-                    let tempsReferenceTour = (window.weatherMode === "sec") ? refSec : refPluie;
-                    if (window.isFCY) tempsReferenceTour = tempsReferenceTour * 1.40;
-
-                    const tempsTotalRestantMS = toursRestants * tempsReferenceTour * 1000;
-                    const heureCible = new Date(Date.now() + tempsTotalRestantMS);
-                    const hh = String(heureCible.getHours()).padStart(2, '0');
-                    const mm = String(heureCible.getMinutes()).padStart(2, '0');
-                    const ss = String(heureCible.getSeconds()).padStart(2, '0');
-                    stopEstime = `${hh}:${mm}:${ss}`;
-                } else {
-                    stopEstime = window.isRedFlag ? "PAUSE" : "PANNE !";
-                }
-
-                // --- CONSTRUIRE LA CASE DE LA VOITURE ---
+                // --- 4. AFFICHAGE ÉPURÉ SPÉCIAL PILOTE ---
                 htmlContent += `
                     <div class="box-monitor-card">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1057,7 +1032,7 @@ div.car-card.state-red-flag,
                         <div style="background: #000; padding: 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px; border: 1px dashed #222;">
                             <div style="display: flex; justify-content: space-between; font-size: 14px; color: #aaa;">
                                 <span>TOUR EN COURS :</span>
-                                <strong style="color: #fff; font-size: 16px;">${cloudCar.currentLap || 0}</strong>
+                                <strong style="color: #fff; font-size: 16px;">${currentLap}</strong>
                             </div>
                             <div style="display: flex; justify-content: space-between; font-size: 14px; color: #aaa; border-top: 1px solid #111; padding-top: 6px;">
                                 <span>ARRÊT IDÉAL :</span>
@@ -1856,10 +1831,12 @@ function saveCarConfig(id) {
     window.dbPushFullRaceState();
 }
 
-     function navigateToPage(targetPageId, activeNavId) {
-            // 🛠️ AUTOMATISATION DU HEADER : On récupère la barre de contrôles du haut
-            // Adapte la classe (ex: '.controls-top') ou l'ID si ton conteneur de boutons en a un
-            const topHeaderControls = document.querySelector('.controls-top') || document.querySelector('header');
+    function navigateToPage(targetPageId, activeNavId) {
+            // 🔍 Recherche du header météo + bouton rouge par toutes les classes possibles de ton projet
+            const topHeader = document.querySelector('.controls-top') || 
+                              document.querySelector('.top-bar') || 
+                              document.getElementById('header-status') ||
+                              document.querySelector('header');
 
             // 1. On cache TOUTES les pages principales
             if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.display = 'none';
@@ -1873,13 +1850,11 @@ function saveCarConfig(id) {
                 if (carPage) carPage.style.display = 'none'; 
             }
             
-            // 3. Gestion dynamique du Header selon la page cible
+            // 3. AFFICHAGE/MASQUAGE DE L'EN-TÊTE MÉTÉO/BOUTON ROUGE
             if (targetPageId === 'page-box-monitor') {
-                // 🙈 On masque le header complet pour le Box Pilotes
-                if (topHeaderControls) topHeaderControls.style.display = 'none';
+                if (topHeader) topHeader.style.setProperty("display", "none", "important"); // Masque complètement au Box
             } else {
-                // 👁️ On le réaffiche en mode "flex" (ou son style d'origine) sur toutes les autres pages
-                if (topHeaderControls) topHeaderControls.style.display = 'flex';
+                if (topHeader) topHeader.style.setProperty("display", "flex", "important"); // Réaffiche ailleurs
             }
 
             // 4. On affiche la page demandée
