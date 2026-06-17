@@ -1752,35 +1752,89 @@ window.executerCalculFlashVoiture = function(id) {
             else document.getElementById("globalMeanValue").innerText = "0.00 L";
         }
 
-    function triggerCarLap(id) {
-    const car = window.fleetState[id]; 
-    if (car.isInsidePit) return;
-    
-    car.currentLap++; 
-    const pilotIdx = car.rotation[0];
-    
-    // Application de tes coefficients physiques linéaires en mode manuel
-    let facteurMeteo = 1.0;
-    if (window.weatherMode === "pluie_moderee") facteurMeteo = 0.75;
-    else if (window.weatherMode === "forte_pluie") facteurMeteo = 0.40;
-    
-    let conso = (car.conso[pilotIdx]["sec"] || 1.77) * facteurMeteo; 
-    
-    // Mode FCY manuel (coefficient à 50% aligné avec Python)
-    if (window.isFCY) {
-        conso = (car.conso[pilotIdx]["sec"] || 1.77) * 0.50;
-    }
-    
-    car.fuel = Math.max(0, car.fuel - conso);
-    
-    let labelLogMeteo = "VERT";
-    if (window.isFCY) labelLogMeteo = "🟨 FCY";
-    else if (window.weatherMode === "pluie_moderee") labelLogMeteo = "🌧️ PLUIE";
-    else if (window.weatherMode === "forte_pluie") labelLogMeteo = "⛈️ ORAGE";
+  function triggerCarLap(id) {
+            const car = window.fleetState[id]; 
+            if (car.isInsidePit) return;
+            
+            car.currentLap++; 
+            const pilotIdx = car.rotation ? car.rotation[0] : "1";
+            
+            // =========================================================
+            // ⏱️ NOUVEAU : GESTION DU CHRONO ET HISTORIQUE DES TOURS
+            // =========================================================
+            const now = Date.now();
+            
+            // Si c'est le tout premier clic, on initialise juste le chronomètre
+            if (!car.lastLapTimestamp) {
+                car.lastLapTimestamp = now;
+            } else {
+                // 1. Calcul du temps du tour
+                const lapTimeMs = now - car.lastLapTimestamp;
+                car.lastLapTimestamp = now;
+                
+                // Formatage propre en Minutes:Secondes.Millièmes (ex: 2:59.850)
+                const minutes = Math.floor(lapTimeMs / 60000);
+                const seconds = Math.floor((lapTimeMs % 60000) / 1000);
+                const millis = lapTimeMs % 1000;
+                const lapTimeStr = `${minutes}:${seconds.toString().padStart(2, '0')}.${millis.toString().padStart(3, '0')}`;
+                
+                let deltaStr = "0.000";
+                
+                // 2. Gestion du meilleur temps
+                if (!car.bestLapMs || lapTimeMs < car.bestLapMs) {
+                    // Nouveau Record !
+                    car.bestLapMs = lapTimeMs;
+                    car.bestLap = lapTimeStr;
+                } else {
+                    // 3. Calcul du delta (écart avec le meilleur tour)
+                    const diffMs = lapTimeMs - car.bestLapMs;
+                    const diffSec = (diffMs / 1000).toFixed(3);
+                    deltaStr = `+${diffSec}`;
+                }
+                
+                // 4. Enregistrement dans l'historique pour le Moniteur Box
+                if (!car.history) car.history = [];
+                car.history.push({
+                    lap: car.currentLap,
+                    time: lapTimeStr,
+                    delta: deltaStr
+                });
+            }
+            // =========================================================
+            
+            // Application de tes coefficients physiques linéaires en mode manuel
+            let facteurMeteo = 1.0;
+            if (window.weatherMode === "pluie_moderee") facteurMeteo = 0.75;
+            else if (window.weatherMode === "forte_pluie") facteurMeteo = 0.40;
+            
+            let conso = (car.conso[pilotIdx] && car.conso[pilotIdx]["sec"] ? parseFloat(car.conso[pilotIdx]["sec"]) : 1.77) * facteurMeteo; 
+            
+            // Mode FCY manuel (coefficient à 50% aligné avec Python)
+            if (window.isFCY) {
+                conso = (car.conso[pilotIdx] && car.conso[pilotIdx]["sec"] ? parseFloat(car.conso[pilotIdx]["sec"]) : 1.77) * 0.50;
+            }
+            
+            car.fuel = Math.max(0, car.fuel - conso);
+            
+            let labelLogMeteo = "VERT";
+            if (window.isFCY) labelLogMeteo = "🟨 FCY";
+            else if (window.weatherMode === "pluie_moderee") labelLogMeteo = "🌧️ PLUIE";
+            else if (window.weatherMode === "forte_pluie") labelLogMeteo = "⛈️ ORAGE";
 
-    window.dbLogLiveEventCloud(window.carIdMapping[id], `(MANUEL) Tour #${car.currentLap} par ${window.pilotsDatabase[id][pilotIdx]}`, `${car.fuel.toFixed(1)} L`, labelLogMeteo);
-    window.dbPushFullRaceState();
-}
+            // Sécurisation de l'affichage dans les logs
+            const nomPilote = (window.pilotsDatabase && window.pilotsDatabase[id] && window.pilotsDatabase[id][pilotIdx]) 
+                ? window.pilotsDatabase[id][pilotIdx] 
+                : `Pilote ${pilotIdx}`;
+            const nomVoiture = (window.carIdMapping && window.carIdMapping[id]) ? window.carIdMapping[id] : id;
+
+            if (typeof window.dbLogLiveEventCloud === "function") {
+                window.dbLogLiveEventCloud(nomVoiture, `(MANUEL) Tour #${car.currentLap} par ${nomPilote}`, `${car.fuel.toFixed(1)} L`, labelLogMeteo);
+            }
+            
+            if (typeof window.dbPushFullRaceState === "function") {
+                window.dbPushFullRaceState();
+            }
+        }
 
         function enterCarPit(id) {
             const car = window.fleetState[id]; 
