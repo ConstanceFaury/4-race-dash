@@ -1121,22 +1121,27 @@ div.car-card.state-red-flag,
         // =======================================================================
         // GENERATION DYNAMIQUE DE L'ÉCRAN BOX PILOTES
         // =======================================================================
-    window.updateBoxMonitorPage = function(data) {
+window.updateBoxMonitorPage = function(data) {
             const gridContainer = document.getElementById("box-monitor-grid");
             if (!gridContainer) return;
 
             let htmlContent = "";
 
-            for (let id in window.fleetState) {
-                const fleetCard = document.getElementById(`card-${id}`);
-                if (fleetCard && fleetCard.style.display === "none") continue;
-                if (!data.cars || !data.cars[id]) continue;
+            // On demande combien de voitures sont engagées (4 par défaut si introuvable)
+            const nbCars = window.currentCarCount || parseInt(document.getElementById("setup-car-count")?.value) || 4;
+
+            // 🛑 NOUVELLE BOUCLE SÉCURISÉE DE 1 À 6
+            for (let i = 1; i <= 6; i++) {
+                if (i > nbCars) continue; // Si la voiture dépasse le nombre engagé, on l'ignore !
+
+                let id = "v" + i;
+                if (!window.fleetState[id] || !data.cars || !data.cars[id]) continue;
                 
                 const cloudCar = data.cars[id];
                 const localCar = window.fleetState[id];
 
                 // 🛑 CORRECTION DU NUMÉRO DE VOITURE (Récupère #531 au lieu de v1)
-                let realCarNum = id; 
+                let realCarNum = id;
                 const lblSpan = document.querySelector(`.lbl-${id}`);
                 if (lblSpan) {
                     realCarNum = lblSpan.innerText; // Va chercher le vrai texte "#531" dans ton menu HTML
@@ -1596,8 +1601,9 @@ div.car-card.state-red-flag,
         };
 
         // LA FONCTION INTERRUPTEUR MAGIQUE
-        window.changerNombreVoitures = function(nombre) {
+       window.changerNombreVoitures = function(nombre) {
             const nb = parseInt(nombre) || 4;
+            window.currentCarCount = nb; // 🧠 On mémorise le chiffre pour le Moniteur Box
             
             for (let i = 1; i <= 6; i++) {
                 const carId = "v" + i;
@@ -1612,8 +1618,20 @@ div.car-card.state-red-flag,
                 const carPage = document.getElementById("page-" + carId);
                 if (carPage && !isVisible && carPage.style.display !== "none") navigateToPage('page-fleet', 'nav-fleet');
             }
+
+            // 🎨 NOUVEAU : Redimensionnement automatique de l'écran Box Pilotes
+            const boxGrid = document.getElementById("box-monitor-grid");
+            if (boxGrid) {
+                // Si 1 à 4 voitures -> 1 à 4 colonnes. Si 5 ou 6 voitures -> 3 colonnes (sur 2 belles lignes)
+                let cols = nb <= 4 ? nb : 3;
+                boxGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            }
+
             if (typeof window.applyGlobalCustomizationLocal === "function") window.applyGlobalCustomizationLocal();
+            // Coup de fouet à la base de données pour forcer le rafraîchissement immédiat de l'écran Box !
+            if (typeof window.dbPushFullRaceState === "function") window.dbPushFullRaceState(); 
         };
+        
         window.dbAppliquerCircuit = function(circuitKey) {
             const circuit = window.circuitsDatabase[circuitKey];
             if (!circuit) return;
