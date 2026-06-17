@@ -1380,11 +1380,18 @@ window.updateBoxMonitorPage = function(data) {
                 else if(window.weatherMode === "forte_pluie") wSelect.className = "weather-select-top rain-heavy";
             }
 
-            // --- BOUCLE PAR VOITURE (Chassis #1 à #4) ---
+      // --- BOUCLE PAR VOITURE ---
+            const nbCars = window.currentCarCount || parseInt(document.getElementById("setup-car-count")?.value) || 4;
+
             for (let id in window.fleetState) {
+                // 🛑 LIGNE MAGIQUE : Firebase ignore les voitures cachées pour ses statistiques !
+                let carNumIndex = parseInt(id.replace('v', ''));
+                if (carNumIndex > nbCars) continue;
+
                 if (data.cars && data.cars[id]) {
                     const cloudCar = data.cars[id];
                     const localCar = window.fleetState[id];
+                    
 
                     localCar.fuel = parseFloat(cloudCar.fuel) || 42.0;
                     localCar.currentLap = parseInt(cloudCar.currentLap) || 0;
@@ -1989,25 +1996,38 @@ window.executerCalculFlashVoiture = function(id) {
     }
 }// Fin de la fonction updateCarStrategyLocal
 
-        function rebuildIntelTableLocal() {
-            const tbody = document.getElementById("intelTableBody"); tbody.innerHTML = "";
+      function rebuildIntelTableLocal() {
+            const tbody = document.getElementById("intelTableBody"); 
+            if (!tbody) return;
+            tbody.innerHTML = "";
             let totalConsoSum = 0; let totalVehiclesCount = 0;
 
+            // 1. On dessine les adversaires
             window.enemyDatabase.forEach(enemy => {
                 totalConsoSum += enemy.conso; totalVehiclesCount++;
                 tbody.innerHTML += `<tr style="background-color: rgba(255, 71, 25, 0.03); border-left: 4px solid var(--4race-coral);"><td><strong>#${enemy.num}</strong></td><td><span style="color:var(--4race-coral); font-weight:600;">Adversaire</span></td><td>${enemy.laps} tours</td><td><strong>${enemy.conso.toFixed(2)} L/tr</strong></td><td><span class="badge-intel ${enemy.danger?'badge-intel-danger':'badge-intel-safe'}">${enemy.status}</span></td></tr>`;
             });
 
+            // 🎯 LECTURE DU NOMBRE DE VOITURES ENGAGÉES
+            const nbCars = window.currentCarCount || parseInt(document.getElementById("setup-car-count")?.value) || 4;
+
+            // 2. On dessine NOTRE équipe
             for(let id in window.fleetState) {
+                // 🛑 LIGNE MAGIQUE : Si la voiture dépasse le nombre engagé (ex: v3 > 2), on l'ignore !
+                let carNumIndex = parseInt(id.replace('v', ''));
+                if (carNumIndex > nbCars) continue;
+
                 const car = window.fleetState[id]; const pilotIdx = car.rotation[0]; 
                 const baseConso = car.conso[pilotIdx][window.weatherMode] || car.conso[pilotIdx]["sec"];
                 totalConsoSum += baseConso; totalVehiclesCount++;
+                
                 tbody.innerHTML += `<tr style="border-left: 4px solid var(--state-green);"><td><strong>#${window.carIdMapping[id]}</strong></td><td><span style="color:var(--state-green); font-weight:600;">Notre Team</span></td><td>~ ${Math.floor(parseFloat(document.getElementById("setup-maxFuel").value) / baseConso)} tours</td><td><strong style="color:var(--state-green);">${baseConso.toFixed(2)} L/tr</strong></td><td><span>${window.pilotsDatabase[id][pilotIdx]}</span></td></tr>`;
             }
+            
+            // Mise à jour de la moyenne en haut de la page
             if (totalVehiclesCount > 0) document.getElementById("globalMeanValue").innerText = (totalConsoSum / totalVehiclesCount).toFixed(2) + " L";
             else document.getElementById("globalMeanValue").innerText = "0.00 L";
         }
-
   function triggerCarLap(id) {
             const car = window.fleetState[id]; 
             if (car.isInsidePit) return;
