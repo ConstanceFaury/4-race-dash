@@ -442,12 +442,8 @@ div.car-card.state-red-flag,
             </div>
             <span id="rc-time-badge" style="font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 3px;">--:--:--</span>
         </div>
-        <div class="log-section col-12">
-            <div class="card-title">Flux d'Événements Général Écurie - LIVE CLOUD</div>
-            <div style="overflow-x: auto; max-height: 200px;"><table><thead><tr><th>Heure</th><th>Voiture</th><th>Action</th><th>Carburant</th><th>Piste</th></tr></thead><tbody id="fleetLogBody"></tbody></table></div>
-        </div>
-    </div>
-    <div id="page-intel" class="page-content grid">
+    
+   </div> <div id="page-intel" class="page-content grid">
         <div class="card col-4">
             <div class="card-title">🕵️ Enregistrer un Arrêt Concurrent</div>
             <div class="config-row">
@@ -780,11 +776,32 @@ div.car-card.state-red-flag,
 <div id="page-intel" class="page-content grid">
     </div>
 
-    <div id="page-box-monitor" class="page-content active-grid" style="display: none; width: 100vw; max-width: 100%; padding: 20px; box-sizing: border-box; background: #0a0a0a;">
-        <div id="box-monitor-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
-            </div>
+    
+    <div id="page-intel" class="page-content grid">
     </div>
     
+    <div id="page-box-monitor" class="page-content active-grid" style="display: none; width: 100vw; max-width: 100%; padding: 20px; box-sizing: border-box; background: #0a0a0a;">
+        <div id="box-monitor-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; width: 100%;">
+        </div>
+    </div>
+      
+    <div id="global-event-log" class="log-section col-12" style="margin: 0 20px 20px 20px;">
+        <div class="card-title" style="color: #fff; font-weight: bold; margin-bottom: 10px;">Flux d'Événements Général Écurie - LIVE CLOUD</div>
+        <div style="overflow-x: auto; max-height: 200px;">
+            <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid #444;">
+                        <th>Heure</th>
+                        <th>Voiture</th>
+                        <th>Action</th>
+                        <th>Carburant</th>
+                        <th>Piste</th>
+                    </tr>
+                </thead>
+                <tbody id="fleetLogBody"></tbody>
+            </table>
+        </div>
+    </div>
     <div id="login-popup" class="race-alert-popup" style="display: flex; z-index: 9999;">
         <div class="race-alert-content" style="border: 3px solid var(--4race-coral);">
             <div class="race-alert-title" style="color: var(--4race-coral);">🔒 ACCÈS SÉCURISÉ</div>
@@ -1018,9 +1035,17 @@ div.car-card.state-red-flag,
                 const toursRestantsVal = parseInt(toursRestants) || 0;
                 const tourArretIdeal = currentLap + toursRestantsVal;
                 // --- HISTORIQUE DES 5 DERNIERS TOURS ---
+               // --- HISTORIQUE DES 5 DERNIERS TOURS (CORRIGÉ POUR FIREBASE) ---
                 let lapsRows = "";
-                const history = cloudCar.history || []; 
-                const last5Laps = history.slice(-5).reverse(); 
+                let historyArray = []; 
+                
+                if (cloudCar.history) {
+                    // Firebase transforme parfois les tableaux en objets. On force la conversion :
+                    historyArray = Array.isArray(cloudCar.history) ? cloudCar.history : Object.values(cloudCar.history);
+                    historyArray = historyArray.filter(h => h && h.lap); // On élimine les cases vides
+                }
+                
+                const last5Laps = historyArray.slice(-5).reverse(); 
                 
                 if (last5Laps.length === 0) {
                     lapsRows = `<tr><td colspan="3" style="color:#555; text-align:center; padding:15px; font-style:italic;">Aucun chrono enregistré</td></tr>`;
@@ -1039,7 +1064,6 @@ div.car-card.state-red-flag,
                         `;
                     });
                 }
-
                 // --- CONSTRUCTION DE LA CARTE (Clone Visuel avec le bloc info pilote à la place de l'essence) ---
                 htmlContent += `
                     <div style="background: #111; border: 1px solid #222; border-radius: 8px; padding: 18px; color: #fff; display: flex; flex-direction: column; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
@@ -1872,34 +1896,43 @@ function saveCarConfig(id) {
     window.dbPushFullRaceState();
 }
 
-  function navigateToPage(targetPageId, activeNavId) {
-            // 🔍 On cible tout l'en-tête de ton site (le bandeau météo/bouton rouge)
+ function navigateToPage(targetPageId, activeNavId) {
             const topHeader = document.querySelector('header') || document.querySelector('.controls-top');
+            const globalEventLog = document.getElementById('global-event-log'); // Le bandeau des logs
 
-            // 1. On cache TOUTES les pages principales
+            // 1. Masquage des pages
             if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.display = 'none';
             if (document.getElementById('page-intel')) document.getElementById('page-intel').style.display = 'none';
             if (document.getElementById('page-setup')) document.getElementById('page-setup').style.display = 'none';
             if (document.getElementById('page-box-monitor')) document.getElementById('page-box-monitor').style.display = 'none';
             
-            // 2. On cache les pages individuelles
             for (let id in window.fleetState) { 
                 const carPage = document.getElementById(`page-${id}`);
                 if (carPage) carPage.style.display = 'none'; 
             }
             
-            // 🚀 3. MASQUAGE DU BANDEAU SPÉCIFIQUE AU BOX
+            // 2. GESTION DU HEADER (Météo/Rouge) ET DU FLUX D'ÉVÉNEMENTS
             if (targetPageId === 'page-box-monitor') {
+                // Au Box : On cache la météo en haut, MAIS on affiche les logs en bas !
                 if (topHeader) topHeader.style.setProperty("display", "none", "important");
-            } else {
+                if (globalEventLog) globalEventLog.style.display = "block";
+            } 
+            else if (targetPageId === 'page-fleet') {
+                // Sur Flotte : On affiche la météo ET les logs en bas
                 if (topHeader) topHeader.style.setProperty("display", "flex", "important");
+                if (globalEventLog) globalEventLog.style.display = "block";
+            } 
+            else {
+                // Sur Intel ou Setup : On affiche la météo, mais on cache les logs
+                if (topHeader) topHeader.style.setProperty("display", "flex", "important");
+                if (globalEventLog) globalEventLog.style.display = "none";
             }
 
-            // 4. On affiche la page demandée
+            // 3. Affichage de la page demandée
             const targetPage = document.getElementById(targetPageId);
             if (targetPage) targetPage.style.display = 'grid';
             
-            // 5. On gère le style actif de l'onglet
+            // 4. Style actif de l'onglet
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             const activeNav = document.getElementById(activeNavId);
             if (activeNav) activeNav.classList.add('active');
