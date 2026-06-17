@@ -182,134 +182,6 @@ div.car-card.state-red-flag,
             border: 2px solid #ef4444 !important;
             animation: clignotementGrandCadre 1.2s infinite ease-in-out !important;
         }
-
-        /* =======================================================================
-   STYLE DE L'ÉCRAN STANDS (GRAND FORMAT / HAUTE LISIBILITÉ)
-   ======================================================================= */
-#page-stands {
-    padding: 20px;
-    background: var(--4race-black);
-}
-.stands-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 3px solid var(--4race-coral);
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-.status-banner-stands {
-    padding: 10px 30px;
-    font-weight: bold;
-    font-size: 1.4rem;
-    border-radius: 5px;
-    background: var(--state-green);
-    color: black;
-    text-transform: uppercase;
-}
-.stands-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-    gap: 25px;
-}
-.stand-car-card {
-    background: var(--4race-card);
-    border: 2px solid #222;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-}
-.stand-car-card.pit-active {
-    border-color: var(--state-alert);
-    animation: pulse-border 2s infinite;
-}
-.stand-car-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #2cf;
-    padding-bottom: 10px;
-}
-.stand-car-num {
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: var(--4race-coral);
-    font-style: italic;
-}
-.stand-car-state {
-    font-size: 1.1rem;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-.stand-main-info {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-.stand-info-block {
-    background: #1b1b1f;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-}
-.stand-info-block label {
-    display: block;
-    font-size: 0.85rem;
-    color: #888;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-}
-.stand-info-block .value {
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: var(--4race-white);
-}
-.stand-info-block .value.highlight {
-    color: #00ffcc;
-}
-/* Section Chronos */
-.stand-chrono-section {
-    background: #0d0d0f;
-    border-radius: 8px;
-    padding: 12px;
-}
-.stand-chrono-title {
-    font-size: 0.9rem;
-    color: #aaa;
-    margin-bottom: 8px;
-    display: flex;
-    justify-content: space-between;
-}
-.stand-laps-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.stand-lap-row {
-    display: flex;
-    justify-content: space-between;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.05rem;
-    padding: 4px 8px;
-    border-radius: 4px;
-    background: #141416;
-}
-.stand-lap-row.best {
-    color: #f0f;
-    font-weight: bold;
-}
-.delta-plus { color: #ff4444; }
-.delta-minus { color: #22c55e; }
-
-@keyframes pulse-border {
-    0% { border-color: #ef4444; }
-    50% { border-color: #500; }
-    100% { border-color: #ef4444; }
-}
-        
     </style>
 </head>
 <body>
@@ -351,18 +223,7 @@ div.car-card.state-red-flag,
             <button class="race-alert-btn" onclick="closeRacePopup()">Prendre note & Fermer</button>
         </div>
     </div>
-    
-<div id="page-stands" class="page-content page-hidden">
-    <div class="stands-header">
-        <h2>📊 SUPERVISION FLOTTE — MODE STANDS</h2>
-        <div id="stands-global-status" class="status-banner-stands">PISTE CLAIR</div>
-    </div>
-    
-    <div class="stands-grid">
-        <div id="stands-cars-container" class="stands-container"></div>
-    </div>
-</div>
-    
+
   <div id="page-fleet" class="page-content active grid">
         <div class="fleet-grid" style="grid-column: span 12;">
             <div id="card-v1" class="car-card">
@@ -1038,122 +899,7 @@ div.car-card.state-red-flag,
                 status: trackStateLabel
             });
         };
-window.renderStandsScreen = function() {
-    const container = document.getElementById("stands-cars-container");
-    if (!container) return;
-    
-    // 1. Mise à jour de la bannière d'état globale de la course
-    const globalStatus = document.getElementById("stands-global-status");
-    if (globalStatus) {
-        if (window.isRedFlag) {
-            globalStatus.innerText = "🛑 DRAPEAU ROUGE";
-            globalStatus.style.background = "var(--state-alert)";
-        } else if (window.isFCY) {
-            globalStatus.innerText = "🟨 FULL COURSE YELLOW";
-            globalStatus.style.background = "var(--state-fcy)";
-        } else if (window.weatherMode === "forte_pluie" || window.weatherMode === "pluie_moderee") {
-            globalStatus.innerText = "🌧️ PISTE HUMIDE / PLUIE";
-            globalStatus.style.background = "#3b82f6";
-        } else {
-            globalStatus.innerText = "🟢 PISTE CLEAR (VERT)";
-            globalStatus.style.background = "var(--state-green)";
-        }
-    }
 
-    let htmlContent = "";
-
-    // 2. Boucle sur les voitures de ton équipe
-    ["v1", "v2", "v3", "v4"].forEach(id => {
-        if (!window.fleetState || !window.fleetState[id]) return;
-        const car = window.fleetState[id];
-        
-        // Récupération du numéro de voiture configuré dans le setup
-        const inputNum = document.getElementById(`setup-${id}`);
-        const carNum = inputNum ? inputNum.value : car.carNumInput || id.toUpperCase();
-        
-        const pilotIdx = car.rotation ? car.rotation[0] : "1";
-        const pilotName = window.pilotsDatabase && window.pilotsDatabase[id] ? window.pilotsDatabase[id][pilotIdx] : `Pilote ${pilotIdx}`;
-        
-        // Gestion de l'état de la voiture
-        let statusText = car.isInsidePit ? "🔧 AU STAND" : "🏎️ EN PISTE";
-        let statusClass = car.isInsidePit ? "background: var(--state-alert); color:white;" : "background: var(--state-green); color:black;";
-        
-        // Logique de calcul du stop estimé et du tour d'arrêt idéal
-        // Disons que la capacité max dépend du circuit (ex: maxFuel) et de la conso
-        const currentFuel = parseFloat(car.fuel) || 0;
-        const currentLap = parseInt(car.currentLap) || 0;
-        
-        // On estime combien de tours il reste avec l'essence actuelle
-        let facteurMeteo = 1.0;
-        if (window.weatherMode === "pluie_moderee") facteurMeteo = 0.75;
-        if (window.weatherMode === "forte_pluie") facteurMeteo = 0.40;
-        let consoEstimee = ((car.conso && car.conso[pilotIdx] ? car.conso[pilotIdx].sec : 1.77) || 1.77) * facteurMeteo;
-        if (window.isFCY) consoEstimee *= 0.50;
-        
-        const toursRestants = consoEstimee > 0 ? Math.floor(currentFuel / consoEstimee) : 0;
-        const tourArretIdeal = currentLap + toursRestants;
-        
-        // Heure de stop estimée (en se basant sur un chrono moyen de 3 min (180s) par tour à Spa en Fun Cup)
-        const tempsMoyenTourSecondes = window.isFCY ? 240 : 185; 
-        const secondesRestantes = toursRestants * tempsMoyenTourSecondes;
-        const heureStop = new Date(Date.now() + secondesRestantes * 1000).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'});
-
-        // Simulation ou récupération de l'historique (ici on extrait les données reçues)
-        // Note : Idéalement, ton script Python alimentera un tableau de derniers chronos. 
-        // En attendant, on affiche le Best Lap et le dernier encodé de manière dynamique.
-        const bestLapStr = car.bestLap || "--:--.--";
-        const lastLapStr = car.lastLap || "--:--.--"; 
-        
-        // Génération du bloc HTML pour la voiture
-        htmlContent += `
-            <div class="stand-car-card ${car.isInsidePit ? 'pit-active' : ''}">
-                <div class="stand-car-top">
-                    <span class="stand-car-num">N° ${carNum}</span>
-                    <span class="stand-car-state" style="${statusClass}">${statusText}</span>
-                </div>
-                
-                <div class="stand-main-info">
-                    <div class="stand-info-block">
-                        <label>Pilote en Piste</label>
-                        <div class="value" style="color:var(--4race-coral); font-size:1.4rem;">${pilotName}</div>
-                    </div>
-                    <div class="stand-info-block">
-                        <label>Tour Actuel</label>
-                        <div class="value">#${currentLap}</div>
-                    </div>
-                    <div class="stand-info-block">
-                        <label>Tour Arrêt Idéal</label>
-                        <div class="value highlight">#${tourArretIdeal}</div>
-                    </div>
-                    <div class="stand-info-block">
-                        <label>Heure du Pitchief Stop</label>
-                        <div class="value" style="color:#eab308;">~ ${heureStop}</div>
-                    </div>
-                </div>
-                
-                <div class="stand-chrono-section">
-                    <div class="stand-chrono-title">
-                        <span>⏱️ CHRONOMÉTRAGE LIVE</span>
-                        <span style="color:#f0f;">Meilleur : ${bestLapStr}</span>
-                    </div>
-                    <div class="stand-laps-list">
-                        <div class="stand-lap-row">
-                            <span>Dernier tour :</span>
-                            <span style="font-weight:bold; color:white;">${lastLapStr}</span>
-                        </div>
-                        <div class="stand-lap-row">
-                            <span>Carburant Restant :</span>
-                            <span style="color:${currentFuel < 8 ? 'var(--state-alert)' : '#22c55e'}">${currentFuel.toFixed(1)} L</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    
-    container.innerHTML = htmlContent;
-};
-        
 // =======================================================================
         // 📢 ÉCOUTE PERMANENTE DU CLOUD FIREBASE (VERSION CORRIGÉE AVEC ALERTE COULEUR)
         // =======================================================================
@@ -1357,11 +1103,6 @@ window.renderStandsScreen = function() {
 
             if (typeof window.applyGlobalCustomizationLocal === "function") {
                 window.applyGlobalCustomizationLocal();
-            }
-            // Tout à la fin de ton bloc onValue(ref(db, 'race_state'), (snapshot) => { ... })
-            // juste avant la fermeture de la fonction :
-            if (typeof window.renderStandsScreen === "function") {
-                window.renderStandsScreen();
             }
         });
         
