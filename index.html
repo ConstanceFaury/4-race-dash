@@ -1817,12 +1817,12 @@ function saveCarConfig(id) {
     window.dbPushFullRaceState();
 }
 
-        function navigateToPage(targetPageId, activeNavId) {
-            // 1. On cache TOUTES les pages principales (on a ajouté la nouvelle ici)
-            if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.style.display = 'none';
+       function navigateToPage(targetPageId, activeNavId) {
+            // 1. On cache TOUTES les pages principales
+            if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.display = 'none';
             if (document.getElementById('page-intel')) document.getElementById('page-intel').style.display = 'none';
             if (document.getElementById('page-setup')) document.getElementById('page-setup').style.display = 'none';
-            if (document.getElementById('page-box-monitor')) document.getElementById('page-box-monitor').style.display = 'none'; // <-- LA LIGNE AJOUTÉE !
+            if (document.getElementById('page-box-monitor')) document.getElementById('page-box-monitor').style.display = 'none';
             
             // 2. On cache les pages individuelles des voitures (#531, #183, etc.)
             for (let id in window.fleetState) { 
@@ -1839,6 +1839,7 @@ function saveCarConfig(id) {
             const activeNav = document.getElementById(activeNavId);
             if (activeNav) activeNav.classList.add('active');
         }
+        
         function triggerRacePopup(type, title, text) {
             const popup = document.getElementById("raceAlertPopup");
             const content = document.getElementById("raceAlertContent");
