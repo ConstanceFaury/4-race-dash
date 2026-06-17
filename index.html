@@ -1126,6 +1126,7 @@ window.updateBoxMonitorPage = function(data) {
             if (!gridContainer) return;
 
             let htmlContent = "";
+            let visibleCarsCount = 0; // 🎯 AJOUT 1 : On crée le compteur ici
 
             // On demande combien de voitures sont engagées (4 par défaut si introuvable)
             const nbCars = window.currentCarCount || parseInt(document.getElementById("setup-car-count")?.value) || 4;
@@ -1137,6 +1138,12 @@ window.updateBoxMonitorPage = function(data) {
                 let id = "v" + i;
                 if (!window.fleetState[id] || !data.cars || !data.cars[id]) continue;
                 
+                // 🛑 AJOUT 2 (LA LIGNE MAGIQUE) : On vérifie l'état de la carte dans la Flotte
+                const fleetCard = document.getElementById(`card-${id}`);
+                if (fleetCard && fleetCard.style.display === "none") continue;
+
+                visibleCarsCount++; // 🎯 AJOUT 3 : La voiture est visible, on ajoute +1 !
+
                 const cloudCar = data.cars[id];
                 const localCar = window.fleetState[id];
 
@@ -1174,7 +1181,6 @@ window.updateBoxMonitorPage = function(data) {
                     statusColor = "#3b82f6";
                     statusBorder = "1px solid #3b82f6";
                 }
-
                 // --- RÉCUPÉRATION IDENTIQUE A LA SUPERVISION FLOTTE ---
                 // On va chercher les vrais textes de la page supervision pour être sûr que c'est 100% identique
                 const posEl = document.getElementById(`fleet-pos-${id}`);
@@ -1289,6 +1295,10 @@ window.updateBoxMonitorPage = function(data) {
                 `;
             }
 
+            let cols = visibleCarsCount <= 4 ? visibleCarsCount : 3;
+            if (visibleCarsCount === 0) cols = 1; // Sécurité
+            gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    
             gridContainer.innerHTML = htmlContent;
         };
 // =======================================================================
