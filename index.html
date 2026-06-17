@@ -963,7 +963,7 @@ div.car-card.state-red-flag,
                 const activePilot = localCar.rotation ? localCar.rotation[0] : "1";
                 const pilotName = cloudCar.pilotsInputs ? (cloudCar.pilotsInputs[activePilot] || `Pilote ${activePilot}`) : `Pilote ${activePilot}`;
 
-                // --- GESTION VISUELLE DE L'ÉTAT DE LA VOITURE / PISTE ---
+                // 1. Détermination de l'état de la voiture
                 let statusText = "EN PISTE";
                 let statusBg = "#10b981";
                 let statusColor = "#fff";
@@ -979,7 +979,7 @@ div.car-card.state-red-flag,
                     statusBg = "#3b82f6";
                 }
 
-                // --- HISTORIQUE DES 5 DERNIERS TOURS ---
+                // 2. Génération de l'historique des 5 derniers tours
                 let lapsRows = "";
                 const history = cloudCar.history || []; 
                 const last5Laps = history.slice(-5).reverse(); 
@@ -1002,30 +1002,58 @@ div.car-card.state-red-flag,
                     });
                 }
 
-                // --- EXTRACTION DES INFOS DE STRATÉGIE (Depuis ton onValue) ---
-                const stopEstime = document.getElementById(`target-time-${id}`) ? document.getElementById(`target-time-${id}`).innerText.replace("🚨 STOP ESTIMÉ : ", "") : "--:--:--";
-                const toursRestants = document.getElementById(`laps-${id}`) ? document.getElementById(`laps-${id}`).innerText : "0";
-                const tourArretIdeal = cloudCar.currentLap ? (parseInt(cloudCar.currentLap) + parseInt(toursRestants)) : "--";
+                // 3. CALCULS EN LIGNE DIRECTS INDÉPENDANTS DES BADGES HTML
+                let consoBase = 1.77;
+                if (cloudCar.conso && cloudCar.conso[activePilot] && cloudCar.conso[activePilot]["sec"]) {
+                    consoBase = parseFloat(cloudCar.conso[activePilot]["sec"]);
+                }
 
-                // --- CONSTRUCTION DU PANNEAU ÉPURÉ (SANS LES LITRES) ---
+                let facteurMeteo = 1.0;
+                if (window.weatherMode === "pluie_moderee") facteurMeteo = 0.75;
+                else if (window.weatherMode === "forte_pluie") facteurMeteo = 0.40;
+
+                const consoStandardAjustee = consoBase * facteurMeteo;
+                const consoFCY = consoBase * 0.50;
+                let consoAppliquee = window.isFCY ? consoFCY : consoStandardAjustee;
+                if (window.isRedFlag) consoAppliquee = 0;
+
+                // Calcul mathématique des tours restants
+                const toursRestants = consoAppliquee > 0 ? Math.floor((parseFloat(cloudCar.fuel) || 42.0) / consoAppliquee) : 0;
+                const tourArretIdeal = cloudCar.currentLap ? (parseInt(cloudCar.currentLap) + toursRestants) : "--";
+
+                // Calcul mathématique du STOP ESTIMÉ
+                let stopEstime = "--:--:--";
+                if (toursRestants > 0) {
+                    const refSec = parseFloat(data.track_ref_sec) || 185.0;
+                    const refPluie = parseFloat(data.track_ref_pluie) || 205.0;
+                    let tempsReferenceTour = (window.weatherMode === "sec") ? refSec : refPluie;
+                    if (window.isFCY) tempsReferenceTour = tempsReferenceTour * 1.40;
+
+                    const tempsTotalRestantMS = toursRestants * tempsReferenceTour * 1000;
+                    const heureCible = new Date(Date.now() + tempsTotalRestantMS);
+                    const hh = String(heureCible.getHours()).padStart(2, '0');
+                    const mm = String(heureCible.getMinutes()).padStart(2, '0');
+                    const ss = String(heureCible.getSeconds()).padStart(2, '0');
+                    stopEstime = `${hh}:${mm}:${ss}`;
+                } else {
+                    stopEstime = window.isRedFlag ? "PAUSE" : "PANNE !";
+                }
+
+                // --- CONSTRUIRE LA CASE DE LA VOITURE ---
                 htmlContent += `
-                    <div class="box-monitor-card ${window.isRedFlag ? 'state-red-flag' : ''}">
-                        <!-- En-tête : Numéro de voiture et État de la piste -->
+                    <div class="box-monitor-card">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span style="font-size: 32px; font-weight: 900; color: #fff;">#${id}</span>
                             <span style="background: ${statusBg}; color: ${statusColor}; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 1px;">${statusText}</span>
                         </div>
 
-                        <!-- Section Chronos Clés -->
                         <div style="background: #000; padding: 10px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; color: #aaa; font-family: monospace;">
                             <div>POS <br><span style="font-size:18px; color:#f59e0b; font-weight:bold;">${cloudCar.position || "-"}</span></div>
                             <div style="text-align: right;">MEILLEUR TOUR <br><span style="color:#a855f7; font-size:16px; font-weight:bold;">${cloudCar.bestLap || "--:--.---"}</span></div>
                         </div>
 
-                        <!-- Nom du pilote en piste -->
                         <div style="font-size: 12px; color: #666; text-transform: uppercase;">Pilote en piste <br><span style="font-size: 18px; font-weight: bold; color: #fff;">${pilotName}</span></div>
 
-                        <!-- Bloc Stratégie de Course Réduit & Précis -->
                         <div style="background: #000; padding: 12px; border-radius: 6px; display: flex; flex-direction: column; gap: 8px; border: 1px dashed #222;">
                             <div style="display: flex; justify-content: space-between; font-size: 14px; color: #aaa;">
                                 <span>TOUR EN COURS :</span>
@@ -1041,7 +1069,6 @@ div.car-card.state-red-flag,
                             </div>
                         </div>
 
-                        <!-- Tableau de l'historique des temps (5 derniers tours) -->
                         <div style="flex-grow: 1;">
                             <table class="box-laps-table">
                                 <thead>
@@ -1829,7 +1856,11 @@ function saveCarConfig(id) {
     window.dbPushFullRaceState();
 }
 
-       function navigateToPage(targetPageId, activeNavId) {
+     function navigateToPage(targetPageId, activeNavId) {
+            // 🛠️ AUTOMATISATION DU HEADER : On récupère la barre de contrôles du haut
+            // Adapte la classe (ex: '.controls-top') ou l'ID si ton conteneur de boutons en a un
+            const topHeaderControls = document.querySelector('.controls-top') || document.querySelector('header');
+
             // 1. On cache TOUTES les pages principales
             if (document.getElementById('page-fleet')) document.getElementById('page-fleet').style.display = 'none';
             if (document.getElementById('page-intel')) document.getElementById('page-intel').style.display = 'none';
@@ -1842,11 +1873,20 @@ function saveCarConfig(id) {
                 if (carPage) carPage.style.display = 'none'; 
             }
             
-            // 3. On affiche la page demandée
+            // 3. Gestion dynamique du Header selon la page cible
+            if (targetPageId === 'page-box-monitor') {
+                // 🙈 On masque le header complet pour le Box Pilotes
+                if (topHeaderControls) topHeaderControls.style.display = 'none';
+            } else {
+                // 👁️ On le réaffiche en mode "flex" (ou son style d'origine) sur toutes les autres pages
+                if (topHeaderControls) topHeaderControls.style.display = 'flex';
+            }
+
+            // 4. On affiche la page demandée
             const targetPage = document.getElementById(targetPageId);
             if (targetPage) targetPage.style.display = 'grid';
             
-            // 4. On gère le style actif sur les boutons du menu
+            // 5. On gère le style actif sur les boutons du menu
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             const activeNav = document.getElementById(activeNavId);
             if (activeNav) activeNav.classList.add('active');
