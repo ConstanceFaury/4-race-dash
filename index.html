@@ -182,6 +182,84 @@ div.car-card.state-red-flag,
             border: 2px solid #ef4444 !important;
             animation: clignotementGrandCadre 1.2s infinite ease-in-out !important;
         }
+
+        /* Styles pour le moniteur des pilotes dans le Box */
+        .box-monitor-card {
+            background: #141414;
+            border: 2px solid #333;
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            color: #fff;
+        }
+        .box-monitor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #222;
+            padding-bottom: 10px;
+        }
+        .box-car-number {
+            font-size: 42px;
+            font-weight: 900;
+            color: #f59e0b;
+        }
+        .box-pilot-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+        .box-status-badge {
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            text-align: center;
+        }
+        .box-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            background: #000;
+            padding: 12px;
+            border-radius: 8px;
+        }
+        .box-meta-item {
+            display: flex;
+            flex-direction: column;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .box-meta-item span {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+        }
+        /* Tableau de l'historique des chronos */
+        .box-laps-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .box-laps-table th {
+            text-align: left;
+            color: #666;
+            font-size: 11px;
+            text-transform: uppercase;
+            padding-bottom: 5px;
+        }
+        .box-laps-table td {
+            padding: 6px 0;
+            font-size: 15px;
+            border-bottom: 1px solid #222;
+            font-family: monospace;
+        }
+        .lap-purple { color: #a855f7; font-weight: bold; } /* Meilleur tour */
+        .delta-green { color: #10b981; }
+        .delta-red { color: #ef4444; }
+        
     </style>
 </head>
 <body>
@@ -738,7 +816,10 @@ div.car-card.state-red-flag,
 
     <div id="page-intel" class="page-content grid">
         </div>
-
+    
+    <div id="page-box-monitor" class="page-content grid" style="display: none; padding: 20px; gap: 20px; background: #0a0a0a; min-height: 80vh;">
+        </div>
+        
     <div id="login-popup" class="race-alert-popup" style="display: flex; z-index: 9999;">
         <div class="race-alert-content" style="border: 3px solid var(--4race-coral);">
             <div class="race-alert-title" style="color: var(--4race-coral);">🔒 ACCÈS SÉCURISÉ</div>
@@ -898,6 +979,109 @@ div.car-card.state-red-flag,
                 fuel: fuel,
                 status: trackStateLabel
             });
+        };
+
+        // =======================================================================
+        // GENERATION DYNAMIQUE DE L'ÉCRAN BOX PILOTES
+        // =======================================================================
+        window.updateBoxMonitorPage = function(data) {
+            const container = document.getElementById("page-box-monitor");
+            if (!container) return;
+
+            let htmlContent = "";
+
+            // On boucle sur les 4 voitures de la flotte
+            for (let id in window.fleetState) {
+                if (!data.cars || !data.cars[id]) continue;
+                
+                const cloudCar = data.cars[id];
+                const localCar = window.fleetState[id];
+                const activePilot = localCar.rotation ? localCar.rotation[0] : "1";
+                const pilotName = cloudCar.pilotsInputs ? (cloudCar.pilotsInputs[activePilot] || `Pilote ${activePilot}`) : `Pilote ${activePilot}`;
+
+                // 1. Détermination de l'état de la piste pour le badge
+                let statusText = "🟢 PISTE DÉGAGÉE";
+                let statusClass = "background: #10b981; color: #fff;";
+                if (window.isRedFlag) {
+                    statusText = "🚨 DRAPEAU ROUGE";
+                    statusClass = "background: #ef4444; color: #fff; animation: blink 0.8s infinite;";
+                } else if (window.isFCY) {
+                    statusText = "🟨 FCY EN COURS";
+                    statusClass = "background: #f59e0b; color: #000;";
+                } else if (cloudCar.isInsidePit) {
+                    statusText = "⛽ AU STAND";
+                    statusClass = "background: #3b82f6; color: #fff;";
+                }
+
+                // 2. Récupération des 5 derniers chronos (historique)
+                // Note : On suppose ici que ton cloudCar contient un tableau ou un objet "history" des derniers tours
+                let lapsRows = "";
+                const history = cloudCar.history || []; // Exemple: [{lap: 12, time: "1:45.230", delta: "+0.120"}, ...]
+                
+                // On prend les 5 derniers et on les trie du plus récent au plus ancien
+                const last5Laps = history.slice(-5).reverse(); 
+                
+                if (last5Laps.length === 0) {
+                    lapsRows = `<tr><td colspan="3" style="color:#444; text-align:center; padding:20px;">Aucun tour enregistré</td></tr>`;
+                } else {
+                    last5Laps.forEach(l => {
+                        const isBest = l.time === cloudCar.bestLap;
+                        const timeClass = isBest ? "lap-purple" : "";
+                        const deltaClass = l.delta.startsWith("-") || l.delta === "0.000" ? "delta-green" : "delta-red";
+                        
+                        lapsRows += `
+                            <tr>
+                                <td>Tour ${l.lap}</td>
+                                <td class="${timeClass}">${l.time}</td>
+                                <td class="${deltaClass}">${l.delta}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                // 3. Calcul ou récupération des arrêts idéaux et stop estimés
+                // On réutilise les valeurs que ton onValue calcule déjà
+                const stopEstime = document.getElementById(`target-time-${id}`) ? document.getElementById(`target-time-${id}`).innerText.replace("🚨 STOP ESTIMÉ : ", "") : "--:--:--";
+                const toursRestants = document.getElementById(`laps-${id}`) ? document.getElementById(`laps-${id}`).innerText : "0";
+                const tourArretIdeal = cloudCar.currentLap ? (parseInt(cloudCar.currentLap) + parseInt(toursRestants)) : "--";
+
+                // Construction de la carte de la voiture
+                htmlContent += `
+                    <div class="box-monitor-card ${window.isRedFlag ? 'state-red-flag' : ''}">
+                        <div class="box-monitor-header">
+                            <div>
+                                <span class="box-car-number">#${id}</span>
+                                <div class="box-pilot-name">${pilotName}</div>
+                            </div>
+                            <div class="box-status-badge" style="${statusClass}">${statusText}</div>
+                        </div>
+
+                        <div class="box-meta-grid">
+                            <div class="box-meta-item">TOUR EN COURS <span>${cloudCar.currentLap || 0}</span></div>
+                            <div class="box-meta-item">MEILLEUR TOUR <span style="color: #a855f7;">${cloudCar.bestLap || "--:--.---"}</span></div>
+                            <div class="box-meta-item">ARRÊT IDÉAL <span>Tour ${tourArretIdeal}</span></div>
+                            <div class="box-meta-item">STOP ESTIMÉ <span style="color: #ef4444;">${stopEstime}</span></div>
+                        </div>
+
+                        <div>
+                            <table class="box-laps-table">
+                                <thead>
+                                    <tr>
+                                        <th>Tour</th>
+                                        <th>Chrono</th>
+                                        <th>Delta / Best</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${lapsRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = htmlContent;
         };
 
 // =======================================================================
@@ -1104,6 +1288,8 @@ div.car-card.state-red-flag,
             if (typeof window.applyGlobalCustomizationLocal === "function") {
                 window.applyGlobalCustomizationLocal();
             }
+
+            window.updateBoxMonitorPage(data);
         });
         
         onValue(ref(db, 'logs'), (snapshot) => {
@@ -1839,20 +2025,26 @@ window.dbAppliquerCircuit = function(circuitKey) {
         };
 
         // 🔑 VERIFICATION SÉCURISÉE AU DÉMARRAGE (SAS)
-        window.checkAccess = function() {
+      window.checkAccess = function() {
             const codeInput = document.getElementById('access-code');
             if (!codeInput) return;
             
             const code = codeInput.value.trim();
             const popup = document.getElementById('login-popup');
             
+            // Masquage de toutes les pages par défaut
+            document.getElementById('page-fleet').style.display = "none";
+            document.getElementById('page-box-monitor').style.display = "none";
+            
             if (code === "ADMIN123") {
                 if (popup) popup.style.display = "none";
-                window.togglePaddockMode(false); // Mode Admin ouvert
+                document.getElementById('page-fleet').style.display = "grid"; // L'admin voit le muret complet
+                window.togglePaddockMode(false); 
             } 
             else if (code === "BOX456") {
                 if (popup) popup.style.display = "none";
-                window.togglePaddockMode(true);  // Mode Box pur, bouton supprimé
+                document.getElementById('page-box-monitor').style.display = "grid"; // Le Box voit l'écran Pilote épuré !
+                window.togglePaddockMode(true);  
             } 
             else {
                 alert("❌ Code d'accès invalide !");
